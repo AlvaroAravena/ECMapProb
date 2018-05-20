@@ -80,6 +80,7 @@ file_txt.close()
 [dist_source, var_cen, lon_cen, lat_cen, azimuth_lin] = [1, 0.0, np.nan, np.nan, np.nan]
 [length_lin, radius_rad, ang1_rad, ang2_rad] = [np.nan, np.nan, np.nan, np.nan]
 [height, var_height, hl, var_hl, N] = [np.nan, 200.0, 0.2, 0.05, 100]
+[east_cen, north_cen] = [np.nan, np.nan]
 
 for i in range(0,len(line)):
 	line[i] = line[i].replace('=',' ')
@@ -108,6 +109,10 @@ for i in range(0,len(line)):
 				lon_cen = float(aux[1])
 			if( aux[0] == 'lat_cen'):
 				lat_cen = float(aux[1])
+			if( aux[0] == 'east_cen'):
+				east_cen = float(aux[1])
+			if( aux[0] == 'north_cen'):
+				north_cen = float(aux[1])
 			if( aux[0] == 'azimuth_lin'):
 				azimuth_lin = float(aux[1])
 			if( aux[0] == 'length_lin'):
@@ -133,50 +138,100 @@ if(source_dem == 1 and (np.isnan(lon1) or np.isnan(lon2) or np.isnan(lat1) or np
 	print 'Problems with input parameters'
 	sys.exit(0)
 
-# IMPORT MAP
-print 'Importing map'
-aux_lon = np.array([lon1, lon2])
-aux_lat = np.array([lat1, lat2])
-lon1 = min(aux_lon)
-lon2 = max(aux_lon)
-lat1 = min(aux_lat)
-lat2 = max(aux_lat)
+if(source_dem == 2 and (np.isnan(east_cen) or np.isnan(north_cen) or np.isnan(height))):
+	print 'Problems with input parameters'
+	sys.exit(0)
 
-elevation.clip(bounds=(lon1, lat1, lon2, lat2), output=current_path + '/' + run_name + '.tif')
+# IMPORT MAP
+if(source_dem == 1):
+	print 'Importing map'
+	aux_lon = np.array([lon1, lon2])
+	aux_lat = np.array([lat1, lat2])
+	lon1 = min(aux_lon)
+	lon2 = max(aux_lon)
+	lat1 = min(aux_lat)
+	lat2 = max(aux_lat)
+	elevation.clip(bounds=(lon1, lat1, lon2, lat2), output=current_path + '/' + run_name + '.tif')
 
 # READ MAP
-print 'Processing map'
-fp = run_name + '.tif'
-with tifffile.TIFFfile(fp) as tif:
-	data = tif.asarray()
-	for page in tif:
-		for tag in page.tags.values():
-			t = tag.name, tag.value
-		image = page.asarray()
-elevation.clean()
+if(source_dem == 1):
+	print 'Processing map'
+	fp = run_name + '.tif'
+	with tifffile.TIFFfile(fp) as tif:
+		data = tif.asarray()
+		for page in tif:
+			for tag in page.tags.values():
+				t = tag.name, tag.value
+			image = page.asarray()
+	elevation.clean()
+	Topography = np.array(image)
+	Topography  = (Topography  + abs(Topography)) / 2
+	cells_lon = Topography.shape[1]
+	cells_lat = Topography.shape[0]
 
-Topography = np.array(image)
-Topography  = (Topography  + abs(Topography)) / 2
-cells_lon = Topography.shape[1]
-cells_lat = Topography.shape[0]
+if(source_dem == 2):
+	print 'Reading map'
+	file_txt = open('input_DEM.asc')
+	line = file_txt.readlines()
+	file_txt.close()
+
+	n_north = -1
+	n_east = -1
+	cellsize = -1
+	indexini = -1
+	nodata = -9999
+
+	for i in range(0,10):
+		aux = line[i].split()
+		if(aux[0] == 'ncols'):
+			n_north = int(aux[1])
+		if(aux[0] == 'nrows'):
+			n_east = int(aux[1])
+		if(aux[0] == 'cellsize'):
+			cellsize = float(aux[1])
+		if(aux[0] == 'xllcorner'):
+			east_cor = float(aux[1])
+		if(aux[0] == 'yllcorner'):
+			north_cor = float(aux[1])
+		if(aux[0] == 'NODATA_value'):
+			nodata = float(aux[1])
+		if(len(aux) >= 10):
+			indexini = i
+			break
+
+	Topography = np.zeros((n_north,n_east)) 
+	for i in range(indexini, indexini + n_north):
+		aux = line[i].split()
+		for j in range(0, n_east):
+			Topography[n_north-1-i+indexini,j] = float(aux[j])
 
 # DEFINE THE MATRIX OF COORDINATES
-distance_lon = distance_two_points(lat1,lat1,lon1,lon2)
-distance_lat = distance_two_points(lat1,lat2,lon1,lon1)
+if(source_dem == 1):
+	distance_lon = distance_two_points(lat1,lat1,lon1,lon2)
+	distance_lat = distance_two_points(lat1,lat2,lon1,lon1)
 
-step_lon_m = distance_lon / (cells_lon-1)
-step_lat_m = distance_lat / (cells_lat-1)
+	step_lon_m = distance_lon / (cells_lon-1)
+	step_lat_m = distance_lat / (cells_lat-1)
 
-matrix_lon = np.zeros((cells_lat,cells_lon))
-matrix_lat = np.zeros((cells_lat,cells_lon))
+	matrix_lon = np.zeros((cells_lat,cells_lon))
+	matrix_lat = np.zeros((cells_lat,cells_lon))
 
-for i in range(0,cells_lon):
-	matrix_lon[:,i] = lon1 + (lon2 - lon1)*(i)/(cells_lon-1)
-for j in range(0,cells_lat):
-	matrix_lat[j,:] = lat1 + (lat2 - lat1)*(cells_lat-1-j)/(cells_lat-1)
+	for i in range(0,cells_lon):
+		matrix_lon[:,i] = lon1 + (lon2 - lon1)*(i)/(cells_lon-1)
+	for j in range(0,cells_lat):
+		matrix_lat[j,:] = lat1 + (lat2 - lat1)*(cells_lat-1-j)/(cells_lat-1)
 
-step_lon_deg = (lon2 - lon1)/(cells_lon - 1)
-step_lat_deg = (lat2 - lat1)/(cells_lat - 1)
+	step_lon_deg = (lon2 - lon1)/(cells_lon - 1)
+	step_lat_deg = (lat2 - lat1)/(cells_lat - 1)
+
+if(source_dem == 2):
+	matrix_north = np.zeros((n_north,n_east))
+	matrix_east = np.zeros((n_north,n_east))
+
+	for i in range(0,n_east):
+		matrix_east[:,i] = (east_cor + cellsize * i)/1000
+	for j in range(0,n_north):
+		matrix_north[j,:] = (north_cor + cellsize * j)/1000
 
 # CREATE VECTORS OF INPUT PARAMETERS AND DELETE NEGATIVE DATA
 print 'Creating input vectors'
@@ -184,137 +239,154 @@ print 'Creating input vectors'
 height_vector = np.random.normal(height,var_height,N)
 hl_vector = np.random.normal(hl,var_hl,N)
 
-lon_cen_vector = np.random.normal(lon_cen,var_cen*step_lon_deg/step_lon_m,N)
-lat_cen_vector = np.random.normal(lat_cen,var_cen*step_lat_deg/step_lat_m,N)
-
-if(dist_source == 2):
-	pos_structure = np.random.uniform(-1,1,N)
-	lon_cen_vector = lon_cen_vector + pos_structure * np.sin(azimuth_structure * np.pi/180) * radius_structure *  step_lon_deg / step_lon_m
-	lat_cen_vector = lat_cen_vector + pos_structure * np.cos(azimuth_structure * np.pi/180) * radius_structure * step_lat_deg / step_lat_m
-
-if(dist_source == 3):
-	pos_structure = init_angle + np.random.uniform(0,1,N)*(final_angle - init_angle)
-	lon_cen_vector = lon_cen_vector + np.cos(pos_structure * np.pi/180) * length_structure *  step_lon_deg / step_lon_m
-	lat_cen_vector = lat_cen_vector + np.sin(pos_structure * np.pi/180) * length_structure * step_lat_deg / step_lat_m
-
 for i in range(0,N):
 	if(height_vector[i] < 0):
-		height_vector[i] = np.random.normal(height,variability_height,1)
+		height_vector[i] = np.random.normal(height,var_height,1)
 		i = i - 1
 for i in range(0,N):
 	if(hl_vector[i] < 0.1):
-		hl_vector[i] = np.random.normal(hl,variability_hl,1)
+		hl_vector[i] = np.random.normal(hl,var_hl,1)
 		i = i - 1
+
+if(source_dem == 1):
+	lon_cen_vector = np.random.normal(lon_cen,var_cen*step_lon_deg/step_lon_m,N)
+	lat_cen_vector = np.random.normal(lat_cen,var_cen*step_lat_deg/step_lat_m,N)
+
+	if(dist_source == 2):
+		pos_structure = np.random.uniform(-1,1,N)
+		lon_cen_vector = lon_cen_vector + pos_structure * np.sin(azimuth_lin * np.pi/180) * length_lin *  step_lon_deg / step_lon_m
+		lat_cen_vector = lat_cen_vector + pos_structure * np.cos(azimuth_lin * np.pi/180) * length_lin * step_lat_deg / step_lat_m
+
+	if(dist_source == 3):
+		pos_structure = ang1_rad + np.random.uniform(0,1,N)*(ang2_rad - ang1_rad)
+		lon_cen_vector = lon_cen_vector + np.cos(pos_structure * np.pi/180) * radius_rad  *  step_lon_deg / step_lon_m
+		lat_cen_vector = lat_cen_vector + np.sin(pos_structure * np.pi/180) * radius_rad * step_lat_deg / step_lat_m
+
+if(source_dem == 2):
+	east_cen_vector = np.random.normal(east_cen,var_cen,N)
+	north_cen_vector = np.random.normal(north_cen,var_cen,N)
+
+	if(dist_source == 2):
+		pos_structure = np.random.uniform(-1,1,N)
+		east_cen_vector = east_cen_vector + pos_structure * np.sin(azimuth_lin * np.pi/180) * length_lin
+		north_cen_vector = north_cen_vector + pos_structure * np.cos(azimuth_lin * np.pi/180) * length_lin
+
+	if(dist_source == 3):
+		pos_structure = ang1_rad + np.random.uniform(0,1,N)*(ang2_rad - ang1_rad)
+		east_cen_vector = east_cen_vector  + np.cos(pos_structure * np.pi/180) * radius_rad 
+		north_cen_vector = north_cen_vector + np.sin(pos_structure * np.pi/180) * radius_rad
 
 # ENERGY CONES
 print 'Computing energy cones'
-data_cones = np.zeros((cells_lat,cells_lon))
 
-for i in range(0,N):
-	polygon=[]
-	height_eff = height_vector[i] + interpol_pos(lon1, lat1, step_lon_deg, step_lat_deg, lon_cen_vector[i], lat_cen_vector[i], cells_lon, cells_lat, Topography)
-	for angle_deg in range(0,360,1):
-		angle_rad = angle_deg * np.pi /180
-		boolean_data = 0
-		for distance in range(0, 100000, 50):
-			h = interpol_pos(lon1, lat1, step_lon_deg, step_lat_deg, lon_cen_vector[i] + distance*cos(angle_rad)*step_lon_deg/step_lon_m , lat_cen_vector[i] + distance*sin(angle_rad)*step_lat_deg/step_lat_m , cells_lon, cells_lat, Topography)
-			if( h >= height_eff - hl_vector[i]*distance ):
-				polygon.append(distance)
-				boolean_data = 1
-				break
-		if(boolean_data == 0):
-			print 'Please use a larger map'
-			sys.exit(0)
+if(source_dem == 1):
+
+	data_cones = np.zeros((cells_lat,cells_lon))
+	for i in range(0,N):
+		polygon=[]
+		height_eff = height_vector[i] + interpol_pos(lon1, lat1, step_lon_deg, step_lat_deg, lon_cen_vector[i], lat_cen_vector[i], cells_lon, cells_lat, Topography)
+		for angle_deg in range(0,360,1):
+			angle_rad = angle_deg * np.pi /180
+			boolean_data = 0
+			for distance in range(0, 100000, 50):
+				h = interpol_pos(lon1, lat1, step_lon_deg, step_lat_deg, lon_cen_vector[i] + distance*cos(angle_rad)*step_lon_deg/step_lon_m , lat_cen_vector[i] + distance*sin(angle_rad)*step_lat_deg/step_lat_m , cells_lon, cells_lat, Topography)
+				if( h >= height_eff - hl_vector[i]*distance ):
+					polygon.append(distance)
+					boolean_data = 1
+					break
+			if(boolean_data == 0):
+				print 'Please use a larger map'
+				sys.exit(0)
 	
-	[lon_index, lat_index] = current_cell(lon1, lat1, step_lon_deg, step_lat_deg, lon_cen_vector[i], lat_cen_vector[i], cells_lon)
-	data_cones[lat_index,lon_index] = data_cones[lat_index,lon_index] + 1.0/N
+		[lon_index, lat_index] = current_cell(lon1, lat1, step_lon_deg, step_lat_deg, lon_cen_vector[i], lat_cen_vector[i], cells_lon)
+		data_cones[lat_index,lon_index] = data_cones[lat_index,lon_index] + 1.0/N
 
-	face_1 = 1
-	face_2 = 1
-	face_3 = 1
-	face_4 = 1
+		face_1 = 1
+		face_2 = 1
+		face_3 = 1
+		face_4 = 1
 
-	for radius in range(1,10000,1):
-		sum_radius = 0
-		if( face_1 == 1 ):
-			face_1 = 0
-			for l in range(0, 1 + 2 * radius , 1):
-				[lat_ind,lon_ind] = [lat_index + radius, lon_index - radius + l]
-				if(lat_ind >= 0 and lat_ind <cells_lat and lon_ind >= 0 and lon_ind <cells_lon):
-					var_lon = (matrix_lon[0,lon_ind] - lon_cen_vector[i]) * step_lon_m / step_lon_deg
-					var_lat = (matrix_lat[lat_ind,0] - lat_cen_vector[i]) * step_lat_m / step_lat_deg
-					distance = np.sqrt(var_lon*var_lon + var_lat*var_lat)
-					if(var_lon >= 0):
-						angle = np.arctan(var_lat/var_lon)
-					else:
-						angle = np.arctan(var_lat/var_lon) + np.pi
-					if(angle < 0):
-						angle = angle + 2*np.pi
-					dr = polygon[int(angle*180/np.pi)]
-					if( dr >= distance):
-						data_cones[lat_ind,lon_ind] = data_cones[lat_ind,lon_ind] + 1.0/N
-						sum_radius = 1
-						face_1 = 1
-		if( face_2 == 1 ):
-			face_2 = 0
-			for l in range(0, 1 + 2 * radius , 1):
-				[lat_ind,lon_ind] = [lat_index - radius, lon_index - radius + l]
-				if(lat_ind >= 0 and lat_ind <cells_lat and lon_ind >= 0 and lon_ind <cells_lon):
-					var_lon = (matrix_lon[0,lon_ind] - lon_cen_vector[i]) * step_lon_m / step_lon_deg
-					var_lat = (matrix_lat[lat_ind,0] - lat_cen_vector[i]) * step_lat_m / step_lat_deg
-					distance = np.sqrt(var_lon*var_lon + var_lat*var_lat)
-					if(var_lon >= 0):
-						angle = np.arctan(var_lat/var_lon)
-					else:
-						angle = np.arctan(var_lat/var_lon) + np.pi
-					if(angle < 0):
-						angle = angle + 2*np.pi
-					dr = polygon[int(angle*180/np.pi)]
-					if( dr >= distance):
-						data_cones[lat_ind,lon_ind] = data_cones[lat_ind,lon_ind] + 1.0/N
-						sum_radius = 1
-						face_2 = 1
-		if( face_3 == 1 ):
-			face_3 = 0
-			for l in range(1, 2 * radius , 1):
-				[lat_ind,lon_ind] = [lat_index - radius + l, lon_index + radius]
-				if(lat_ind >= 0 and lat_ind <cells_lat and lon_ind >= 0 and lon_ind <cells_lon):
-					var_lon = (matrix_lon[0,lon_ind] - lon_cen_vector[i]) * step_lon_m / step_lon_deg
-					var_lat = (matrix_lat[lat_ind,0] - lat_cen_vector[i]) * step_lat_m / step_lat_deg
-					distance = np.sqrt(var_lon*var_lon + var_lat*var_lat)
-					if(var_lon >= 0):
-						angle = np.arctan(var_lat/var_lon)
-					else:
-						angle = np.arctan(var_lat/var_lon) + np.pi
-					if(angle < 0):
-						angle = angle + 2*np.pi
-					dr = polygon[int(angle*180/np.pi)]
-					if( dr >= distance):
-						data_cones[lat_ind,lon_ind] = data_cones[lat_ind,lon_ind] + 1.0/N
-						sum_radius = 1
-						face_3 = 1
-		if( face_4 == 1 ):
-			face_4 = 0
-			for l in range(1, 2 * radius , 1):
-				[lat_ind,lon_ind] = [lat_index - radius + l, lon_index - radius]
-				if(lat_ind >= 0 and lat_ind <cells_lat and lon_ind >= 0 and lon_ind <cells_lon):
-					var_lon = (matrix_lon[0,lon_ind] - lon_cen_vector[i]) * step_lon_m / step_lon_deg
-					var_lat = (matrix_lat[lat_ind,0] - lat_cen_vector[i]) * step_lat_m / step_lat_deg
-					distance = np.sqrt(var_lon*var_lon + var_lat*var_lat)
-					if(var_lon >= 0):
-						angle = np.arctan(var_lat/var_lon)
-					else:
-						angle = np.arctan(var_lat/var_lon) + np.pi
-					if(angle < 0):
-						angle = angle + 2*np.pi
-					dr = polygon[int(angle*180/np.pi)]
-					if( dr >= distance):
-						data_cones[lat_ind,lon_ind] = data_cones[lat_ind,lon_ind] + 1.0/N
-						sum_radius = 1
-						face_4 = 1
-		if(sum_radius == 0):
-			break
-	print ' Simulation finished (N = ' + str(i+1) + ')'
+		for radius in range(1,10000,1):
+			sum_radius = 0
+			if( face_1 == 1 ):
+				face_1 = 0
+				for l in range(0, 1 + 2 * radius , 1):
+					[lat_ind,lon_ind] = [lat_index + radius, lon_index - radius + l]
+					if(lat_ind >= 0 and lat_ind <cells_lat and lon_ind >= 0 and lon_ind <cells_lon):
+						var_lon = (matrix_lon[0,lon_ind] - lon_cen_vector[i]) * step_lon_m / step_lon_deg
+						var_lat = (matrix_lat[lat_ind,0] - lat_cen_vector[i]) * step_lat_m / step_lat_deg
+						distance = np.sqrt(var_lon*var_lon + var_lat*var_lat)
+						if(var_lon >= 0):
+							angle = np.arctan(var_lat/var_lon)
+						else:
+							angle = np.arctan(var_lat/var_lon) + np.pi
+						if(angle < 0):
+							angle = angle + 2*np.pi
+						dr = polygon[int(angle*180/np.pi)]
+						if( dr >= distance):
+							data_cones[lat_ind,lon_ind] = data_cones[lat_ind,lon_ind] + 1.0/N
+							sum_radius = 1
+							face_1 = 1
+			if( face_2 == 1 ):
+				face_2 = 0
+				for l in range(0, 1 + 2 * radius , 1):
+					[lat_ind,lon_ind] = [lat_index - radius, lon_index - radius + l]
+					if(lat_ind >= 0 and lat_ind <cells_lat and lon_ind >= 0 and lon_ind <cells_lon):
+						var_lon = (matrix_lon[0,lon_ind] - lon_cen_vector[i]) * step_lon_m / step_lon_deg
+						var_lat = (matrix_lat[lat_ind,0] - lat_cen_vector[i]) * step_lat_m / step_lat_deg
+						distance = np.sqrt(var_lon*var_lon + var_lat*var_lat)
+						if(var_lon >= 0):
+							angle = np.arctan(var_lat/var_lon)
+						else:
+							angle = np.arctan(var_lat/var_lon) + np.pi
+						if(angle < 0):
+							angle = angle + 2*np.pi
+						dr = polygon[int(angle*180/np.pi)]
+						if( dr >= distance):
+							data_cones[lat_ind,lon_ind] = data_cones[lat_ind,lon_ind] + 1.0/N
+							sum_radius = 1
+							face_2 = 1
+			if( face_3 == 1 ):
+				face_3 = 0
+				for l in range(1, 2 * radius , 1):
+					[lat_ind,lon_ind] = [lat_index - radius + l, lon_index + radius]
+					if(lat_ind >= 0 and lat_ind <cells_lat and lon_ind >= 0 and lon_ind <cells_lon):
+						var_lon = (matrix_lon[0,lon_ind] - lon_cen_vector[i]) * step_lon_m / step_lon_deg
+						var_lat = (matrix_lat[lat_ind,0] - lat_cen_vector[i]) * step_lat_m / step_lat_deg
+						distance = np.sqrt(var_lon*var_lon + var_lat*var_lat)
+						if(var_lon >= 0):
+							angle = np.arctan(var_lat/var_lon)
+						else:
+							angle = np.arctan(var_lat/var_lon) + np.pi
+						if(angle < 0):
+							angle = angle + 2*np.pi
+						dr = polygon[int(angle*180/np.pi)]
+						if( dr >= distance):
+							data_cones[lat_ind,lon_ind] = data_cones[lat_ind,lon_ind] + 1.0/N
+							sum_radius = 1
+							face_3 = 1
+			if( face_4 == 1 ):
+				face_4 = 0
+				for l in range(1, 2 * radius , 1):
+					[lat_ind,lon_ind] = [lat_index - radius + l, lon_index - radius]
+					if(lat_ind >= 0 and lat_ind <cells_lat and lon_ind >= 0 and lon_ind <cells_lon):
+						var_lon = (matrix_lon[0,lon_ind] - lon_cen_vector[i]) * step_lon_m / step_lon_deg
+						var_lat = (matrix_lat[lat_ind,0] - lat_cen_vector[i]) * step_lat_m / step_lat_deg
+						distance = np.sqrt(var_lon*var_lon + var_lat*var_lat)
+						if(var_lon >= 0):
+							angle = np.arctan(var_lat/var_lon)
+						else:
+							angle = np.arctan(var_lat/var_lon) + np.pi
+						if(angle < 0):
+							angle = angle + 2*np.pi
+						dr = polygon[int(angle*180/np.pi)]
+						if( dr >= distance):
+							data_cones[lat_ind,lon_ind] = data_cones[lat_ind,lon_ind] + 1.0/N
+							sum_radius = 1
+							face_4 = 1
+			if(sum_radius == 0):
+				break
+		print ' Simulation finished (N = ' + str(i+1) + ')'
 
 # FIGURES
 plt.figure(1)
