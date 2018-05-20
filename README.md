@@ -8,4 +8,4 @@ Input parameter:
  See the file input_data.py for the definition of the input parameters.
 
 This code needs:
- - Installation of matplotlib (https://matplotlib.org/), numpy (http://www.numpy.org/), scipy (https://www.scipy.org/), elevation (https://pypi.org/project/elevation/) and tifffile (https://pypi.org/project/tifffile/).
+ - Installation of matplotlib (https://matplotlib.org/), numpy (http://www.numpy.org/), elevation (https://pypi.org/project/elevation/) and tifffile (https://pypi.org/project/tifffile/).
