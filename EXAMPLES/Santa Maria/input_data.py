@@ -1,7 +1,7 @@
 # Name of the run (used to save the parameters and the output)
 run_name = Santa_Maria
 
-# Source of DEM (1 => SRTM 30 m / 2 => uploaded DEM. A default location is assumed for uploaded DEMS: input_DEM.asc, see example in EXAMPLES/UploadDEM)
+# Source of DEM (1 => SRTM 30 m / 2 => uploaded DEM. A default location is assumed for uploaded DEMS: input_DEM.asc, see an example in EXAMPLES/UploadDEM)
 source_dem = 1
 
 # Map limits (only considered if source_dem = 1)
@@ -14,26 +14,26 @@ lon2 = -91.1
 lat1 = 14.2
 lat2 = 15.0
 
-# Probability distribution of collapse location (1 => Punctual / 2 => Linear / 3 => Radial)
+# Probability distribution of collapse location (1 => Punctual / 2 => Linear / 3 => Circumference arch)
 dist_source = 1
 
 # Parameters of the collapse location
-# lon_cen = longitude of the collapse position center (only considered if source_dem = 1)
-# lat_cen = latitude of the collapse position center (only considered if source_dem = 1)
-# east_cen = east position of collapse center (only considered if source_dem = 2)
-# north_cen = north position of collapse center (only considered if source_dem = 2)
-# var_cen = uncertainty of collapse position center (in meters)
-# azimuth_lin = azimuth of the line that define the collapse position (in degrees, only considered if dist_source = 2)
-# length_lin = length of the line that define the collapse position (in meters, only considered if dist_source = 2)
-# radius_rad = radius of the circumference arch that define the collapse position (in meters, only considered if dist_source = 3)
-# ang1_rad = initial angle of the circumference arch that define the collapse position (in degrees, only considered if dist_source = 3)
-# ang2_rad = initial angle of the circumference arch that define the collapse position (in degrees, only considered if dist_source = 3)
+# lon_cen = longitude of the collapse zone center (only considered if source_dem = 1)
+# lat_cen = latitude of the collapse zone center (only considered if source_dem = 1)
+# east_cen = east coordinate of collapse zone center (only considered if source_dem = 2)
+# north_cen = north coordinate of collapse zone center (only considered if source_dem = 2)
+# var_cen = uncertainty of collapse position (in meters)
+# azimuth_lin = azimuth of the line that define the collapse zone (in degrees, only considered if dist_source = 2)
+# length_lin = length of the line that define the collapse zone (in meters, only considered if dist_source = 2)
+# radius_rad = radius of the circumference arch that define the collapse zone (in meters, only considered if dist_source = 3)
+# ang1_rad = initial angle of the circumference arch that define the collapse zone (in degrees, only considered if dist_source = 3. Anticlockwise)
+# ang2_rad = initial angle of the circumference arch that define the collapse zone (in degrees, only considered if dist_source = 3. Anticlockwise)
 lon_cen = -91.568
 lat_cen = 14.739
 var_cen = 1000.0
 
 # Other parameters of energy cones
-# height = expected height above the surface of collapse (in meters)
+# height = expected height of collapse (above the surface, in meters)
 # var_height = uncertainty of collapse height (in meters)
 # hl = expected H/L for the energy cones
 # var_hal = uncertainty of H/L

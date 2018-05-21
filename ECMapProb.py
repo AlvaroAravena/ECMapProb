@@ -56,7 +56,7 @@ def interpol_pos(lon1, lat1, step_lon_deg, step_lat_deg, lon_cen, lat_cen, cells
 
 	return ((- aux_lon*f1 - aux_lat*f2) / f3 + dc)
 
-def current_cell(lon1, lat1, step_lon_deg, step_lat_deg, lon_cen, lat_cen, cells_lon):
+def current_cell(lon1, lat1, step_lon_deg, step_lat_deg, lon_cen, lat_cen, cells_lon, cells_lat):
 
 	dlon = int(np.floor( (lon_cen - lon1 )/ (step_lon_deg) ))
 	dlat = (cells_lat - 2) - int(np.floor( (lat_cen - lat1) / (step_lat_deg) ))
@@ -229,9 +229,9 @@ if(source_dem == 2):
 	matrix_east = np.zeros((n_north,n_east))
 
 	for i in range(0,n_east):
-		matrix_east[:,i] = (east_cor + cellsize * i)/1000
+		matrix_east[:,i] = (east_cor + cellsize * i)
 	for j in range(0,n_north):
-		matrix_north[j,:] = (north_cor + cellsize * j)/1000
+		matrix_north[j,:] = (north_cor + cellsize * j)
 
 # CREATE VECTORS OF INPUT PARAMETERS AND DELETE NEGATIVE DATA
 print 'Creating input vectors'
@@ -283,6 +283,7 @@ if(source_dem == 1):
 
 	data_cones = np.zeros((cells_lat,cells_lon))
 	for i in range(0,N):
+		boolean_map = 0
 		polygon=[]
 		height_eff = height_vector[i] + interpol_pos(lon1, lat1, step_lon_deg, step_lat_deg, lon_cen_vector[i], lat_cen_vector[i], cells_lon, cells_lat, Topography)
 		for angle_deg in range(0,360,1):
@@ -295,11 +296,15 @@ if(source_dem == 1):
 					boolean_data = 1
 					break
 			if(boolean_data == 0):
-				print 'Please use a larger map'
-				sys.exit(0)
+				polygon.append(2 * distance)
+				boolean_map = 1
+
+		if(boolean_map == 1):
+			print ' WARNING: Please use a larger map'	
 	
-		[lon_index, lat_index] = current_cell(lon1, lat1, step_lon_deg, step_lat_deg, lon_cen_vector[i], lat_cen_vector[i], cells_lon)
+		[lon_index, lat_index] = current_cell(lon1, lat1, step_lon_deg, step_lat_deg, lon_cen_vector[i], lat_cen_vector[i], cells_lon, cells_lat)
 		data_cones[lat_index,lon_index] = data_cones[lat_index,lon_index] + 1.0/N
+
 
 		face_1 = 1
 		face_2 = 1
@@ -388,28 +393,168 @@ if(source_dem == 1):
 				break
 		print ' Simulation finished (N = ' + str(i+1) + ')'
 
+if( source_dem == 2):
+
+	data_cones = np.zeros((n_north,n_east))
+
+	for i in range(0,N):
+		boolean_map = 0
+		polygon=[]
+		height_eff = height_vector[i] + interpol_pos(east_cor, north_cor, cellsize, cellsize, east_cen_vector[i], north_cen_vector[i], n_east, n_north, Topography)
+		for angle_deg in range(0,360,1):
+			angle_rad = angle_deg * np.pi /180
+			boolean_data = 0
+			for distance in range(0, 100000, 50):
+				h = interpol_pos(east_cor, north_cor, cellsize, cellsize, east_cen_vector[i] + distance*cos(angle_rad), north_cen_vector[i] + distance*sin(angle_rad), n_east, n_north, Topography)
+				if( h >= height_eff - hl_vector[i]*distance ):
+					polygon.append(distance)
+					boolean_data = 1
+					break
+			if(boolean_data == 0):
+				polygon.append(1e10)
+				boolean_map = 1
+
+		if(boolean_map == 1):
+			print ' WARNING: Please use a larger map'	
+	
+		[east_index, north_index] = current_cell(east_cor, north_cor, cellsize, cellsize, east_cen_vector[i], north_cen_vector[i], n_east, n_north)
+		data_cones[north_index, east_index] = data_cones[north_index, east_index] + 1.0/N
+
+		face_1 = 1
+		face_2 = 1
+		face_3 = 1
+		face_4 = 1
+
+		for radius in range(1,10000,1):
+			sum_radius = 0
+			if( face_1 == 1 ):
+				face_1 = 0
+				for l in range(0, 1 + 2 * radius , 1):
+					[east_ind, north_ind] = [east_index + radius, north_index - radius + l]
+					if(north_ind >= 0 and north_ind < n_north and east_ind >= 0 and east_ind < n_east):
+						var_east = (matrix_east[0,east_ind] - east_cen_vector[i])
+						var_north = (matrix_north[north_ind,0] - north_cen_vector[i])
+						distance = np.sqrt(var_east*var_east + var_north*var_north)
+						if(var_east >= 0):
+							angle = np.arctan(var_north/var_east)
+						else:
+							angle = np.arctan(var_north/var_east) + np.pi
+						if(angle < 0):
+							angle = angle + 2*np.pi
+						dr = polygon[int(angle*180/np.pi)]
+						if( dr >= distance):
+							data_cones[north_ind,east_ind] = data_cones[north_ind,east_ind] + 1.0/N
+							sum_radius = 1
+							face_1 = 1
+			if( face_2 == 1 ):
+				face_2 = 0
+				for l in range(0, 1 + 2 * radius , 1):
+					[east_ind,north_ind] = [east_index - radius, north_index - radius + l]
+					if(north_ind >= 0 and north_ind < n_north and east_ind >= 0 and east_ind < n_east):
+						var_east = (matrix_east[0,east_ind] - east_cen_vector[i])
+						var_north = (matrix_north[north_ind,0] - north_cen_vector[i])
+						distance = np.sqrt(var_east*var_east + var_north*var_north)
+						if(var_east >= 0):
+							angle = np.arctan(var_north/var_east)
+						else:
+							angle = np.arctan(var_north/var_east) + np.pi
+						if(angle < 0):
+							angle = angle + 2*np.pi
+						dr = polygon[int(angle*180/np.pi)]
+						if( dr >= distance):
+							data_cones[north_ind,east_ind] = data_cones[north_ind,east_ind] + 1.0/N
+							sum_radius = 1
+							face_2 = 1
+			if( face_3 == 1 ):
+				face_3 = 0
+				for l in range(1, 2 * radius , 1):
+					[east_ind,north_ind] = [east_index - radius + l, north_index + radius]
+					if(north_ind >= 0 and north_ind < n_north and east_ind >= 0 and east_ind < n_east):
+						var_east = (matrix_east[0,east_ind] - east_cen_vector[i])
+						var_north = (matrix_north[north_ind,0] - north_cen_vector[i])
+						distance = np.sqrt(var_east*var_east + var_north*var_north)
+						if(var_east >= 0):
+							angle = np.arctan(var_north/var_east)
+						else:
+							angle = np.arctan(var_north/var_east) + np.pi
+						if(angle < 0):
+							angle = angle + 2*np.pi
+						dr = polygon[int(angle*180/np.pi)]
+						if( dr >= distance):
+							data_cones[north_ind,east_ind] = data_cones[north_ind,east_ind] + 1.0/N
+							sum_radius = 1
+							face_3 = 1
+			if( face_4 == 1 ):
+				face_4 = 0
+				for l in range(1, 2 * radius , 1):
+					[east_ind,north_ind] = [east_index - radius + l, north_index - radius]
+					if(north_ind >= 0 and north_ind < n_north and east_ind >= 0 and east_ind < n_east):
+						var_east = (matrix_east[0,east_ind] - east_cen_vector[i])
+						var_north = (matrix_north[north_ind,0] - north_cen_vector[i])
+						distance = np.sqrt(var_east*var_east + var_north*var_north)
+						if(var_east >= 0):
+							angle = np.arctan(var_north/var_east)
+						else:
+							angle = np.arctan(var_north/var_east) + np.pi
+						if(angle < 0):
+							angle = angle + 2*np.pi
+						dr = polygon[int(angle*180/np.pi)]
+						if( dr >= distance):
+							data_cones[north_ind,east_ind] = data_cones[north_ind,east_ind] + 1.0/N
+							sum_radius = 1
+							face_4 = 1
+			if(sum_radius == 0):
+				break
+		print ' Simulation finished (N = ' + str(i+1) + ')'
+
+
 # FIGURES
-plt.figure(1)
-plt.contourf(matrix_lon,matrix_lat,Topography,100,cmap='Greys',min=0)
-plt.colorbar()
-CS = plt.contourf(matrix_lon,matrix_lat,data_cones, N+1, alpha= 0.5, interpolation='nearest', min=1e-20, max=1.01, cmap='Reds', antialiased=True, lw=0.01)
-fmt = '%.1f'
-CS_lines = plt.contour(matrix_lon,matrix_lat,data_cones, np.array([0.1, 0.2, 0.4, 0.7]), min=1e-20, max=1.01, colors='w', interpolation='nearest')
-plt.clabel(CS_lines, inline=1, fontsize=10, colors='k', fmt=fmt)
-plt.axes().set_aspect(step_lat_m/step_lon_m)
-plt.xlabel('Longitude $[^\circ]$')
-plt.ylabel('Latitude $[^\circ]$')
-for i in range(0,N):
-	plt.plot( lon_cen_vector[i], lat_cen_vector[i], 'r.', markersize=2)
-plt.savefig(run_name + '_map.png')
+if(source_dem == 1):
+	plt.figure(1)
+	plt.contourf(matrix_lon,matrix_lat,Topography,100,cmap='Greys',min=0)
+	plt.colorbar()
+	CS = plt.contourf(matrix_lon,matrix_lat,data_cones, N+1, alpha= 0.5, interpolation='nearest', min=1e-20, max=1.01, cmap='Reds', antialiased=True, lw=0.01)	
+	fmt = '%.1f'
+	CS_lines = plt.contour(matrix_lon,matrix_lat,data_cones, np.array([0.1, 0.2, 0.4, 0.7]), min=1e-20, max=1.01, colors='w', interpolation='nearest')
+	plt.clabel(CS_lines, inline=1, fontsize=10, colors='k', fmt=fmt)
+	plt.axes().set_aspect(step_lat_m/step_lon_m)
+	plt.xlabel('Longitude $[^\circ]$')
+	plt.ylabel('Latitude $[^\circ]$')
+	for i in range(0,N):
+		plt.plot( lon_cen_vector[i], lat_cen_vector[i], 'r.', markersize=2)
+	plt.savefig(run_name + '_map.png')
 
-plt.figure(2)
-plt.subplot(121)
-plt.hist(height_vector)
-plt.xlabel('Initial height [m]')
-plt.subplot(122)
-plt.hist(hl_vector)
-plt.xlabel('H/L')
-plt.savefig(run_name + '_histogram.png')
-plt.show()
+	plt.figure(2)
+	plt.subplot(121)
+	plt.hist(height_vector)
+	plt.xlabel('Initial height [m]')
+	plt.subplot(122)
+	plt.hist(hl_vector)
+	plt.xlabel('H/L')
+	plt.savefig(run_name + '_histogram.png')
+	plt.show()
 
+if(source_dem == 2):
+	plt.figure(1)
+	plt.contourf(matrix_east,matrix_north,Topography,100,cmap='Greys',min=0)
+	plt.colorbar()
+	CS = plt.contourf(matrix_east,matrix_north,data_cones, N+1, alpha= 0.5, interpolation='nearest', min=1e-20, max=1.01, cmap='Reds', antialiased=True, lw=0.01)	
+	fmt = '%.1f'
+	CS_lines = plt.contour(matrix_east,matrix_north,data_cones, np.array([0.1, 0.2, 0.4, 0.7]), min=1e-20, max=1.01, colors='w', interpolation='nearest')
+	plt.clabel(CS_lines, inline=1, fontsize=10, colors='k', fmt=fmt)
+	plt.axes().set_aspect(1.0)
+	plt.xlabel('East [m]')
+	plt.ylabel('North [m]')
+	for i in range(0,N):
+		plt.plot( east_cen_vector[i], north_cen_vector[i], 'r.', markersize=2)
+	plt.savefig(run_name + '_map.png')
+
+	plt.figure(2)
+	plt.subplot(121)
+	plt.hist(height_vector)
+	plt.xlabel('Initial height [m]')
+	plt.subplot(122)
+	plt.hist(hl_vector)
+	plt.xlabel('H/L')
+	plt.savefig(run_name + '_histogram.png')
+	plt.show()
