@@ -511,9 +511,11 @@ if( source_dem == 2):
 # FIGURES
 if(source_dem == 1):
 	plt.figure(1)
-	plt.contourf(matrix_lon,matrix_lat,Topography,100,cmap='Greys',min=0)
+	cmapg = plt.cm.get_cmap('Greys')
+	plt.contourf(matrix_lon,matrix_lat,Topography,100,cmap=cmapg,min=0)
 	plt.colorbar()
-	CS = plt.contourf(matrix_lon,matrix_lat,data_cones, N+1, alpha= 0.5, interpolation='nearest', min=1e-20, max=1.01, cmap='Reds', antialiased=True, lw=0.01)	
+	cmapr = plt.cm.get_cmap('Reds')
+	CS = plt.contourf(matrix_lon,matrix_lat,data_cones, N+1, alpha= 0.5, interpolation='nearest', cmap=cmapr, min=1e-20, max=1.01, antialiased=True, lw=0.01)	
 	fmt = '%.1f'
 	CS_lines = plt.contour(matrix_lon,matrix_lat,data_cones, np.array([0.1, 0.2, 0.4, 0.7]), min=1e-20, max=1.01, colors='w', interpolation='nearest')
 	plt.clabel(CS_lines, inline=1, fontsize=10, colors='k', fmt=fmt)
@@ -536,9 +538,11 @@ if(source_dem == 1):
 
 if(source_dem == 2):
 	plt.figure(1)
-	plt.contourf(matrix_east,matrix_north,Topography,100,cmap='Greys',min=0)
+	cmapg = plt.cm.get_cmap('Greys')
+	plt.contourf(matrix_east,matrix_north,Topography,100,cmap=cmapg,min=0)
 	plt.colorbar()
-	CS = plt.contourf(matrix_east,matrix_north,data_cones, N+1, alpha= 0.5, interpolation='nearest', min=1e-20, max=1.01, cmap='Reds', antialiased=True, lw=0.01)	
+	cmapr = plt.cm.get_cmap('Reds')
+	CS = plt.contourf(matrix_east,matrix_north,data_cones, N+1, alpha= 0.5, interpolation='nearest', cmap=cmapr, min=1e-20, max=1.01, antialiased=True, lw=0.01)	
 	fmt = '%.1f'
 	CS_lines = plt.contour(matrix_east,matrix_north,data_cones, np.array([0.1, 0.2, 0.4, 0.7]), min=1e-20, max=1.01, colors='w', interpolation='nearest')
 	plt.clabel(CS_lines, inline=1, fontsize=10, colors='k', fmt=fmt)
