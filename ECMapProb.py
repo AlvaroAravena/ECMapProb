@@ -280,7 +280,7 @@ if(source_dem == 2):
 # ENERGY CONES
 print 'Computing energy cones'
 
-angstep = 10
+angstep = 1
 if(source_dem == 1):
 
 	data_cones = np.zeros((cells_lat,cells_lon))
