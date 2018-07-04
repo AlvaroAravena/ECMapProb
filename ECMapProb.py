@@ -224,7 +224,7 @@ if(source_dem == 2):
 	for i in range(indexini, indexini + n_north):
 		aux = line[i].split()
 		for j in range(0, n_east):
-			Topography[n_north-1-i+indexini,j] = float(aux[j])
+			Topography[i-indexini,j] = float(aux[j])
 
 # DEFINE THE MATRIX OF COORDINATES
 if(source_dem == 1):
@@ -237,7 +237,7 @@ if(source_dem == 1):
 	matrix_lon = np.zeros((cells_lat,cells_lon))
 	matrix_lat = np.zeros((cells_lat,cells_lon))
 
-	for i in range(0,cells_lon):
+	for i in range(0,cells_lon): 
 		matrix_lon[:,i] = lon1 + (lon2 - lon1)*(i)/(cells_lon-1)
 	for j in range(0,cells_lat):
 		matrix_lat[j,:] = lat1 + (lat2 - lat1)*(cells_lat-1-j)/(cells_lat-1)
@@ -253,6 +253,7 @@ if(source_dem == 2):
 		matrix_east[:,i] = (east_cor + cellsize * i)
 	for j in range(0,n_north):
 		matrix_north[j,:] = (north_cor + cellsize * j)
+	matrix_north = matrix_north[ range(len(matrix_north[:,0]) -1 , -1 , -1 ) , : ]
 
 # CREATE VECTORS OF INPUT PARAMETERS AND DELETE NEGATIVE DATA
 print 'Creating input vectors'
@@ -302,8 +303,8 @@ while( 1 == 1 ):
 if(source_dem == 1):
 
 	if( var_cen > 0.0):
-		lon_cen_vector = np.random.normal(lon_cen,var_cen*step_lon_deg/step_lon_m,N)
-		lat_cen_vector = np.random.normal(lat_cen,var_cen*step_lat_deg/step_lat_m,N)
+		lon_cen_vector = np.random.normal(lon_cen, var_cen * step_lon_deg / step_lon_m, N)
+		lat_cen_vector = np.random.normal(lat_cen, var_cen * step_lat_deg / step_lat_m, N)
 	else:
 		lon_cen_vector = np.ones(N) * lon_cen
 		lat_cen_vector = np.ones(N) * lat_cen
@@ -562,13 +563,13 @@ if(source_dem == 1):
 	plt.contourf(matrix_lon,matrix_lat,Topography,100,cmap=cmapg,min=0)
 	plt.colorbar()
 	cmapr = plt.cm.get_cmap('Reds')
-	CS = plt.contourf(matrix_lon,matrix_lat,data_cones, 100, alpha= 0.5, interpolation='linear', cmap=cmapr, antialiased=True, lw=0.01)	
-	fmt = '%.2f'
 	if( N > 1 ):
-		CS_lines = plt.contour(matrix_lon,matrix_lat,data_cones, np.array([0.02, 0.1, 0.2, 0.4, 0.7]), colors='w', interpolation='linear')
+		CS = plt.contourf(matrix_lon,matrix_lat,data_cones, min(100,N+1), alpha= 0.5, interpolation='linear', cmap=cmapr, antialiased=True, lw=0.01)	
+		fmt = '%.2f'
+		CS_lines = plt.contour(matrix_lon,matrix_lat,data_cones, np.array([0.02, 0.1, 0.2, 0.4, 0.7]), colors='w', interpolation='linear', lw=0.01)
 		plt.clabel(CS_lines, inline=1, fontsize=10, colors='k', fmt=fmt)
 	else:
-		CS_lines = plt.contour(matrix_lon, matrix_lat,data_cones, colors='w', interpolation='linear')
+		CS = plt.contourf(matrix_lon, matrix_lat, data_cones, 100, alpha= 0.5, interpolation='nearest', cmap=cmapr, antialiased=True, lw=0.01)	
 	plt.axes().set_aspect(step_lat_m/step_lon_m)
 	plt.xlabel('Longitude $[^\circ]$')
 	plt.ylabel('Latitude $[^\circ]$')
@@ -580,30 +581,34 @@ if(source_dem == 1):
 		plt.plot( lon_cen_vector[i], lat_cen_vector[i], 'r.', markersize=2)
 	plt.savefig(run_name + '_map.png')
 
-	plt.figure(2)
-	plt.subplot(131)
-	plt.hist(height_vector)
-	plt.xlabel('Initial height [m]')
-	plt.subplot(132)
-	plt.hist(hl0_vector)
-	plt.xlabel('H/L0')
-	plt.subplot(133)
-	plt.hist(hl_vector)
-	plt.xlabel('H/L')
-	plt.savefig(run_name + '_histogram.png')
+	if( N > 1 ):
+		plt.figure(2)
+		plt.subplot(131)
+		plt.hist(height_vector)
+		plt.xlabel('Initial height [m]')
+		plt.subplot(132)
+		plt.hist(hl0_vector)
+		plt.xlabel('H/L0')
+		plt.subplot(133)
+		plt.hist(hl_vector)
+		plt.xlabel('H/L')
+		plt.savefig(run_name + '_histogram.png')
 	plt.show()
-
+	
 if(source_dem == 2):
-	data_cones = data_cones / N
+	data_cones = data_cones[ range(len(data_cones[:,0]) -1 , -1 , -1 ) , : ] / N
 	plt.figure(1)
 	cmapg = plt.cm.get_cmap('Greys')
 	plt.contourf(matrix_east,matrix_north,Topography,100,cmap=cmapg,min=0)
 	plt.colorbar()
 	cmapr = plt.cm.get_cmap('Reds')
-	CS = plt.contourf(matrix_east,matrix_north,data_cones, N+1, alpha= 0.5, interpolation='nearest', cmap=cmapr, min=1e-20, max=1.01, antialiased=True, lw=0.01)	
-	fmt = '%.1f'
-	CS_lines = plt.contour(matrix_east,matrix_north,data_cones, np.array([0.01, 0.1, 0.2, 0.4, 0.7]), min=1e-20, max=1.01, colors='w', linewidth = 0.1, interpolation='nearest')
-	plt.clabel(CS_lines, inline=1, fontsize=10, colors='k', fmt=fmt)
+	if( N > 1 ):
+		CS = plt.contourf(matrix_east,matrix_north,data_cones, min(100,N+1), alpha= 0.5, interpolation='linear', cmap=cmapr, antialiased=True, lw=0.01)	
+		fmt = '%.2f'
+		CS_lines = plt.contour(matrix_east,matrix_north,data_cones, np.array([0.02, 0.1, 0.2, 0.4, 0.7]), colors='w', interpolation='linear', lw=0.01)
+		plt.clabel(CS_lines, inline=1, fontsize=10, colors='k', fmt=fmt)
+	else:
+		CS = plt.contourf(matrix_east,matrix_north,data_cones, 100, alpha= 0.5, interpolation='nearest', cmap=cmapr, antialiased=True, lw=0.01)	
 	plt.axes().set_aspect(1.0)
 	plt.xlabel('East [m]')
 	plt.ylabel('North [m]')
@@ -612,15 +617,16 @@ if(source_dem == 2):
 		plt.plot( east_cen_vector[i], north_cen_vector[i], 'r.', markersize=2)
 	plt.savefig(run_name + '_map.png')
 
-	plt.figure(2)
-	plt.subplot(131)
-	plt.hist(height_vector)
-	plt.xlabel('Initial height [m]')
-	plt.subplot(132)
-	plt.hist(hl0_vector)
-	plt.xlabel('H/L0')
-	plt.subplot(133)
-	plt.hist(hl_vector)
-	plt.xlabel('H/L')
-	plt.savefig(run_name + '_histogram.png')
+	if( N > 1 ):
+		plt.figure(2)
+		plt.subplot(131)
+		plt.hist(height_vector)
+		plt.xlabel('Initial height [m]')
+		plt.subplot(132)
+		plt.hist(hl0_vector)
+		plt.xlabel('H/L0')
+		plt.subplot(133)
+		plt.hist(hl_vector)
+		plt.xlabel('H/L')
+		plt.savefig(run_name + '_histogram.png')
 	plt.show()
