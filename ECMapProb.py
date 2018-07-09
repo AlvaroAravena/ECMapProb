@@ -2,7 +2,7 @@ import elevation
 import tifffile
 import numpy as np
 import matplotlib.pyplot as plt
-from math import sin, cos, sqrt, atan2, radians, log
+from math import sin, cos, sqrt, atan2, radians, log, factorial
 import sys
 import os
 from PIL import Image, ImageDraw
@@ -80,7 +80,7 @@ file_txt.close()
 [run_name, source_dem, lon1, lon2, lat1, lat2] = ['run_default', 1, np.nan, np.nan, np.nan, np.nan]
 [dist_source, var_cen, lon_cen, lat_cen, east_cen, north_cen, azimuth_lin] = [1, 0.0, np.nan, np.nan, np.nan, np.nan, np.nan]
 [length_lin, radius_rad, ang1_rad, ang2_rad] = [np.nan, np.nan, np.nan, np.nan]
-[height, hl0, hl, var_height, var_hl0, var_hl, N, cone_levels] = [np.nan, 0.8, 0.2, 200.0, 0.05, 0.05, 100, 1]
+[height, hl, var_height, var_hl, N, cone_levels] = [np.nan, 0.2, 200.0, 0.05, 100, 1]
 
 for i in range(0,len(line)):
 	line[i] = line[i].replace('=',' ')
@@ -123,14 +123,10 @@ for i in range(0,len(line)):
 				ang2_rad = float(aux[1])
 			if( aux[0] == 'height'):
 				height = float(aux[1])
-			if( aux[0] == 'hl0'):
-				hl0 = float(aux[1])
 			if( aux[0] == 'hl'):
 				hl = float(aux[1])
 			if( aux[0] == 'var_height'):
 				var_height = float(aux[1])
-			if( aux[0] == 'var_hl0'):
-				var_hl0 = float(aux[1])
 			if( aux[0] == 'var_hl'):
 				var_hl = float(aux[1])
 			if( aux[0] == 'N'):
@@ -268,40 +264,27 @@ if(var_hl > 0.0):
 else:
 	hl_vector = np.ones(N) * hl
 
-if(var_hl0 > 0.0):
-	hl0_vector = np.random.normal(hl0,var_hl0,N)
-else:
-	hl0_vector = np.ones(N) * hl0
+if(var_height > 0.0):
+	while( 1 == 1 ):
+		aux_boolean = 0
+		for i in range(0,N):
+			if(height_vector[i] < 0):
+				height_vector[i] = np.random.normal(height,var_height,1)
+				aux_boolean = 1
+		if(aux_boolean == 0):
+			break
 
-while( 1 == 1 ):
-	aux_boolean = 0
-	for i in range(0,N):
-		if(height_vector[i] < 0):
-			height_vector[i] = np.random.normal(height,var_height,1)
-			aux_boolean = 1
-	if(aux_boolean == 0):
-		break
-
-while( 1 == 1 ):
-	aux_boolean = 0
-	for i in range(0,N):
-		if(hl_vector[i] < 0.05):
-			hl_vector[i] = np.random.normal(hl,var_hl,1)
-			aux_boolean = 1
-	if(aux_boolean == 0):
-		break
-
-while( 1 == 1 ):
-	aux_boolean = 0
-	for i in range(0,N):
-		if(hl0_vector[i] < 0.05):
-			hl0_vector[i] = np.random.normal(hl0,var_hl0,1)
-			aux_boolean = 1
-	if(aux_boolean == 0):
-		break
+if(var_hl > 0.0):
+	while( 1 == 1 ):
+		aux_boolean = 0
+		for i in range(0,N):
+			if(hl_vector[i] < 0.05):
+				hl_vector[i] = np.random.normal(hl,var_hl,1)
+				aux_boolean = 1
+		if(aux_boolean == 0):
+			break
 
 if(source_dem == 1):
-
 	if( var_cen > 0.0):
 		lon_cen_vector = np.random.normal(lon_cen, var_cen * step_lon_deg / step_lon_m, N)
 		lat_cen_vector = np.random.normal(lat_cen, var_cen * step_lat_deg / step_lat_m, N)
@@ -341,23 +324,25 @@ if(source_dem == 2):
 # ENERGY CONES
 print 'Computing energy cones'
 
-angstep = 3
+angstep = 10
 anglen = 360 / angstep
-fact_relax = 1.0
 
 if(source_dem == 1):
 
 	data_cones = np.zeros((cells_lat,cells_lon))
 	data_aux_t = np.ones((cells_lat,cells_lon))
 	data_aux_b = np.zeros((cells_lat,cells_lon))
+	vec_ang = range(0, 360, angstep)
 
 	for i in range(0,N):
+
 		current_level = 0
 		data_step = np.zeros((cells_lat,cells_lon))
 		polygon = []
 		height_eff = height_vector[i] + interpol_pos(lon1, lat1, step_lon_deg, step_lat_deg, lon_cen_vector[i], lat_cen_vector[i], cells_lon, cells_lat, Topography)
-		polygon.append((lon_cen_vector[i], lat_cen_vector[i],  height_eff, 1.0 , 1.0, range(0, 360, angstep), 0.0 ))
+		polygon.append((lon_cen_vector[i], lat_cen_vector[i],  height_eff, 1.0 ))
 		sum_pixels = 0
+		hl_current = hl_vector[i]		
 
 		for j in range(10000): 
 
@@ -365,85 +350,73 @@ if(source_dem == 1):
 				if( N == 1 ):			
 					data_cones = data_cones + data_step
 				break
-			if( cone_levels < polygon[j][4] ):
+			if( cone_levels < polygon[j][3] ):
 				if( N == 1 ):
 					data_cones = data_cones + data_step
 				break
-			elif(current_level < polygon[j][4]):
-				current_level = polygon[j][4]
+			elif(current_level < polygon[j][3]):
+				current_level = polygon[j][3]
 				if( N == 1 ):
 					data_cones = data_cones + data_step
 
-			vec_ang = polygon[j][5]
 			polygon_xy = []
 			polygons_new = []
 
-			if(polygon[j][4] == 1.0):
-				hl_current = hl0_vector[i]
-			else:
-				hl_current = ( hl_vector[i] * polygon[j][3] ** ( ( log( hl0_vector[i] ) - log( hl_vector[i] ) ) / log(0.01)  )) * fact_relax + (1.0 - fact_relax) * hl_current  
-
 			for angle_deg in vec_ang:
-				ang_max = ( vec_ang[0] + 180.0 ) * np.pi / 180
 				angle_rad = angle_deg * np.pi /180
-				if( polygon[j][4] == 1.0 ):
-					fact_angle = 1.0
-				else:
-					fact_angle = 1.0 / ( np.exp( 0.01* np.abs(ang_max - angle_rad) ))
 				for distance in range(0, 100000, 10):
-					h = interpol_pos(lon1, lat1, step_lon_deg, step_lat_deg, polygon[j][0] + distance * cos(angle_rad)*step_lon_deg/step_lon_m , polygon[j][1] + distance*sin(angle_rad)*step_lat_deg/step_lat_m , cells_lon, cells_lat, Topography)
-					if( h >= polygon[j][2] - hl_current * fact_angle * distance ):
+					h = interpol_pos(lon1, lat1, step_lon_deg, step_lat_deg, polygon[j][0] + distance * cos(angle_rad) * step_lon_deg / step_lon_m , polygon[j][1] + distance*sin(angle_rad)*step_lat_deg/step_lat_m , cells_lon, cells_lat, Topography)
+					if( h >= polygon[j][2] - hl_current * distance ):
 						polygon_xy.append((int((polygon[j][0] + distance*cos(angle_rad)*step_lon_deg/step_lon_m - lon1) * cells_lon / (lon2 - lon1)),int((polygon[j][1] + distance*sin(angle_rad)*step_lat_deg/step_lat_m - lat1) * cells_lat / (lat2 - lat1))))
 						polygons_new.append(distance)
 						break
 
 			img = Image.new('L', (cells_lon, cells_lat), 0)
 			if( len(polygon_xy) > 0 ):
-				draw = ImageDraw.Draw(img).polygon(polygon_xy, outline = 0 , fill = 1.0)
+				draw = ImageDraw.Draw(img).polygon(polygon_xy, outline = 1 , fill = 1.0)
 				data_step = np.maximum( np.minimum(data_aux_t, data_step + np.array(img)), data_aux_b)
-		
-			if( cone_levels > polygon[j][4] and sum(sum(data_step)) > sum_pixels):
+
+			if( cone_levels > polygon[j][3] and sum(sum(data_step)) > sum_pixels):
 				aux = np.zeros(len(polygons_new)+2) 
-				aux[1:len(polygons_new)+1] = np.array(polygons_new)
+				aux[1:len(polygons_new)+1] = np.array(polygons_new) 
 				aux[0] = polygons_new[len(polygons_new)-1]
 				aux[len(polygons_new)+1] = polygons_new[0]
 				der1 = (aux[1:len(aux)-1] - aux[2:len(aux)])
 				der2 = (aux[1:len(aux)-1] - aux[0:len(aux)-2])
 				wh1 = np.where(der1 >= 0)
 				wh2 = np.where(der2 > 0)
-				wh = np.intersect1d(wh1[0], wh2[0])
-			
-				for l in wh:
-					val_acu = [0, 0]
-					index_des = l
-					for k in range(len(polygons_new)):
-						index_des = index_des + 1
-						if(index_des == len(polygons_new)):
-							index_des = 0
-						if(polygons_new[index_des] <= polygons_new[l]):
-							val_acu[0] = val_acu[0] + 0.5
-							if(val_acu[1] < polygons_new[index_des] and polygons_new[index_des] < polygons_new[l]):
-								val_acu[1] = polygons_new[index_des]
-						else:
-							break
-					index_des = l
-					for k in range(len(polygons_new)):
-						index_des = index_des - 1
-						if(index_des < 0):
-							index_des = len(polygons_new) - 1
-						if(polygons_new[index_des] <= polygons_new[l]):
-							val_acu[0] = val_acu[0] + 0.5
-							if(val_acu[1] < polygons_new[index_des] and polygons_new[index_des] < polygons_new[l]):
-								val_acu[1] = polygons_new[index_des]
-						else:
-							break
+				wh_max = np.intersect1d(wh1[0], wh2[0])
+				wh_sum = np.zeros(len(polygons_new)) 
 
-					hl_new = hl_vector[i] * (val_acu[0] * polygon[j][3] / (anglen - 1)) ** ( ( log( hl0_vector[i] ) - log( hl_vector[i] ) ) / log(0.01) ) * fact_relax + (1.0 - fact_relax) * hl_current  
-					if( hl_new <= hl0_vector[i] ):
-						polygon.append(( polygon[j][0] + val_acu[1]*cos(vec_ang[l] * np.pi / 180 ) *step_lon_deg/step_lon_m , polygon[j][1] + val_acu[1]*sin(vec_ang[l] * np.pi / 180 ) * step_lat_deg / step_lat_m, polygon[j][2] - hl_current * val_acu[1] ,  val_acu[0] * polygon[j][3] / (anglen - 1)  , polygon[j][4] + 1, range(vec_ang[l]-180, vec_ang[l]+180, angstep ), hl_current ))
+				if(len(wh_max) > 0):
+					for lmax in wh_max:
+						l_it = 	len(polygons_new) - 1		
+						for l in range(1,len(polygons_new)):
+							l_index = lmax + l
+							if(l_index >= len(polygons_new)):
+								l_index = l_index - len(polygons_new)
+							if( polygons_new[lmax] < polygons_new[l_index] ):
+								l_it = l
+								break
+							wh_sum[lmax] = wh_sum[lmax] + (polygons_new[lmax] - polygons_new[l_index])							
+						for l in range(1,len(polygons_new) - l_it):
+							l_index = lmax - l
+							if(l_index < 0):
+								l_index = l_index + len(polygons_new)
+							if( polygons_new[lmax] < polygons_new[l_index] ):
+								break							
+							wh_sum[lmax] = wh_sum[lmax] + (polygons_new[lmax] - polygons_new[l_index])
+
+					wh_sum = wh_sum * hl_current * angstep / 360
+
+					for l in wh_max:
+						new_x = polygon[j][0] + polygons_new[l] * cos(vec_ang[l] * np.pi / 180 ) *step_lon_deg/step_lon_m ; 
+						new_y = polygon[j][1] + polygons_new[l] * sin(vec_ang[l] * np.pi / 180 ) *step_lat_deg/step_lat_m ;
+						height_eff = wh_sum[l] + interpol_pos(lon1, lat1, step_lon_deg, step_lat_deg, new_x, new_y, cells_lon, cells_lat, Topography)
+						polygon.append(( new_x, new_y, height_eff, polygon[j][3] + 1 ))
 			
 			sum_pixels = sum(sum(data_step))	
-			print j, len(polygon), polygon[j][4], polygon[j][3], sum(sum(data_step)), hl_current
+			print j, len(polygon), polygon[j][3], polygon[j][2], sum(sum(data_step))
 
 		if( N > 1 ):
 			data_cones = data_cones + data_step
@@ -455,14 +428,17 @@ if( source_dem == 2):
 	data_cones = np.zeros((n_north,n_east))
 	data_aux_t = np.ones((n_north,n_east))
 	data_aux_b = np.zeros((n_north,n_east))
+	vec_ang = range(0, 360, angstep)
 
 	for i in range(0,N):
+
 		current_level = 0
 		data_step = np.zeros((n_north,n_east))
 		polygon = []
 		height_eff = height_vector[i] + interpol_pos(east_cor, north_cor, cellsize, cellsize, east_cen_vector[i], north_cen_vector[i], n_east, n_north, Topography)
-		polygon.append((east_cen_vector[i], north_cen_vector[i],  height_eff, 1.0 , 1.0, range(0, 360, angstep), 0.0 ))
+		polygon.append((east_cen_vector[i], north_cen_vector[i],  height_eff, 1.0 ))
 		sum_pixels = 0
+		hl_current = hl_vector[i]
 
 		for j in range(10000): 
 
@@ -470,34 +446,23 @@ if( source_dem == 2):
 				if( N == 1 ):			
 					data_cones = data_cones + data_step
 				break
-			if( cone_levels < polygon[j][4] ):
+			if( cone_levels < polygon[j][3] ):
 				if( N == 1 ):
 					data_cones = data_cones + data_step
 				break
-			elif(current_level < polygon[j][4]):
-				current_level = polygon[j][4]
+			elif(current_level < polygon[j][3]):
+				current_level = polygon[j][3]
 				if( N == 1 ):
 					data_cones = data_cones + data_step
 
-			vec_ang = polygon[j][5]
 			polygon_xy = []
 			polygons_new = []
 
-			if(polygon[j][4] == 1.0):
-				hl_current = hl0_vector[i]
-			else:
-				hl_current = ( hl_vector[i] * polygon[j][3] ** ( ( log( hl0_vector[i] ) - log( hl_vector[i] ) ) / log(0.01)  )) * fact_relax + (1.0 - fact_relax) * hl_current  
-
 			for angle_deg in vec_ang:
-				ang_max = ( vec_ang[0] + 180.0 ) * np.pi / 180
 				angle_rad = angle_deg * np.pi /180
-				if( polygon[j][4] == 1.0 ):
-					fact_angle = 1.0
-				else:
-					fact_angle = 1.0 / ( np.exp( 0.01* np.abs(ang_max - angle_rad) ))
 				for distance in range(0, 100000, 10):
 					h = interpol_pos(east_cor, north_cor, cellsize, cellsize, polygon[j][0] + distance * cos(angle_rad) , polygon[j][1] + distance*sin(angle_rad) , n_east, n_north, Topography)
-					if( h >= polygon[j][2] - hl_current * fact_angle * distance ):
+					if( h >= polygon[j][2] - hl_current * distance ):
 						polygon_xy.append((int((polygon[j][0] + distance* cos(angle_rad) - east_cor) * n_east / ( cellsize * ( n_east - 1 ) ) ), int((polygon[j][1] + distance*sin(angle_rad) - north_cor) * n_north / ( cellsize * ( n_north - 1 ) ))))
 						polygons_new.append(distance)
 						break
@@ -507,7 +472,7 @@ if( source_dem == 2):
 				draw = ImageDraw.Draw(img).polygon(polygon_xy, outline = 0 , fill = 1)
 				data_step = np.maximum( np.minimum(data_aux_t, data_step + np.array(img)), data_aux_b)
 
-			if( cone_levels > polygon[j][4] and sum(sum(data_step)) > sum_pixels):
+			if( cone_levels > polygon[j][3] and sum(sum(data_step)) > sum_pixels):
 				aux = np.zeros(len(polygons_new)+2) 
 				aux[1:len(polygons_new)+1] = np.array(polygons_new)
 				aux[0] = polygons_new[len(polygons_new)-1]
@@ -516,39 +481,38 @@ if( source_dem == 2):
 				der2 = (aux[1:len(aux)-1] - aux[0:len(aux)-2])
 				wh1 = np.where(der1 >= 0)
 				wh2 = np.where(der2 > 0)
-				wh = np.intersect1d(wh1[0], wh2[0])
+				wh_max = np.intersect1d(wh1[0], wh2[0])
+				wh_sum = np.zeros(len(polygons_new)) 
 
-				for l in wh:
-					val_acu = [0, 0]
-					index_des = l
-					for k in range(len(polygons_new)):
-						index_des = index_des + 1
-						if(index_des == len(polygons_new)):
-							index_des = 0
-						if(polygons_new[index_des] <= polygons_new[l]):
-							val_acu[0] = val_acu[0] + 0.5
-							if(val_acu[1] < polygons_new[index_des] and polygons_new[index_des] < polygons_new[l]):
-								val_acu[1] = polygons_new[index_des]
-						else:
-							break
-					index_des = l
-					for k in range(len(polygons_new)):
-						index_des = index_des - 1
-						if(index_des < 0):
-							index_des = len(polygons_new) - 1
-						if(polygons_new[index_des] <= polygons_new[l]):
-							val_acu[0] = val_acu[0] + 0.5
-							if(val_acu[1] < polygons_new[index_des] and polygons_new[index_des] < polygons_new[l]):
-								val_acu[1] = polygons_new[index_des]
-						else:
-							break
+				if(len(wh_max) > 0):
+					for lmax in wh_max:
+						l_it = 	len(polygons_new) - 1		
+						for l in range(1,len(polygons_new)):
+							l_index = lmax + l
+							if(l_index >= len(polygons_new)):
+								l_index = l_index - len(polygons_new)
+							if( polygons_new[lmax] < polygons_new[l_index] ):
+								l_it = l
+								break
+							wh_sum[lmax] = wh_sum[lmax] + (polygons_new[lmax] - polygons_new[l_index])
+						
+						for l in range(1,len(polygons_new) - l_it):
+							l_index = lmax - l
+							if(l_index < 0):
+								l_index = l_index + len(polygons_new)
+							if( polygons_new[lmax] < polygons_new[l_index] ):
+								break							
+							wh_sum[lmax] = wh_sum[lmax] + (polygons_new[lmax] - polygons_new[l_index])
 
-					hl_new = hl_vector[i] * (val_acu[0] * polygon[j][3] / (anglen - 1)) ** ( ( log( hl0_vector[i] ) - log( hl_vector[i] ) ) / log(0.01) ) * fact_relax + (1.0 - fact_relax) * hl_current  
-					if( hl_new <= hl0_vector[i] ):
-						polygon.append(( polygon[j][0] + val_acu[1]*cos(vec_ang[l] * np.pi / 180 ) , polygon[j][1] + val_acu[1]*sin(vec_ang[l] * np.pi / 180 ), polygon[j][2] - hl_current * val_acu[1] ,  val_acu[0] * polygon[j][3] / (anglen - 1)  , polygon[j][4] + 1, range(vec_ang[l]-180, vec_ang[l]+180, angstep ), hl_current ))
-			
+					wh_sum = wh_sum * hl_current * angstep / 360
+
+					for l in wh_max:
+						new_x = polygon[j][0] + polygons_new[l] * cos(vec_ang[l] * np.pi / 180 ) ; 
+						new_y = polygon[j][1] + polygons_new[l] * sin(vec_ang[l] * np.pi / 180 ) ;
+						height_eff = wh_sum[l] + interpol_pos(east_cor, north_cor, cellsize, cellsize, new_x, new_y, n_east, n_north, Topography)
+						polygon.append(( new_x, new_y, height_eff, polygon[j][3] + 1 ))
 			sum_pixels = sum(sum(data_step))	
-			print j, len(polygon), polygon[j][4], polygon[j][3], sum(sum(data_step)), hl_current
+			print j, len(polygon), polygon[j][3], polygon[j][2], sum(sum(data_step))
 
 		if( N > 1 ):
 			data_cones = data_cones + data_step
@@ -564,12 +528,13 @@ if(source_dem == 1):
 	plt.colorbar()
 	cmapr = plt.cm.get_cmap('Reds')
 	if( N > 1 ):
-		CS = plt.contourf(matrix_lon,matrix_lat,data_cones, min(100,N+1), alpha= 0.5, interpolation='linear', cmap=cmapr, antialiased=True, lw=0.01)	
+		CS = plt.contourf(matrix_lon,matrix_lat,data_cones, min(100,N+1), alpha= 0.6, interpolation='linear', cmap=cmapr, antialiased=True, lw=0.01)	
 		fmt = '%.2f'
-		CS_lines = plt.contour(matrix_lon,matrix_lat,data_cones, np.array([0.02, 0.1, 0.2, 0.4, 0.7]), colors='w', interpolation='linear', lw=0.01)
+		plt.colorbar()
+		CS_lines = plt.contour(matrix_lon,matrix_lat,data_cones, np.array([0.05, 0.5]), colors='k', interpolation='linear', lw=0.01)
 		plt.clabel(CS_lines, inline=1, fontsize=10, colors='k', fmt=fmt)
 	else:
-		CS = plt.contourf(matrix_lon, matrix_lat, data_cones, 100, alpha= 0.5, interpolation='nearest', cmap=cmapr, antialiased=True, lw=0.01)	
+		CS = plt.contourf(matrix_lon, matrix_lat, data_cones, 100, alpha= 0.6, interpolation='nearest', cmap=cmapr, antialiased=True, lw=0.01)
 	plt.axes().set_aspect(step_lat_m/step_lon_m)
 	plt.xlabel('Longitude $[^\circ]$')
 	plt.ylabel('Latitude $[^\circ]$')
@@ -579,22 +544,24 @@ if(source_dem == 1):
 
 	for i in range(0,N):
 		plt.plot( lon_cen_vector[i], lat_cen_vector[i], 'r.', markersize=2)
+
+	if( N == 1 ):
+		for i in range(1,len(polygon)):
+			plt.plot( polygon[i][0],polygon[i][1], 'b.', markersize=2)
+
 	plt.savefig(run_name + '_map.png')
 
 	if( N > 1 ):
 		plt.figure(2)
-		plt.subplot(131)
+		plt.subplot(121)
 		plt.hist(height_vector)
 		plt.xlabel('Initial height [m]')
-		plt.subplot(132)
-		plt.hist(hl0_vector)
-		plt.xlabel('H/L0')
-		plt.subplot(133)
+		plt.subplot(122)
 		plt.hist(hl_vector)
 		plt.xlabel('H/L')
 		plt.savefig(run_name + '_histogram.png')
 	plt.show()
-	
+
 if(source_dem == 2):
 	data_cones = data_cones[ range(len(data_cones[:,0]) -1 , -1 , -1 ) , : ] / N
 	plt.figure(1)
@@ -603,29 +570,32 @@ if(source_dem == 2):
 	plt.colorbar()
 	cmapr = plt.cm.get_cmap('Reds')
 	if( N > 1 ):
-		CS = plt.contourf(matrix_east,matrix_north,data_cones, min(100,N+1), alpha= 0.5, interpolation='linear', cmap=cmapr, antialiased=True, lw=0.01)	
+		CS = plt.contourf(matrix_east,matrix_north,data_cones, min(100,N+1), alpha= 0.6, interpolation='linear', cmap=cmapr, antialiased=True, lw=0.01)	
 		fmt = '%.2f'
-		CS_lines = plt.contour(matrix_east,matrix_north,data_cones, np.array([0.02, 0.1, 0.2, 0.4, 0.7]), colors='w', interpolation='linear', lw=0.01)
+		plt.colorbar()
+		CS_lines = plt.contour(matrix_east, matrix_north, data_cones, np.array([0.05, 0.5]), colors='k', interpolation='linear', lw=0.01)
 		plt.clabel(CS_lines, inline=1, fontsize=10, colors='k', fmt=fmt)
 	else:
-		CS = plt.contourf(matrix_east,matrix_north,data_cones, 100, alpha= 0.5, interpolation='nearest', cmap=cmapr, antialiased=True, lw=0.01)	
+		CS = plt.contourf(matrix_east,matrix_north,data_cones, 100, alpha= 0.6, interpolation='nearest', cmap=cmapr, antialiased=True, lw=0.01)	
 	plt.axes().set_aspect(1.0)
 	plt.xlabel('East [m]')
 	plt.ylabel('North [m]')
 
 	for i in range(0,N):
-		plt.plot( east_cen_vector[i], north_cen_vector[i], 'r.', markersize=2)
+		plt.plot( east_cen_vector[i], north_cen_vector[i], 'r.', markersize = 2 )
+
+	if( N == 1 ):
+		for i in range(1,len(polygon)):
+			plt.plot( polygon[i][0], polygon[i][1], 'b.', markersize = 2 )
+
 	plt.savefig(run_name + '_map.png')
 
 	if( N > 1 ):
 		plt.figure(2)
-		plt.subplot(131)
+		plt.subplot(121)
 		plt.hist(height_vector)
 		plt.xlabel('Initial height [m]')
-		plt.subplot(132)
-		plt.hist(hl0_vector)
-		plt.xlabel('H/L0')
-		plt.subplot(133)
+		plt.subplot(122)
 		plt.hist(hl_vector)
 		plt.xlabel('H/L')
 		plt.savefig(run_name + '_histogram.png')

@@ -1,5 +1,5 @@
 # Name of the run (used to save the parameters and the output)
-run_name = Chaiten_3
+run_name = Chaiten_B
 
 # Source of DEM (1 => SRTM 30 m / 2 => uploaded DEM. A default location is assumed for uploaded DEMS: input_DEM.asc, see an example in EXAMPLES/UploadDEM)
 source_dem = 1
@@ -37,17 +37,13 @@ var_cen = 300.0
 
 # Other parameters of energy cones
 # height = expected height of collapse (above the surface, in meters)
-# hl0 = initial H/L for the energy cones
-# hl = minimum H/L for the energy cones
+# hl = H/L for the energy cones
 # var_height = uncertainty of collapse height (in meters)
-# var_hl0 = uncertainty of hl0
 # var_hl = uncertainty of hl
 height = 500.0
-hl0 = 0.30
-hl = 0.10
+hl = 0.40
 var_height = 200.0
-var_hl0 = 0.03
-var_hl = 0.005
+var_hl = 0.05
 
 # Number of energy cones computed by the code
 N = 300

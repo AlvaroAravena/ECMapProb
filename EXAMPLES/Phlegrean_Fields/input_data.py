@@ -9,16 +9,16 @@ source_dem = 1
 # lon2 = longitude of the second limit of the map 
 # lat1 = latitude of the first limit of the map
 # lat2 = latitude of the second limit of the map
-lon1 = 13.95
-lon2 = 14.35
-lat1 = 40.7
-lat2 = 41.0
+lon1 = 13.9
+lon2 = 14.4
+lat1 = 40.6
+lat2 = 41.1
 
 # Number of cones
 cone_levels = 30
 
 # Probability distribution of collapse location (1 => Punctual / 2 => Linear / 3 => Circumference arch)
-dist_source = 1
+dist_source = 3
 
 # Parameters of the collapse location
 # lon_cen = longitude of the collapse zone center (only considered if source_dem = 1)
@@ -31,9 +31,12 @@ dist_source = 1
 # radius_rad = radius of the circumference arch that define the collapse zone (in meters, only considered if dist_source = 3)
 # ang1_rad = initial angle of the circumference arch that define the collapse zone (in degrees, only considered if dist_source = 3. Anticlockwise)
 # ang2_rad = initial angle of the circumference arch that define the collapse zone (in degrees, only considered if dist_source = 3. Anticlockwise)
-lon_cen = 14.12
+lon_cen = 14.13
 lat_cen = 40.85
-var_cen = 2000.0
+var_cen = 300.0
+radius_rad = 4000.0
+ang1_rad = -60.0
+ang2_rad = 240.0
 
 # Other parameters of energy cones
 # height = expected height of collapse (above the surface, in meters)
@@ -43,11 +46,9 @@ var_cen = 2000.0
 # var_hl0 = uncertainty of hl0
 # var_hl = uncertainty of hl
 height = 800.0
-hl0 = 0.50
-hl = 0.10
+hl = 0.40
 var_height = 200.0
-var_hl0 = 0.03
-var_hl = 0.005
+var_hl = 0.05
 
 # Number of energy cones computed by the code
 N = 100
