@@ -1,5 +1,5 @@
 # Name of the run (used to save the parameters and the output)
-run_name = El_Fuego
+run_name = Fuego
 
 # Source of DEM (1 => SRTM 30 m / 2 => uploaded DEM. A default location is assumed for uploaded DEMS: input_DEM.asc, see an example in EXAMPLES/UploadDEM)
 source_dem = 1
