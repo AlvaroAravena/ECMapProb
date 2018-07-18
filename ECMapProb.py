@@ -9,16 +9,6 @@ from PIL import Image, ImageDraw
 
 # Auxiliary functions
 
-def smooth(x, window_len = 5, window='hanning'):
-
-	s=np.r_[x[window_len-1:0:-1],x,x[-2:-window_len-1:-1]]
-
-	w=eval('np.' + window + '(window_len)')
-
-	y=np.convolve(w/w.sum(),s,mode='valid')
-    
-	return y[2:len(y)-2]
-
 def distance_two_points(lat1, lat2, lon1, lon2):
 
 	R = 6373.0
