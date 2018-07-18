@@ -2,12 +2,22 @@ import elevation
 import tifffile
 import numpy as np
 import matplotlib.pyplot as plt
-from math import sin, cos, sqrt, atan2, radians, log, factorial
+from math import sin, cos, sqrt, atan2, radians, log, factorial, tan
 import sys
 import os
 from PIL import Image, ImageDraw
 
 # Auxiliary functions
+
+def smooth(x, window_len = 5, window='hanning'):
+
+	s=np.r_[x[window_len-1:0:-1],x,x[-2:-window_len-1:-1]]
+
+	w=eval('np.' + window + '(window_len)')
+
+	y=np.convolve(w/w.sum(),s,mode='valid')
+    
+	return y[2:len(y)-2]
 
 def distance_two_points(lat1, lat2, lon1, lon2):
 
@@ -21,41 +31,41 @@ def distance_two_points(lat1, lat2, lon1, lon2):
 	dlon = lon2 - lon1
 	dlat = lat2 - lat1
 
-	a = sin(dlat / 2)**2 + cos(lat1) * cos(lat2) * sin(dlon / 2)**2
-	c = 2 * atan2(sqrt(a), sqrt(1 - a))
-	return (R * c) * 1000
+	a = sin(dlat / 2.0)**2.0 + cos(lat1) * cos(lat2) * sin(dlon / 2.0)**2.0
+	c = 2.0 * atan2(sqrt(a), sqrt(1.0 - a))
+	return (R * c) * 1000.0
 
 def interpol_pos(lon1, lat1, step_lon_deg, step_lat_deg, lon_cen, lat_cen, cells_lon, cells_lat, Topography):
 
 	dlon = int(np.floor( (lon_cen - lon1 )/ (step_lon_deg) ))
 	dlat = (cells_lat - 2) - int(np.floor( (lat_cen - lat1) / (step_lat_deg) ))
 
-	if(dlon >= (cells_lon-1) or dlat >= (cells_lat-1) or dlon < 0 or dlat < 0):
-		return np.nan
+	if(dlon >= (cells_lon-1.0) or dlat >= (cells_lat-1.0) or dlon < 0.0 or dlat < 0.0):
+		return 99999
 
-	aux_lon = 2 * ( lon_cen - (dlon * step_lon_deg + lon1) - step_lon_deg / 2 ) / step_lon_deg
-	aux_lat = 2 *( - lat_cen + ((cells_lat - 1 - dlat) * step_lat_deg + lat1) - step_lat_deg / 2 ) / step_lat_deg
+	aux_lon = 2.0 * ( lon_cen - (dlon * step_lon_deg + lon1) - step_lon_deg / 2.0 ) / step_lon_deg
+	aux_lat = 2.0 *( - lat_cen + ((cells_lat - 1.0 - dlat) * step_lat_deg + lat1) - step_lat_deg / 2.0 ) / step_lat_deg
 
 	dc = (Topography[dlat][dlon] + Topography[dlat][dlon+1] + Topography[dlat+1][dlon] + Topography[dlat+1][dlon+1]) / 4
-	[x3, y3, z3] = [0, 0, dc]
+	[x3, y3, z3] = [0.0, 0.0, dc]
 	if( aux_lon >= 0.0 and abs(aux_lon) >= abs(aux_lat) ):
-		[x1,y1,z1] = [1, 1, Topography[dlat+1][dlon+1]] 
-		[x2,y2,z2] = [1, -1, Topography[dlat][dlon+1]] 
+		[x1,y1,z1] = [1.0, 1.0, Topography[dlat+1][dlon+1]] 
+		[x2,y2,z2] = [1.0, -1.0, Topography[dlat][dlon+1]] 
 	elif( aux_lat >= 0.0 and abs(aux_lon) < abs(aux_lat) ):
-		[x1,y1,z1] = [-1, 1, Topography[dlat+1][dlon]] 
-		[x2,y2,z2] = [1, 1, Topography[dlat+1][dlon+1]] 
+		[x1,y1,z1] = [-1.0, 1.0, Topography[dlat+1][dlon]] 
+		[x2,y2,z2] = [1.0, 1.0, Topography[dlat+1][dlon+1]] 
 	elif( aux_lon < 0.0 and abs(aux_lon) >= abs(aux_lat) ):
-		[x1,y1,z1] = [-1, 1, Topography[dlat+1][dlon]] 
-		[x2,y2,z2] = [-1, -1, Topography[dlat][dlon]] 
+		[x1,y1,z1] = [-1.0, 1.0, Topography[dlat+1][dlon]] 
+		[x2,y2,z2] = [-1.0, -1.0, Topography[dlat][dlon]] 
 	else:
-		[x1,y1,z1] = [-1, -1, Topography[dlat][dlon]] 
-		[x2,y2,z2] = [1, -1, Topography[dlat][dlon+1]]
+		[x1,y1,z1] = [-1.0, -1.0, Topography[dlat][dlon]] 
+		[x2,y2,z2] = [1.0, -1.0, Topography[dlat][dlon+1]]
  
 	f1 = (y2-y1)*(z3-z1) - (y3-y1)*(z2-z1)
 	f2 = (z2-z1)*(x3-x1) - (z3-z1)*(x2-x1)
 	f3 = (x2-x1)*(y3-y1) - (x3-x1)*(y2-y1)
 
-	return ((- aux_lon*f1 - aux_lat*f2) / f3 + dc)
+	return ((- aux_lon * f1 - aux_lat * f2) / f3 + dc)
 
 def current_cell(lon1, lat1, step_lon_deg, step_lat_deg, lon_cen, lat_cen, cells_lon, cells_lat):
 
@@ -182,7 +192,7 @@ if(source_dem == 1):
 			image = page.asarray()
 	elevation.clean()
 	Topography = np.array(image)
-	Topography  = (Topography  + abs(Topography)) / 2
+	Topography  = (Topography  + abs(Topography)) / 2.0
 	cells_lon = Topography.shape[1]
 	cells_lat = Topography.shape[0]
 
@@ -326,6 +336,7 @@ print 'Computing energy cones'
 
 angstep = 10
 anglen = 360 / angstep
+pix_min = 0.0
 
 if(source_dem == 1):
 
@@ -376,7 +387,7 @@ if(source_dem == 1):
 				draw = ImageDraw.Draw(img).polygon(polygon_xy, outline = 1 , fill = 1.0)
 				data_step = np.maximum( np.minimum(data_aux_t, data_step + np.array(img)), data_aux_b)
 
-			if( cone_levels > polygon[j][3] and sum(sum(data_step)) > sum_pixels):
+			if( cone_levels > polygon[j][3] and sum(sum(data_step)) > sum_pixels + pix_min ):
 				aux = np.zeros(len(polygons_new)+2) 
 				aux[1:len(polygons_new)+1] = np.array(polygons_new) 
 				aux[0] = polygons_new[len(polygons_new)-1]
@@ -384,12 +395,37 @@ if(source_dem == 1):
 				der1 = (aux[1:len(aux)-1] - aux[2:len(aux)])
 				der2 = (aux[1:len(aux)-1] - aux[0:len(aux)-2])
 				wh1 = np.where(der1 >= 0)
-				wh2 = np.where(der2 > 0)
+				wh2 = np.where(der2 >= 0)
 				wh_max = np.intersect1d(wh1[0], wh2[0])
+				wh_grouped = np.split(wh_max, np.where(np.diff(wh_max) > 1)[0] + 1 )
+				wh3 = np.where( abs(der1) + abs(der2) > 0)
+				wh4 = np.intersect1d(wh_max, wh3[0])
+				grouped_filter = np.zeros(len(wh_grouped))
+
+				for x_grouped in range(len(wh_grouped)):
+					if( len(np.intersect1d(wh_grouped[x_grouped],wh4)) > 0):
+						grouped_filter[x_grouped] = 1
+
+				if( (np.min(wh_grouped[0])) == 0 and (np.max(wh_grouped[len(wh_grouped)-1])) == len(polygons_new)-1 ):
+					aux_grouped = np.concatenate((wh_grouped[len(wh_grouped)-1], wh_grouped[0] + len(polygons_new)))
+					aux_filter = grouped_filter[len(wh_grouped)-1] + grouped_filter[0]
+					wh_grouped = wh_grouped[1:-1]
+					wh_grouped.append(aux_grouped)
+					grouped_filter = np.append(grouped_filter[1:-1],aux_filter)
+
+				wh_max = []
+				for k in range(len(grouped_filter)):
+					if(grouped_filter[k] > 0):
+						if(np.mean(wh_grouped[k]) <= len(polygons_new) - 1.0):
+							wh_max.append(np.mean(wh_grouped[k]))
+						else:
+							wh_max.append(len(polygons_new) - np.mean(wh_grouped[k]))
+
 				wh_sum = np.zeros(len(polygons_new)) 
 
 				if(len(wh_max) > 0):
-					for lmax in wh_max:
+					for l_max_real in wh_max:
+						lmax = np.int(l_max_real)
 						l_it = 	len(polygons_new) - 1		
 						for l in range(1,len(polygons_new)):
 							l_index = lmax + l
@@ -410,10 +446,13 @@ if(source_dem == 1):
 					wh_sum = wh_sum * hl_current * angstep / 360
 
 					for l in wh_max:
-						new_x = polygon[j][0] + polygons_new[l] * cos(vec_ang[l] * np.pi / 180 ) *step_lon_deg/step_lon_m ; 
-						new_y = polygon[j][1] + polygons_new[l] * sin(vec_ang[l] * np.pi / 180 ) *step_lat_deg/step_lat_m ;
-						height_eff = wh_sum[l] + interpol_pos(lon1, lat1, step_lon_deg, step_lat_deg, new_x, new_y, cells_lon, cells_lat, Topography)
-						polygon.append(( new_x, new_y, height_eff, polygon[j][3] + 1 ))
+						lint = np.int(l)
+						if( wh_sum[lint] > 0 ):
+							new_x = polygon[j][0] + polygons_new[lint] * cos((vec_ang[lint] + angstep*(l-lint) ) * np.pi / 180 ) *step_lon_deg/step_lon_m ; 
+							new_y = polygon[j][1] + polygons_new[lint] * sin((vec_ang[lint] + angstep*(l-lint) ) * np.pi / 180 ) *step_lat_deg/step_lat_m ;
+							height_eff = wh_sum[l] + interpol_pos(lon1, lat1, step_lon_deg, step_lat_deg, new_x, new_y, cells_lon, cells_lat, Topography)
+							if(interpol_pos(lon1, lat1, step_lon_deg, step_lat_deg, new_x, new_y, cells_lon, cells_lat, Topography) < 99999):
+								polygon.append(( new_x, new_y, height_eff, polygon[j][3] + 1 ))
 			
 			sum_pixels = sum(sum(data_step))	
 			print j, len(polygon), polygon[j][3], polygon[j][2], sum(sum(data_step))
@@ -472,20 +511,44 @@ if( source_dem == 2):
 				draw = ImageDraw.Draw(img).polygon(polygon_xy, outline = 0 , fill = 1)
 				data_step = np.maximum( np.minimum(data_aux_t, data_step + np.array(img)), data_aux_b)
 
-			if( cone_levels > polygon[j][3] and sum(sum(data_step)) > sum_pixels):
+			if( cone_levels > polygon[j][3] and sum(sum(data_step)) > sum_pixels + pix_min ):
 				aux = np.zeros(len(polygons_new)+2) 
-				aux[1:len(polygons_new)+1] = np.array(polygons_new)
+				aux[1:len(polygons_new)+1] = np.array(polygons_new) 
 				aux[0] = polygons_new[len(polygons_new)-1]
 				aux[len(polygons_new)+1] = polygons_new[0]
 				der1 = (aux[1:len(aux)-1] - aux[2:len(aux)])
 				der2 = (aux[1:len(aux)-1] - aux[0:len(aux)-2])
 				wh1 = np.where(der1 >= 0)
-				wh2 = np.where(der2 > 0)
+				wh2 = np.where(der2 >= 0)
 				wh_max = np.intersect1d(wh1[0], wh2[0])
-				wh_sum = np.zeros(len(polygons_new)) 
+				wh_grouped = np.split(wh_max, np.where(np.diff(wh_max) > 1)[0] + 1 )
+				wh3 = np.where( abs(der1) + abs(der2) > 0)
+				wh4 = np.intersect1d(wh_max, wh3[0])
+				grouped_filter = np.zeros(len(wh_grouped))
 
+				for x_grouped in range(len(wh_grouped)):
+					if( len(np.intersect1d(wh_grouped[x_grouped],wh4)) > 0):
+						grouped_filter[x_grouped] = 1
+
+				if( (np.min(wh_grouped[0])) == 0 and (np.max(wh_grouped[len(wh_grouped)-1])) == len(polygons_new)-1 ):
+					aux_grouped = np.concatenate((wh_grouped[len(wh_grouped)-1], wh_grouped[0] + len(polygons_new)))
+					aux_filter = grouped_filter[len(wh_grouped)-1] + grouped_filter[0]
+					wh_grouped = wh_grouped[1:-1]
+					wh_grouped.append(aux_grouped)
+					grouped_filter = np.append(grouped_filter[1:-1],aux_filter)
+
+				wh_max = []
+				for k in range(len(grouped_filter)):
+					if(grouped_filter[k] > 0):
+						if(np.mean(wh_grouped[k]) <= len(polygons_new) - 1.0):
+							wh_max.append(np.mean(wh_grouped[k]))
+						else:
+							wh_max.append(len(polygons_new) - np.mean(wh_grouped[k]))
+
+				wh_sum = np.zeros(len(polygons_new)) 
 				if(len(wh_max) > 0):
-					for lmax in wh_max:
+					for l_max_real in wh_max:
+						lmax = np.int(l_max_real)
 						l_it = 	len(polygons_new) - 1		
 						for l in range(1,len(polygons_new)):
 							l_index = lmax + l
@@ -494,8 +557,7 @@ if( source_dem == 2):
 							if( polygons_new[lmax] < polygons_new[l_index] ):
 								l_it = l
 								break
-							wh_sum[lmax] = wh_sum[lmax] + (polygons_new[lmax] - polygons_new[l_index])
-						
+							wh_sum[lmax] = wh_sum[lmax] + (polygons_new[lmax] - polygons_new[l_index])							
 						for l in range(1,len(polygons_new) - l_it):
 							l_index = lmax - l
 							if(l_index < 0):
@@ -507,10 +569,14 @@ if( source_dem == 2):
 					wh_sum = wh_sum * hl_current * angstep / 360
 
 					for l in wh_max:
-						new_x = polygon[j][0] + polygons_new[l] * cos(vec_ang[l] * np.pi / 180 ) ; 
-						new_y = polygon[j][1] + polygons_new[l] * sin(vec_ang[l] * np.pi / 180 ) ;
-						height_eff = wh_sum[l] + interpol_pos(east_cor, north_cor, cellsize, cellsize, new_x, new_y, n_east, n_north, Topography)
-						polygon.append(( new_x, new_y, height_eff, polygon[j][3] + 1 ))
+						lint = np.int(l)
+						if( wh_sum[lint] > 0 ):
+							new_x = polygon[j][0] + polygons_new[lint] * cos((vec_ang[lint] + angstep*(l-lint) ) * np.pi / 180 ) ; 
+							new_y = polygon[j][1] + polygons_new[lint] * sin((vec_ang[lint] + angstep*(l-lint) ) * np.pi / 180 ) ;
+							height_eff = wh_sum[l] + interpol_pos(east_cor, north_cor, cellsize, cellsize, new_x, new_y, n_east, n_north, Topography)
+							if(interpol_pos(east_cor, north_cor, cellsize, cellsize, new_x, new_y, n_east, n_north, Topography) < 99999):
+								polygon.append(( new_x, new_y, height_eff, polygon[j][3] + 1 ))
+
 			sum_pixels = sum(sum(data_step))	
 			print j, len(polygon), polygon[j][3], polygon[j][2], sum(sum(data_step))
 
@@ -538,6 +604,8 @@ if(source_dem == 1):
 	plt.axes().set_aspect(step_lat_m/step_lon_m)
 	plt.xlabel('Longitude $[^\circ]$')
 	plt.ylabel('Latitude $[^\circ]$')
+	plt.xlim(lon1, lon2 )
+	plt.ylim(lat1, lat2 )
 
 	for i in range(len(Cities)):
 		plt.text(float(Cities[i][0]), float(Cities[i][1]), str(Cities[i][2]), horizontalalignment='center', verticalalignment='center', fontsize = 6)
@@ -580,6 +648,8 @@ if(source_dem == 2):
 	plt.axes().set_aspect(1.0)
 	plt.xlabel('East [m]')
 	plt.ylabel('North [m]')
+	plt.xlim(east_cor, east_cor + cellsize * (n_east - 1) )
+	plt.ylim(north_cor,north_cor +cellsize * (n_north - 1) )
 
 	for i in range(0,N):
 		plt.plot( east_cen_vector[i], north_cen_vector[i], 'r.', markersize = 2 )
