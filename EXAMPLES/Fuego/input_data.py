@@ -14,7 +14,7 @@ lon2 = -90.4
 lat1 = 14.1
 lat2 = 14.7
 
-# Number of cones
+# Maximum order of energy cones
 cone_levels = 30
 
 # Probability distribution of collapse location (1 => Punctual / 2 => Linear / 3 => Circumference arch)
@@ -45,5 +45,5 @@ hl = 0.40
 var_height = 200.0
 var_hl = 0.03
 
-# Number of energy cones computed by the code
+# Number of simulations computed by the code
 N = 100

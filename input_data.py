@@ -1,7 +1,7 @@
 # Name of the run (used to save the parameters and the output)
-run_name = Chaiten_A
+run_name = Example
 
-# Source of DEM (1 => SRTM 30 m / 2 => uploaded DEM. A default location is assumed for uploaded DEMS: input_DEM.asc, see an example in EXAMPLES/UploadDEM)
+# Source of DEM (1 => SRTM 30 m / 2 => uploaded DEM. A default location is assumed for uploaded DEMs: input_DEM.asc, see an example in EXAMPLES/UploadDEM)
 source_dem = 1
 
 # Map limits (only considered if source_dem = 1)
@@ -14,7 +14,7 @@ lon2 = -72.5
 lat1 = -42.95
 lat2 = -42.75
 
-# Number of cones
+# Maximum order of energy cones
 cone_levels = 30
 
 # Probability distribution of collapse location (1 => Punctual / 2 => Linear / 3 => Circumference arch)
@@ -45,5 +45,5 @@ hl = 0.40
 var_height = 200.0
 var_hl = 0.05
 
-# Number of energy cones computed by the code
-N = 300
+# Number of simulations computed by the code
+N = 30

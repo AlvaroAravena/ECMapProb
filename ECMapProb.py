@@ -57,13 +57,6 @@ def interpol_pos(lon1, lat1, step_lon_deg, step_lat_deg, lon_cen, lat_cen, cells
 
 	return ((- aux_lon * f1 - aux_lat * f2) / f3 + dc)
 
-def current_cell(lon1, lat1, step_lon_deg, step_lat_deg, lon_cen, lat_cen, cells_lon, cells_lat):
-
-	dlon = int(np.floor( (lon_cen - lon1 )/ (step_lon_deg) ))
-	dlat = (cells_lat - 2) - int(np.floor( (lat_cen - lat1) / (step_lat_deg) ))
-
-	return [dlon, dlat]
-
 ##########################################################################################################################
 ################################################### MAIN PROGRAM #########################################################
 ##########################################################################################################################
