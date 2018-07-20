@@ -627,7 +627,6 @@ if(source_dem == 2):
 	if( N > 1 ):
 		CS= plt.contourf(matrix_east,matrix_north,data_cones, 100, vmax = 1, alpha= 0.6,interpolation='linear',cmap=cmapr ,antialiased=True, lw=0.01)	
 		fmt = '%.2f'
-		CS.set_clim([0.0,1.0])
 		plt.colorbar()
 		CS_lines = plt.contour(matrix_east, matrix_north, data_cones, np.array([0.05, 0.5]), colors='k', interpolation='linear', lw=0.01)
 		plt.clabel(CS_lines, inline=1, fontsize=10, colors='k', fmt=fmt)
