@@ -433,7 +433,7 @@ if(source_dem == 1):
 						if( wh_sum[lint] > 0 ):
 							new_x = polygon[j][0] + polygons_new[lint] * cos((vec_ang[lint] + angstep*(l-lint) ) * np.pi / 180 ) *step_lon_deg/step_lon_m ; 
 							new_y = polygon[j][1] + polygons_new[lint] * sin((vec_ang[lint] + angstep*(l-lint) ) * np.pi / 180 ) *step_lat_deg/step_lat_m ;
-							height_eff = wh_sum[l] + interpol_pos(lon1, lat1, step_lon_deg, step_lat_deg, new_x, new_y, cells_lon, cells_lat, Topography)
+							height_eff = wh_sum[lint] + interpol_pos(lon1, lat1, step_lon_deg, step_lat_deg, new_x, new_y, cells_lon, cells_lat, Topography)
 							if(interpol_pos(lon1, lat1, step_lon_deg, step_lat_deg, new_x, new_y, cells_lon, cells_lat, Topography) < 99999):
 								polygon.append(( new_x, new_y, height_eff, polygon[j][3] + 1 ))
 			
@@ -556,7 +556,7 @@ if( source_dem == 2):
 						if( wh_sum[lint] > 0 ):
 							new_x = polygon[j][0] + polygons_new[lint] * cos((vec_ang[lint] + angstep*(l-lint) ) * np.pi / 180 ) ; 
 							new_y = polygon[j][1] + polygons_new[lint] * sin((vec_ang[lint] + angstep*(l-lint) ) * np.pi / 180 ) ;
-							height_eff = wh_sum[l] + interpol_pos(east_cor, north_cor, cellsize, cellsize, new_x, new_y, n_east, n_north, Topography)
+							height_eff = wh_sum[lint] + interpol_pos(east_cor, north_cor, cellsize, cellsize, new_x, new_y, n_east, n_north, Topography)
 							if(interpol_pos(east_cor, north_cor, cellsize, cellsize, new_x, new_y, n_east, n_north, Topography) < 99999):
 								polygon.append(( new_x, new_y, height_eff, polygon[j][3] + 1 ))
 
@@ -569,7 +569,9 @@ if( source_dem == 2):
 		print ' Simulation finished (N = ' + str(i+1) + ')'
 
 # FIGURES
+
 if(source_dem == 1):
+
 	data_cones = data_cones[ range(len(data_cones[:,0]) -1 , -1 , -1 ) , : ] / N
 	plt.figure(1)
 	cmapg = plt.cm.get_cmap('Greys')
@@ -577,7 +579,7 @@ if(source_dem == 1):
 	plt.colorbar()
 	cmapr = plt.cm.get_cmap('Reds')
 	if( N > 1 ):
-		CS = plt.contourf(matrix_lon,matrix_lat,data_cones, min(100,N+1), alpha= 0.6, interpolation='linear', cmap=cmapr, antialiased=True, lw=0.01)	
+		CS = plt.contourf(matrix_lon, matrix_lat, data_cones, 100, vmax = 1,  alpha= 0.6, interpolation='linear', cmap=cmapr, antialiased=True, lw=0.01)	
 		fmt = '%.2f'
 		plt.colorbar()
 		CS_lines = plt.contour(matrix_lon,matrix_lat,data_cones, np.array([0.05, 0.5]), colors='k', interpolation='linear', lw=0.01)
@@ -603,6 +605,7 @@ if(source_dem == 1):
 	plt.savefig(run_name + '_map.png')
 
 	if( N > 1 ):
+
 		plt.figure(2)
 		plt.subplot(121)
 		plt.hist(height_vector)
@@ -611,6 +614,7 @@ if(source_dem == 1):
 		plt.hist(hl_vector)
 		plt.xlabel('H/L')
 		plt.savefig(run_name + '_histogram.png')
+
 	plt.show()
 
 if(source_dem == 2):
@@ -621,8 +625,9 @@ if(source_dem == 2):
 	plt.colorbar()
 	cmapr = plt.cm.get_cmap('Reds')
 	if( N > 1 ):
-		CS = plt.contourf(matrix_east,matrix_north,data_cones, min(100,N+1), alpha= 0.6, interpolation='linear', cmap=cmapr, antialiased=True, lw=0.01)	
+		CS= plt.contourf(matrix_east,matrix_north,data_cones, 100, vmax = 1, alpha= 0.6,interpolation='linear',cmap=cmapr ,antialiased=True, lw=0.01)	
 		fmt = '%.2f'
+		CS.set_clim([0.0,1.0])
 		plt.colorbar()
 		CS_lines = plt.contour(matrix_east, matrix_north, data_cones, np.array([0.05, 0.5]), colors='k', interpolation='linear', lw=0.01)
 		plt.clabel(CS_lines, inline=1, fontsize=10, colors='k', fmt=fmt)
@@ -644,6 +649,7 @@ if(source_dem == 2):
 	plt.savefig(run_name + '_map.png')
 
 	if( N > 1 ):
+
 		plt.figure(2)
 		plt.subplot(121)
 		plt.hist(height_vector)
@@ -652,4 +658,5 @@ if(source_dem == 2):
 		plt.hist(hl_vector)
 		plt.xlabel('H/L')
 		plt.savefig(run_name + '_histogram.png')
+
 	plt.show()
