@@ -42,7 +42,7 @@ var_cen = 300.0
 # var_hl = uncertainty of hl
 height = 500.0
 hl = 0.40
-var_height = 200.0
+var_height = 300.0
 var_hl = 0.05
 
 # Number of simulations computed by the code

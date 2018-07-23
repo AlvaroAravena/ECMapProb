@@ -27,21 +27,19 @@ dist_source = 1
 # radius_rad = radius of the circumference arch that define the collapse zone (in meters, only considered if dist_source = 3)
 # ang1_rad = initial angle of the circumference arch that define the collapse zone (in degrees, only considered if dist_source = 3. Anticlockwise)
 # ang2_rad = initial angle of the circumference arch that define the collapse zone (in degrees, only considered if dist_source = 3. Anticlockwise)
-east_cen = 498500.0
-north_cen = 4176200.0
-var_cen = 50.0
+east_cen = 501000.0
+north_cen = 4178000.0
+var_cen = 100.0
 
 # Other parameters of energy cones
 # height = expected height of collapse (above the surface, in meters)
-# hl0 = initial H/L for the energy cones
 # hl = minimum H/L for the energy cones
 # var_height = uncertainty of collapse height (in meters)
-# var_hl0 = uncertainty of hl0
 # var_hl = uncertainty of hl
-height = 100.0
+height = 150.0
 hl = 0.65
-var_height = 20.0
-var_hl = 0.02
+var_height = 50.0
+var_hl = 0.05
 
 # Number of simulations computed by the code
-N = 500
+N = 200

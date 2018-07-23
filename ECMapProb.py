@@ -209,7 +209,7 @@ if(source_dem == 2):
 			indexini = i
 			break
 
-	Topography = np.zeros((n_north,n_east)) 
+	Topography = np.zeros((n_north,n_east))
 	for i in range(indexini, indexini + n_north):
 		aux = line[i].split()
 		for j in range(0, n_east):
