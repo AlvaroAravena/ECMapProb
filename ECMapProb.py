@@ -175,6 +175,12 @@ if(source_dem == 1):
 			image = page.asarray()
 	elevation.clean()
 	Topography = np.array(image)
+
+	Topography_Sea = Topography + 0.0
+	Topography_Sea[ Topography_Sea[:,:] <= 0] = -1.0 * np.sqrt(-1.0 * Topography_Sea[ Topography_Sea[:,:] <= 0])
+	Topography_Sea[ Topography_Sea[:,:] > 0] =  np.nan
+	Topography_Sea = Topography_Sea * -1.0
+
 	Topography  = (Topography  + abs(Topography)) / 2.0
 	cells_lon = Topography.shape[1]
 	cells_lat = Topography.shape[0]
@@ -214,6 +220,12 @@ if(source_dem == 2):
 		aux = line[i].split()
 		for j in range(0, n_east):
 			Topography[i-indexini,j] = float(aux[j])
+
+	Topography_Sea = Topography + 0.0
+	Topography_Sea[ Topography_Sea[:,:] <= 0] = -1.0 * np.sqrt(-1.0 * Topography_Sea[ Topography_Sea[:,:] <= 0])
+	Topography_Sea[ Topography_Sea[:,:] > 0] =  np.nan
+	Topography_Sea = Topography_Sea * -1.0
+	Topography  = (Topography  + abs(Topography)) / 2.0
 
 # DEFINE THE MATRIX OF COORDINATES
 if(source_dem == 1):
@@ -573,19 +585,29 @@ if( source_dem == 2):
 if(source_dem == 1):
 
 	data_cones = data_cones[ range(len(data_cones[:,0]) -1 , -1 , -1 ) , : ] / N
+	line_val = data_cones.max()
+	data_cones[data_cones[:,:] == 0] =  np.nan
+	val_up = np.floor((line_val + 0.1 - 1.0 / N ) * 10.0) / 20.0
+	val_down = np.max( val_up / 10.0 , 0.02 )
+
 	plt.figure(1)
 	cmapg = plt.cm.get_cmap('Greys')
-	plt.contourf(matrix_lon,matrix_lat,Topography,100,cmap=cmapg,min=0)
-	plt.colorbar()
 	cmapr = plt.cm.get_cmap('Reds')
+	cmaps = plt.cm.get_cmap('Blues') 
+
 	if( N > 1 ):
-		CS = plt.contourf(matrix_lon, matrix_lat, data_cones, 100, vmax = 1,  alpha= 0.6, interpolation='linear', cmap=cmapr, antialiased=True, lw=0.01)	
+		CS_Topo = plt.contourf(matrix_lon,matrix_lat,Topography, 100, alpha = 1.0, cmap = cmapg ,antialiased=True, lw=0.0001)
+		CS_Sea = plt.contourf(matrix_lon,matrix_lat,Topography_Sea, 100, alpha = 0.5, cmap = cmaps ,antialiased=True, lw=100)
+		CS = plt.contourf(matrix_lon, matrix_lat, data_cones, 100, vmin = 0.0, vmax = 1.0,  alpha= 0.3, interpolation='linear', cmap=cmapr, antialiased=True, lw=0.01)	
 		fmt = '%.2f'
 		plt.colorbar()
-		CS_lines = plt.contour(matrix_lon,matrix_lat,data_cones, np.array([0.05, 0.5]), colors='k', interpolation='linear', lw=0.01)
-		plt.clabel(CS_lines, inline=1, fontsize=10, colors='k', fmt=fmt)
+		CS_lines = plt.contour(matrix_lon,matrix_lat,data_cones, np.array([val_down, val_up]), colors='r', interpolation='linear', lw=0.01)
+		plt.clabel(CS_lines, inline=0.1, fontsize = 7, colors='k', fmt=fmt)
 	else:
-		CS = plt.contourf(matrix_lon, matrix_lat, data_cones, 100, alpha= 0.6, interpolation='nearest', cmap=cmapr, antialiased=True, lw=0.01)
+		CS_Topo = plt.contourf(matrix_lon,matrix_lat,Topography, 100, alpha = 1.0, cmap = cmapg ,antialiased=True, lw=0.0001)
+		CS_Sea = plt.contourf(matrix_lon,matrix_lat,Topography_Sea, 100, alpha = 0.5, cmap = cmaps ,antialiased=True, lw=100)
+		CS = plt.contourf(matrix_lon, matrix_lat, data_cones, 100, alpha= 0.3, interpolation='nearest', cmap=cmapr, antialiased=True, lw=0.01)
+
 	plt.axes().set_aspect(step_lat_m/step_lon_m)
 	plt.xlabel('Longitude $[^\circ]$')
 	plt.ylabel('Latitude $[^\circ]$')
@@ -618,20 +640,31 @@ if(source_dem == 1):
 	plt.show()
 
 if(source_dem == 2):
+
 	data_cones = data_cones[ range(len(data_cones[:,0]) -1 , -1 , -1 ) , : ] / N
+	line_val = data_cones.max()
+	data_cones[data_cones[:,:] == 0] =  np.nan
+	val_up = np.floor((line_val + 0.1 - 1.0 / N ) * 10.0) / 20.0
+	val_down = np.max( val_up / 10.0 , 0.02 )
+
 	plt.figure(1)
+
 	cmapg = plt.cm.get_cmap('Greys')
-	plt.contourf(matrix_east,matrix_north,Topography,100,cmap=cmapg,min=0)
-	plt.colorbar()
 	cmapr = plt.cm.get_cmap('Reds')
+	cmaps = plt.cm.get_cmap('Blues') 
+
 	if( N > 1 ):
-		CS= plt.contourf(matrix_east,matrix_north,data_cones, 100, vmax = 1, alpha= 0.6,interpolation='linear',cmap=cmapr ,antialiased=True, lw=0.01)	
+		CS_Topo = plt.contourf(matrix_east,matrix_north,Topography, 100, alpha = 1.0, cmap = cmapg ,antialiased=True, lw=0.0001)
+		CS_Sea = plt.contourf(matrix_east,matrix_north,Topography_Sea, 100, alpha = 0.5, cmap = cmaps ,antialiased=True, lw=100)
+		CS = plt.contourf(matrix_east,matrix_north, data_cones, 100, vmin = 0.0, vmax = 1.0,  alpha= 0.3, interpolation='linear', cmap=cmapr, antialiased=True, lw=0.01)	
 		fmt = '%.2f'
 		plt.colorbar()
-		CS_lines = plt.contour(matrix_east, matrix_north, data_cones, np.array([0.05, 0.5]), colors='k', interpolation='linear', lw=0.01)
-		plt.clabel(CS_lines, inline=1, fontsize=10, colors='k', fmt=fmt)
+		CS_lines = plt.contour(matrix_east,matrix_north, data_cones, np.array([val_down, val_up]), colors='r', interpolation='linear', lw=0.01)
+		plt.clabel(CS_lines, inline=0.1, fontsize = 7, colors='k', fmt=fmt)
 	else:
-		CS = plt.contourf(matrix_east,matrix_north,data_cones, 100, alpha= 0.6, interpolation='nearest', cmap=cmapr, antialiased=True, lw=0.01)	
+		CS_Topo = plt.contourf(matrix_lon,matrix_lat,Topography, 100, alpha = 1.0, cmap = cmapg ,antialiased=True, lw=0.0001)
+		CS_Sea = plt.contourf(matrix_lon,matrix_lat,Topography_Sea, 100, alpha = 0.5, cmap = cmaps ,antialiased=True, lw=100)
+		CS = plt.contourf(matrix_east,matrix_north,data_cones, 100, alpha= 0.3, interpolation='nearest', cmap=cmapr, antialiased=True, lw=0.01)	
 	plt.axes().set_aspect(1.0)
 	plt.xlabel('East [m]')
 	plt.ylabel('North [m]')
