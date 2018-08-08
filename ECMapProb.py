@@ -662,8 +662,8 @@ if(source_dem == 2):
 		CS_lines = plt.contour(matrix_east,matrix_north, data_cones, np.array([val_down, val_up]), colors='r', interpolation='linear', lw=0.01)
 		plt.clabel(CS_lines, inline=0.1, fontsize = 7, colors='k', fmt=fmt)
 	else:
-		CS_Topo = plt.contourf(matrix_lon,matrix_lat,Topography, 100, alpha = 1.0, cmap = cmapg ,antialiased=True, lw=0.0001)
-		CS_Sea = plt.contourf(matrix_lon,matrix_lat,Topography_Sea, 100, alpha = 0.5, cmap = cmaps ,antialiased=True, lw=100)
+		CS_Topo = plt.contourf(matrix_east,matrix_north,Topography, 100, alpha = 1.0, cmap = cmapg ,antialiased=True, lw=0.0001)
+		CS_Sea = plt.contourf(matrix_east,matrix_north,Topography_Sea, 100, alpha = 0.5, cmap = cmaps ,antialiased=True, lw=100)
 		CS = plt.contourf(matrix_east,matrix_north,data_cones, 100, alpha= 0.3, interpolation='nearest', cmap=cmapr, antialiased=True, lw=0.01)	
 	plt.axes().set_aspect(1.0)
 	plt.xlabel('East [m]')
