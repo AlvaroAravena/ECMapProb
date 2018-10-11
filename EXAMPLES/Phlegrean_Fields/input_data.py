@@ -1,7 +1,7 @@
 # Name of the run (used to save the parameters and the output)
 run_name = Phlegrean_Fields
 
-# Source of DEM (1 => SRTM 30 m / 2 => uploaded DEM. A default location is assumed for uploaded DEMS: input_DEM.asc, see an example in EXAMPLES/UploadDEM)
+# Source of DEM (1 => SRTM 30 m / 2 => Uploaded DEM (UTM)). A default location is assumed for uploaded DEMS: input_DEM.asc, see an example in EXAMPLES/UploadDEM)
 source_dem = 1
 
 # Map limits (only considered if source_dem = 1)
@@ -45,10 +45,15 @@ ang2_rad = 240.0
 # var_height = uncertainty of collapse height (in meters)
 # var_hl0 = uncertainty of hl0
 # var_hl = uncertainty of hl
+# distribution = type of distribution (1 => Gaussian / 2 => Uniform)
 height = 500.0
 hl = 0.40
 var_height = 200.0
 var_hl = 0.05
+distribution = 1
 
 # Number of simulations computed by the code
 N = 100
+
+# Save results in files txt (1 => No / 2 => Yes)
+save_data = 1

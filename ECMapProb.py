@@ -63,7 +63,7 @@ def interpol_pos(lon1, lat1, step_lon_deg, step_lat_deg, lon_cen, lat_cen, cells
 
 # INPUT PARAMETERS
 
-print 'Reading input file'
+print('Reading input file')
 
 current_path = os.getcwd()
 file_txt = open('input_data.py')
@@ -73,7 +73,7 @@ file_txt.close()
 [run_name, source_dem, lon1, lon2, lat1, lat2] = ['run_default', 1, np.nan, np.nan, np.nan, np.nan]
 [dist_source, var_cen, lon_cen, lat_cen, east_cen, north_cen, azimuth_lin] = [1, 0.0, np.nan, np.nan, np.nan, np.nan, np.nan]
 [length_lin, radius_rad, ang1_rad, ang2_rad] = [np.nan, np.nan, np.nan, np.nan]
-[height, hl, var_height, var_hl, N, cone_levels] = [np.nan, 0.2, 200.0, 0.05, 100, 1]
+[height, hl, var_height, var_hl, N, cone_levels, save_data, distribution] = [np.nan, 0.2, 200.0, 0.05, 100, 1, 1, 1]
 
 for i in range(0,len(line)):
 	line[i] = line[i].replace('=',' ')
@@ -126,18 +126,28 @@ for i in range(0,len(line)):
 				N = int(aux[1])
 			if( aux[0] == 'cone_levels'):
 				cone_levels = int(aux[1])
+			if( aux[0] == 'save_data'):
+				save_data = int(aux[1])
+			if( aux[0] == 'distribution'):
+				distribution = int(aux[1])
+
+if(save_data == 2):
+	try:
+		os.mkdir(run_name + '_Data')
+	except:
+		pass
 
 if(source_dem == 1 and (np.isnan(lon1) or np.isnan(lon2) or np.isnan(lat1) or np.isnan(lat2) or np.isnan(lon_cen) or np.isnan(lat_cen) or np.isnan(height))):
-	print 'Problems with input parameters'
+	print('Problems with input parameters')
 	sys.exit(0)
 
 if(source_dem == 2 and (np.isnan(east_cen) or np.isnan(north_cen) or np.isnan(height))):
-	print 'Problems with input parameters'
+	print('Problems with input parameters')
 	sys.exit(0)
 
 # IMPORT MAP
 if(source_dem == 1):
-	print 'Importing map'
+	print('Importing map')
 	aux_lon = np.array([lon1, lon2])
 	aux_lat = np.array([lat1, lat2])
 	lon1 = min(aux_lon)
@@ -165,7 +175,7 @@ if(source_dem == 1):
 
 # READ MAP
 if(source_dem == 1):
-	print 'Processing map'
+	print('Processing map')
 	fp = run_name + '.tif'
 	with tifffile.TIFFfile(fp) as tif:
 		data = tif.asarray()
@@ -186,7 +196,7 @@ if(source_dem == 1):
 	cells_lat = Topography.shape[0]
 
 if(source_dem == 2):
-	print 'Reading map'
+	print('Reading map')
 	file_txt = open('input_DEM.asc')
 	line = file_txt.readlines()
 	file_txt.close()
@@ -257,15 +267,21 @@ if(source_dem == 2):
 	matrix_north = matrix_north[ range(len(matrix_north[:,0]) -1 , -1 , -1 ) , : ]
 
 # CREATE VECTORS OF INPUT PARAMETERS AND DELETE NEGATIVE DATA
-print 'Creating input vectors'
+print('Creating input vectors')
 
 if(var_height > 0.0):
-	height_vector = np.random.normal(height,var_height,N)
+	if(distribution == 1):
+		height_vector = np.random.normal(height, var_height, N)
+	elif(distribution == 2):
+		height_vector = np.random.uniform(height - var_height, height + var_height, N)
 else:
 	height_vector = np.ones(N) * height
 
 if(var_hl > 0.0):
-	hl_vector = np.random.normal(hl,var_hl,N)
+	if(distribution == 1):
+		hl_vector = np.random.normal(hl,var_hl,N)
+	elif(distribution == 2):
+		hl_vector = np.random.uniform(hl - var_hl, hl + var_hl, N)
 else:
 	hl_vector = np.ones(N) * hl
 
@@ -274,7 +290,10 @@ if(var_height > 0.0):
 		aux_boolean = 0
 		for i in range(0,N):
 			if(height_vector[i] < 0):
-				height_vector[i] = np.random.normal(height,var_height,1)
+				if(distribution == 1):
+					height_vector[i] = np.random.normal(height,var_height, 1)
+				elif(distribution == 2):
+					height_vector[i] = np.random.uniform(height - var_height, height + var_height, 1)
 				aux_boolean = 1
 		if(aux_boolean == 0):
 			break
@@ -284,15 +303,33 @@ if(var_hl > 0.0):
 		aux_boolean = 0
 		for i in range(0,N):
 			if(hl_vector[i] < 0.05):
-				hl_vector[i] = np.random.normal(hl,var_hl,1)
+				if(distribution == 1):
+					hl_vector[i] = np.random.normal(hl,var_hl,1)
+				elif(distribution == 2):
+					hl_vector[i] = np.random.uniform(hl - var_hl, hl + var_hl, 1)
 				aux_boolean = 1
 		if(aux_boolean == 0):
 			break
 
 if(source_dem == 1):
-	if( var_cen > 0.0):
-		lon_cen_vector = np.random.normal(lon_cen, var_cen * step_lon_deg / step_lon_m, N)
-		lat_cen_vector = np.random.normal(lat_cen, var_cen * step_lat_deg / step_lat_m, N)
+	if( var_cen > 0.0 ):
+		if(distribution == 1):
+			lon_cen_vector = np.random.normal(lon_cen, var_cen * step_lon_deg / step_lon_m, N)
+			lat_cen_vector = np.random.normal(lat_cen, var_cen * step_lat_deg / step_lat_m, N)
+		elif(distribution == 2):
+			lon_cen_vector = np.random.uniform(lon_cen - var_cen * step_lon_deg / step_lon_m, lon_cen + var_cen * step_lon_deg / step_lon_m, N)
+			lat_cen_vector = np.random.uniform(lat_cen - var_cen * step_lat_deg / step_lat_m, lat_cen + var_cen * step_lat_deg / step_lat_m, N)
+
+			while( 1 == 1 ):
+				aux_boolean = 0
+				for i in range(0,N):
+					if(np.power((lon_cen_vector[i] - lon_cen) * step_lon_m / step_lon_deg ,2) + np.power((lat_cen_vector[i] - lat_cen) * step_lat_m / step_lat_deg , 2) > np.power(var_cen,2)):
+						lon_cen_vector[i]  = np.random.uniform(lon_cen - var_cen * step_lon_deg / step_lon_m, lon_cen + var_cen * step_lon_deg / step_lon_m, 1)
+						lat_cen_vector[i]  = np.random.uniform(lat_cen - var_cen * step_lat_deg / step_lat_m, lat_cen + var_cen * step_lat_deg / step_lat_m, 1)
+						aux_boolean = 1
+				if(aux_boolean == 0):
+					break
+
 	else:
 		lon_cen_vector = np.ones(N) * lon_cen
 		lat_cen_vector = np.ones(N) * lat_cen
@@ -303,15 +340,28 @@ if(source_dem == 1):
 		lat_cen_vector = lat_cen_vector + pos_structure * np.cos(azimuth_lin * np.pi/180) * length_lin * step_lat_deg / step_lat_m
 
 	if(dist_source == 3):
-		pos_structure = ang1_rad + np.random.uniform(0,1,N)*(ang2_rad - ang1_rad)
+		pos_structure = ang1_rad + np.random.uniform(0,1,N) * (ang2_rad - ang1_rad)
 		lon_cen_vector = lon_cen_vector + np.cos(pos_structure * np.pi/180) * radius_rad  *  step_lon_deg / step_lon_m
 		lat_cen_vector = lat_cen_vector + np.sin(pos_structure * np.pi/180) * radius_rad * step_lat_deg / step_lat_m
 
 if(source_dem == 2):
 
 	if( var_cen > 0.0):
-		east_cen_vector = np.random.normal(east_cen,var_cen,N)
-		north_cen_vector = np.random.normal(north_cen,var_cen,N)
+		if(distribution == 1):
+			east_cen_vector = np.random.normal(east_cen,var_cen,N)
+			north_cen_vector = np.random.normal(north_cen,var_cen,N)
+		elif(distribution == 2):
+			east_cen_vector = np.random.uniform(east_cen - var_cen, east_cen + var_cen, N)
+			north_cen_vector = np.random.uniform(north_cen - var_cen, north_cen + var_cen,N)
+			while( 1 == 1 ):
+				aux_boolean = 0
+				for i in range(0,N):
+					if(np.power((east_cen_vector[i] - east_cen) ,2) + np.power((north_cen_vector[i] - north_cen) , 2) > np.power(var_cen,2)):
+						east_cen_vector[i]  = np.random.uniform(east_cen - var_cen , east_cen + var_cen , 1)
+						north_cen_vector[i]  = np.random.uniform(north_cen - var_cen, north_cen + var_cen , 1)
+						aux_boolean = 1
+				if(aux_boolean == 0):
+					break
 	else:
 		east_cen_vector = np.ones(N) * east_cen
 		north_cen_vector = np.ones(N) * north_cen
@@ -327,11 +377,28 @@ if(source_dem == 2):
 		north_cen_vector = north_cen_vector + np.sin(pos_structure * np.pi/180 ) * radius_rad
 
 # ENERGY CONES
-print 'Computing energy cones'
+print('Computing energy cones')
 
 angstep = 10
 anglen = 360 / angstep
 pix_min = 0.0
+
+if( save_data == 2 ):
+
+	summary_data = np.zeros((N,6))
+	summary_data[:,0] = height_vector
+	summary_data[:,1] = hl_vector
+	if( source_dem == 1 ):
+		summary_data[:,2] = lon_cen_vector
+		summary_data[:,3] = lat_cen_vector
+		area_pixel = step_lon_m * step_lat_m * 1e-6
+		sim_data = str(N) + "\n" + str(step_lon_m) + "\n" + str(step_lat_m) + "\n" + str(source_dem) + "\n" + str(cone_levels) + "\n"
+	elif( source_dem == 2 ):
+		summary_data[:,2] = east_cen_vector
+		summary_data[:,3] = north_cen_vector
+		area_pixel = cellsize * cellsize * 1e-6
+		sim_data = str(N) + "\n" + cellsize + "\n" + cellsize + "\n" + str(source_dem) + "\n" + str(cone_levels) + "\n"
+	string_data = ""
 
 if(source_dem == 1):
 
@@ -450,14 +517,33 @@ if(source_dem == 1):
 								polygon.append(( new_x, new_y, height_eff, polygon[j][3] + 1 ))
 			
 			sum_pixels = sum(sum(data_step))	
-			print j, len(polygon), polygon[j][3], polygon[j][2], sum(sum(data_step))
+			print((j, len(polygon), polygon[j][3], polygon[j][2], sum(sum(data_step))))
+
+			if( save_data == 2 ):
+				if(j == 0 or (j + 1 == len(polygon))):
+					distances = np.power(np.power(( matrix_lon - lon_cen_vector[i]) * (step_lon_m / step_lon_deg),2) + np.power(( matrix_lat - lat_cen_vector[i])*(step_lat_m / step_lat_deg),2),0.5) 
+					distances = distances * data_step[ range(len(data_cones[:,0]) -1 , -1 , -1 ) , : ]
+					string_data = string_data + "\n" + str(polygon[j][3]) + " " + str(sum(sum(data_step))* area_pixel) + " " + str(distances.max() / 1000.0)
+				elif(polygon[j][3] < polygon[j+1][3] ):
+					distances = np.power(np.power(( matrix_lon - lon_cen_vector[i]) * (step_lon_m / step_lon_deg),2) + np.power(( matrix_lat - lat_cen_vector[i])*(step_lat_m / step_lat_deg),2),0.5) 
+					distances = distances * data_step[ range(len(data_cones[:,0]) -1 , -1 , -1 ) , : ]
+					string_data = string_data + "\n" + str(polygon[j][3]) + " " + str(sum(sum(data_step))* area_pixel) + " " + str(distances.max() / 1000.0)
 
 		if( N > 1 ):
 			data_cones = data_cones + data_step
 
-		print ' Simulation finished (N = ' + str(i+1) + ')'
+		if( save_data == 2):
 
-if( source_dem == 2):
+			distances = np.power(np.power(( matrix_lon - lon_cen_vector[i]) * (step_lon_m / step_lon_deg),2) + np.power(( matrix_lat - lat_cen_vector[i])*(step_lat_m / step_lat_deg),2),0.5) 
+
+			distances = distances * data_step[ range(len(data_cones[:,0]) -1 , -1 , -1 ) , : ]
+
+			summary_data[i,4] = sum(sum(data_step)) * area_pixel
+			summary_data[i,5] = distances.max() / 1000.0
+
+		print(' Simulation finished (N = ' + str(i+1) + ')')
+
+if( source_dem == 2 ):
 
 	data_cones = np.zeros((n_north,n_east))
 	data_aux_t = np.ones((n_north,n_east))
@@ -465,7 +551,6 @@ if( source_dem == 2):
 	vec_ang = range(0, 360, angstep)
 
 	for i in range(0,N):
-
 		current_level = 0
 		data_step = np.zeros((n_north,n_east))
 		polygon = []
@@ -475,7 +560,6 @@ if( source_dem == 2):
 		hl_current = hl_vector[i]
 
 		for j in range(10000): 
-
 			if(j == len(polygon)):
 				if( N == 1 ):			
 					data_cones = data_cones + data_step
@@ -573,22 +657,57 @@ if( source_dem == 2):
 								polygon.append(( new_x, new_y, height_eff, polygon[j][3] + 1 ))
 
 			sum_pixels = sum(sum(data_step))	
-			print j, len(polygon), polygon[j][3], polygon[j][2], sum(sum(data_step))
+			print((j, len(polygon), polygon[j][3], polygon[j][2], sum(sum(data_step))))
+
+			if( save_data == 2 ):
+				if(j == 1 or (j + 1 == len(polygon))):
+					distances = np.power(np.power(( matrix_east - east_cen_vector[i]),2) + np.power(( matrix_north - north_cen_vector[i]),2),0.5) 
+					distances = distances * data_step[ range(len(data_cones[:,0]) -1 , -1 , -1 ) , : ]
+					string_data = string_data + "\n" + str(polygon[j][3]) + " " + str(sum(sum(data_step))* area_pixel) + " " + str(distances.max() / 1000.0)
+
+				elif(polygon[j][3] < polygon[j+1][3] ):
+					distances = np.power(np.power(( matrix_east - east_cen_vector[i]),2) + np.power(( matrix_north - north_cen_vector[i]),2),0.5) 
+					distances = distances * data_step[ range(len(data_cones[:,0]) -1 , -1 , -1 ) , : ]
+					string_data = string_data + "\n" + str(polygon[j][3]) + " " + str(sum(sum(data_step))* area_pixel) + " " + str(distances.max() / 1000.0)
 
 		if( N > 1 ):
 			data_cones = data_cones + data_step
 
-		print ' Simulation finished (N = ' + str(i+1) + ')'
+		if( save_data == 2):
+			distances = np.power(np.power(( matrix_east - east_cen_vector[i]) ,2) + np.power(( matrix_north - north_cen_vector[i]) ,2),0.5) 
+
+			distances = distances * data_step[ range(len(data_cones[:,0]) -1 , -1 , -1 ) , : ]
+			summary_data[i,4] = sum(sum(data_step)) * area_pixel
+			summary_data[i,5] = distances.max() / 1000.0
+
+		print(' Simulation finished (N = ' + str(i+1) + ')')
+
+# SAVE DATA
+if(save_data == 2):
+	np.savetxt(run_name + '_Data/' + 'data_cones.txt', data_cones, fmt='%.2e')
+	np.savetxt(run_name + '_Data/' + 'topography.txt', Topography, fmt='%.2e')
+	np.savetxt(run_name + '_Data/' + 'summary.txt', summary_data, fmt='%.5e')
+	text_file = open(run_name + '_Data/' + 'energy_cones.txt', 'w')
+	text_file.write(string_data)
+	text_file.close()
+	text_file = open(run_name + '_Data/' + 'sim_data.txt', 'w')
+	text_file.write(sim_data)
+	text_file.close()
+	if(source_dem == 1):		
+		np.savetxt(run_name + '_Data/' + 'matrix_lon.txt', matrix_lon, fmt='%.5e')
+		np.savetxt(run_name + '_Data/' + 'matrix_lat.txt', matrix_lat, fmt='%.5e')
+	elif(source_dem == 2):		
+		np.savetxt(run_name + '_Data/' + 'matrix_east.txt', matrix_east, fmt='%.5e')
+		np.savetxt(run_name + '_Data/' + 'matrix_north.txt', matrix_north, fmt='%.5e')
 
 # FIGURES
-
 if(source_dem == 1):
 
 	data_cones = data_cones[ range(len(data_cones[:,0]) -1 , -1 , -1 ) , : ] / N
 	line_val = data_cones.max()
 	data_cones[data_cones[:,:] == 0] =  np.nan
 	val_up = np.floor((line_val + 0.1 - 1.0 / N ) * 10.0) / 20.0
-	val_down = np.max( val_up / 10.0 , 0.02 )
+	val_down = np.maximum( val_up / 10.0 , 0.02 )
 
 	plt.figure(1)
 	cmapg = plt.cm.get_cmap('Greys')
@@ -645,7 +764,7 @@ if(source_dem == 2):
 	line_val = data_cones.max()
 	data_cones[data_cones[:,:] == 0] =  np.nan
 	val_up = np.floor((line_val + 0.1 - 1.0 / N ) * 10.0) / 20.0
-	val_down = np.max( val_up / 10.0 , 0.02 )
+	val_down = np.maximum( val_up / 10.0 , 0.02 )
 
 	plt.figure(1)
 

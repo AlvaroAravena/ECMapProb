@@ -1,7 +1,7 @@
 # Name of the run (used to save the parameters and the output)
 run_name = Upload_DEM
 
-# Source of DEM (1 => SRTM 30 m / 2 => uploaded DEM. A default location is assumed for uploaded DEMS: input_DEM.asc, see an example in EXAMPLES/UploadDEM)
+# Source of DEM (1 => SRTM 30 m / 2 => Uploaded DEM (UTM)). A default location is assumed for uploaded DEMS: input_DEM.asc, see an example in EXAMPLES/UploadDEM)
 source_dem = 2
 
 # Map limits (only considered if source_dem = 1)
@@ -36,10 +36,15 @@ var_cen = 100.0
 # hl = minimum H/L for the energy cones
 # var_height = uncertainty of collapse height (in meters)
 # var_hl = uncertainty of hl
+# distribution = type of distribution (1 => Gaussian / 2 => Uniform)
 height = 150.0
 hl = 0.65
 var_height = 50.0
 var_hl = 0.05
+distribution = 1
 
 # Number of simulations computed by the code
 N = 200
+
+# Save results in files txt (1 => No / 2 => Yes)
+save_data = 1
