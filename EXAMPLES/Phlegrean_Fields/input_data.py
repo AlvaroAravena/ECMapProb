@@ -1,7 +1,11 @@
 # Name of the run (used to save the parameters and the output)
 run_name = Phlegrean_Fields
 
-# Source of DEM (1 => SRTM 30 m / 2 => Uploaded DEM (UTM)). A default location is assumed for uploaded DEMS: input_DEM.asc, see an example in EXAMPLES/UploadDEM)
+# Source of DEM 
+# source_dem = type of input data (1 => SRTM 30 m / 2 => Uploaded DEM (UTM) / 3 => Uploaded Data (lat,lon)). 
+#              (A default location is assumed for type 2: #input_DEM.asc, see an example in EXAMPLES/UploadDEM).
+# topography_file = name of the file with topography information (only considered if source_dem = 3).
+#              (Simulations with source_dem = 1 and save_data = 2 create a compatible file for source_dem = 3 in Results).
 source_dem = 1
 
 # Map limits (only considered if source_dem = 1)

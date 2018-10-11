@@ -6,6 +6,7 @@ from math import sin, cos, sqrt, atan2, radians, log, factorial, tan
 import sys
 import os
 from PIL import Image, ImageDraw
+import shutil
 
 # Auxiliary functions
 
@@ -72,7 +73,7 @@ file_txt.close()
 
 [run_name, source_dem, lon1, lon2, lat1, lat2] = ['run_default', 1, np.nan, np.nan, np.nan, np.nan]
 [dist_source, var_cen, lon_cen, lat_cen, east_cen, north_cen, azimuth_lin] = [1, 0.0, np.nan, np.nan, np.nan, np.nan, np.nan]
-[length_lin, radius_rad, ang1_rad, ang2_rad] = [np.nan, np.nan, np.nan, np.nan]
+[length_lin, radius_rad, ang1_rad, ang2_rad, topography_file] = [np.nan, np.nan, np.nan, np.nan, 'Topography_3.txt']
 [height, hl, var_height, var_hl, N, cone_levels, save_data, distribution] = [np.nan, 0.2, 200.0, 0.05, 100, 1, 1, 1]
 
 for i in range(0,len(line)):
@@ -84,6 +85,8 @@ for i in range(0,len(line)):
 				run_name = aux[1]
 			if( aux[0] == 'source_dem'):
 				source_dem = int(aux[1])
+			if( aux[0] == 'topography_file'):
+				topography_file = aux[1]
 			if( aux[0] == 'lon1'):
 				lon1 = float(aux[1])
 			if( aux[0] == 'lon2'):
@@ -131,17 +134,25 @@ for i in range(0,len(line)):
 			if( aux[0] == 'distribution'):
 				distribution = int(aux[1])
 
-if(save_data == 2):
-	try:
-		os.mkdir(run_name + '_Data')
-	except:
-		pass
+try:
+	os.mkdir('Results')
+except:
+	pass
+try:
+	os.mkdir('Results/' + run_name)
+except:
+	pass
+shutil.copyfile('input_data.py', 'Results/' + run_name + '/input_data.py') 
 
 if(source_dem == 1 and (np.isnan(lon1) or np.isnan(lon2) or np.isnan(lat1) or np.isnan(lat2) or np.isnan(lon_cen) or np.isnan(lat_cen) or np.isnan(height))):
 	print('Problems with input parameters')
 	sys.exit(0)
 
 if(source_dem == 2 and (np.isnan(east_cen) or np.isnan(north_cen) or np.isnan(height))):
+	print('Problems with input parameters')
+	sys.exit(0)
+
+if(source_dem == 3 and (np.isnan(lon_cen) or np.isnan(lat_cen) or np.isnan(height))):
 	print('Problems with input parameters')
 	sys.exit(0)
 
@@ -237,8 +248,67 @@ if(source_dem == 2):
 	Topography_Sea = Topography_Sea * -1.0
 	Topography  = (Topography  + abs(Topography)) / 2.0
 
+if(source_dem == 3):
+	print('Reading map')
+	file_txt = open(topography_file)
+	line = file_txt.readlines()
+	file_txt.close()
+
+	lon1 = -1
+	lon2 = -1
+	lat1 = -1
+	lat2 = -1
+	cells_lat = -1
+	cells_lon = -1
+
+	for i in range(0,10):
+		aux = line[i].split()
+		if(aux[0] == 'lon1'):
+			lon1 = float(aux[1])
+		if(aux[0] == 'lon2'):
+			lon2 = float(aux[1])
+		if(aux[0] == 'lat1'):
+			lat1 = float(aux[1])
+		if(aux[0] == 'lat2'):
+			lat2 = float(aux[1])
+		if(aux[0] == 'cells_lon'):
+			cells_lon = int(aux[1])
+		if(aux[0] == 'cells_lat'):
+			cells_lat = int(aux[1])
+		if(len(aux) >= 10):
+			indexini = i
+			break
+
+	Topography = np.zeros((cells_lat,cells_lon))
+	for i in range(indexini, indexini + cells_lat):
+		aux = line[i].split()
+		for j in range(0, cells_lon):
+			Topography[i-indexini,j] = float(aux[j])
+
+	Topography_Sea = Topography + 0.0
+	Topography_Sea[ Topography_Sea[:,:] <= 0] = -1.0 * np.sqrt(-1.0 * Topography_Sea[ Topography_Sea[:,:] <= 0])
+	Topography_Sea[ Topography_Sea[:,:] > 0] =  np.nan
+	Topography_Sea = Topography_Sea * -1.0
+	Topography  = (Topography  + abs(Topography)) / 2.0
+
+	file_txt = open('Cities.txt')
+	line = file_txt.readlines()
+	file_txt.close()
+
+	for population in range(10000,10000000,10000):
+		Cities = []
+		for i in range(1,len(line)):
+			aux = line[i].split(',')
+			pop = float(aux[4])
+			lat_dat = float(aux[5])
+			lon_dat = float(aux[6])
+			if( lon_dat > lon1 and lon_dat < lon2 and lat_dat > lat1 and lat_dat < lat2 and pop > population):
+				Cities.append([lon_dat, lat_dat, aux[2]])
+		if(len(Cities) <= 5):
+			break
+
 # DEFINE THE MATRIX OF COORDINATES
-if(source_dem == 1):
+if(source_dem == 1 or source_dem == 3):
 	distance_lon = distance_two_points(lat1,lat1,lon1,lon2)
 	distance_lat = distance_two_points(lat1,lat2,lon1,lon1)
 
@@ -311,7 +381,7 @@ if(var_hl > 0.0):
 		if(aux_boolean == 0):
 			break
 
-if(source_dem == 1):
+if(source_dem == 1 or source_dem == 3):
 	if( var_cen > 0.0 ):
 		if(distribution == 1):
 			lon_cen_vector = np.random.normal(lon_cen, var_cen * step_lon_deg / step_lon_m, N)
@@ -388,7 +458,7 @@ if( save_data == 2 ):
 	summary_data = np.zeros((N,6))
 	summary_data[:,0] = height_vector
 	summary_data[:,1] = hl_vector
-	if( source_dem == 1 ):
+	if( source_dem == 1 or source_dem == 3):
 		summary_data[:,2] = lon_cen_vector
 		summary_data[:,3] = lat_cen_vector
 		area_pixel = step_lon_m * step_lat_m * 1e-6
@@ -400,7 +470,7 @@ if( save_data == 2 ):
 		sim_data = str(N) + "\n" + cellsize + "\n" + cellsize + "\n" + str(source_dem) + "\n" + str(cone_levels) + "\n"
 	string_data = ""
 
-if(source_dem == 1):
+if(source_dem == 1 or source_dem == 3):
 
 	data_cones = np.zeros((cells_lat,cells_lon))
 	data_aux_t = np.ones((cells_lat,cells_lon))
@@ -684,24 +754,37 @@ if( source_dem == 2 ):
 
 # SAVE DATA
 if(save_data == 2):
-	np.savetxt(run_name + '_Data/' + 'data_cones.txt', data_cones, fmt='%.2e')
-	np.savetxt(run_name + '_Data/' + 'topography.txt', Topography, fmt='%.2e')
-	np.savetxt(run_name + '_Data/' + 'summary.txt', summary_data, fmt='%.5e')
-	text_file = open(run_name + '_Data/' + 'energy_cones.txt', 'w')
+	np.savetxt('Results/' + run_name + '/' + 'data_cones.txt', data_cones, fmt='%.2e')
+	np.savetxt('Results/' + run_name + '/' + 'topography.txt', Topography, fmt='%.2e')
+	np.savetxt('Results/' + run_name + '/' + 'summary.txt', summary_data, fmt='%.5e')
+	text_file = open('Results/' + run_name + '/' + 'energy_cones.txt', 'w')
 	text_file.write(string_data)
 	text_file.close()
-	text_file = open(run_name + '_Data/' + 'sim_data.txt', 'w')
+	text_file = open('Results/' + run_name + '/' + 'sim_data.txt', 'w')
 	text_file.write(sim_data)
 	text_file.close()
-	if(source_dem == 1):		
-		np.savetxt(run_name + '_Data/' + 'matrix_lon.txt', matrix_lon, fmt='%.5e')
-		np.savetxt(run_name + '_Data/' + 'matrix_lat.txt', matrix_lat, fmt='%.5e')
+	if(source_dem == 1 or source_dem == 3):		
+		np.savetxt('Results/' + run_name + '/' + 'matrix_lon.txt', matrix_lon, fmt='%.5e')
+		np.savetxt('Results/' + run_name + '/' + 'matrix_lat.txt', matrix_lat, fmt='%.5e')
+		if(source_dem == 1):		
+			text_file = open('Results/' + run_name + '/Topography_3.txt', 'w')
+			text_file.write('lon1 ' + str(lon1) + '\n')
+			text_file.write('lon2 ' + str(lon2) + '\n')
+			text_file.write('lat1 ' + str(lat1) + '\n')
+			text_file.write('lat2 ' + str(lat2) + '\n')
+			text_file.write('cells_lon ' + str(cells_lon) + '\n')
+			text_file.write('cells_lat ' + str(cells_lat) + '\n')
+			for i in range(cells_lat):
+				for j in range(cells_lon):
+					text_file.write(str(Topography[i,j]) + ' ')
+				text_file.write('\n')		
+			text_file.close()
 	elif(source_dem == 2):		
-		np.savetxt(run_name + '_Data/' + 'matrix_east.txt', matrix_east, fmt='%.5e')
-		np.savetxt(run_name + '_Data/' + 'matrix_north.txt', matrix_north, fmt='%.5e')
+		np.savetxt('Results/' + run_name + '/' + 'matrix_east.txt', matrix_east, fmt='%.5e')
+		np.savetxt('Results/' + run_name + '/' + 'matrix_north.txt', matrix_north, fmt='%.5e')
 
 # FIGURES
-if(source_dem == 1):
+if(source_dem == 1 or source_dem == 3):
 
 	data_cones = data_cones[ range(len(data_cones[:,0]) -1 , -1 , -1 ) , : ] / N
 	line_val = data_cones.max()
@@ -743,7 +826,7 @@ if(source_dem == 1):
 		for i in range(1,len(polygon)):
 			plt.plot( polygon[i][0],polygon[i][1], 'b.', markersize=2)
 
-	plt.savefig(run_name + '_map.png')
+	plt.savefig('Results/' + run_name + '/Map.png')
 
 	if( N > 1 ):
 
@@ -754,7 +837,7 @@ if(source_dem == 1):
 		plt.subplot(122)
 		plt.hist(hl_vector)
 		plt.xlabel('H/L')
-		plt.savefig(run_name + '_histogram.png')
+		plt.savefig('Results/' + run_name + '/Histogram.png')
 
 	plt.show()
 
@@ -797,7 +880,7 @@ if(source_dem == 2):
 		for i in range(1,len(polygon)):
 			plt.plot( polygon[i][0], polygon[i][1], 'b.', markersize = 2 )
 
-	plt.savefig(run_name + '_map.png')
+	plt.savefig('Results/' + run_name + '/Map.png')
 
 	if( N > 1 ):
 
@@ -808,6 +891,6 @@ if(source_dem == 2):
 		plt.subplot(122)
 		plt.hist(hl_vector)
 		plt.xlabel('H/L')
-		plt.savefig(run_name + '_histogram.png')
+		plt.savefig('Results/' + run_name + '/Histogram.png')
 
 	plt.show()
