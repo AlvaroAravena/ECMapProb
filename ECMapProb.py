@@ -7,6 +7,7 @@ import sys
 import os
 from PIL import Image, ImageDraw
 import shutil
+import utm
 
 # Auxiliary functions
 
@@ -309,8 +310,16 @@ if(source_dem == 3):
 
 # DEFINE THE MATRIX OF COORDINATES
 if(source_dem == 1 or source_dem == 3):
-	distance_lon = distance_two_points(lat1,lat1,lon1,lon2)
-	distance_lat = distance_two_points(lat1,lat2,lon1,lon1)
+
+	utm1 = utm.from_latlon(lat1,lon1)
+	utm2 = utm.from_latlon(lat2,lon2)
+
+	if( utm1[2] == utm2[2] and utm1[3] == utm2[3] ):
+		distance_lon = abs(utm2[0] - utm1[0])
+		distance_lat = abs(utm2[1] - utm1[1])
+	else:
+		distance_lon = distance_two_points(lat1,lat1,lon1,lon2)
+		distance_lat = distance_two_points(lat1,lat2,lon1,lon1)
 
 	step_lon_m = distance_lon / (cells_lon-1)
 	step_lat_m = distance_lat / (cells_lat-1)
@@ -866,7 +875,8 @@ if(source_dem == 2):
 	else:
 		CS_Topo = plt.contourf(matrix_east,matrix_north,Topography, 100, alpha = 1.0, cmap = cmapg ,antialiased=True, lw=0.0001)
 		CS_Sea = plt.contourf(matrix_east,matrix_north,Topography_Sea, 100, alpha = 0.5, cmap = cmaps ,antialiased=True, lw=100)
-		CS = plt.contourf(matrix_east,matrix_north,data_cones, 100, alpha= 0.3, interpolation='nearest', cmap=cmapr, antialiased=True, lw=0.01)	
+		CS = plt.contourf(matrix_east,matrix_north,data_cones, 100, alpha= 0.3, interpolation='nearest', cmap=cmapr, antialiased=True, lw=0.01)
+	
 	plt.axes().set_aspect(1.0)
 	plt.xlabel('East [m]')
 	plt.ylabel('North [m]')
