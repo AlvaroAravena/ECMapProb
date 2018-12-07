@@ -23,23 +23,24 @@ def distance_two_points(lat1, lat2, lon1, lon2):
 	dlon = lon2 - lon1
 	dlat = lat2 - lat1
 
-	a = sin(dlat / 2.0)**2.0 + cos(lat1) * cos(lat2) * sin(dlon / 2.0)**2.0
+	a = sin(dlat / 2.0) ** 2.0 + cos(lat1) * cos(lat2) * sin(dlon / 2.0) ** 2.0
 	c = 2.0 * atan2(sqrt(a), sqrt(1.0 - a))
-	return (R * c) * 1000.0
+	return ( R * c ) * 1000.0
 
 def interpol_pos(lon1, lat1, step_lon_deg, step_lat_deg, lon_cen, lat_cen, cells_lon, cells_lat, Topography):
 
 	dlon = int(np.floor( (lon_cen - lon1 )/ (step_lon_deg) ))
 	dlat = (cells_lat - 2) - int(np.floor( (lat_cen - lat1) / (step_lat_deg) ))
 
-	if(dlon >= (cells_lon-1.0) or dlat >= (cells_lat-1.0) or dlon < 0.0 or dlat < 0.0):
+	if(dlon >= ( cells_lon - 1.0 ) or dlat >= ( cells_lat - 1.0 ) or dlon < 0.0 or dlat < 0.0):
 		return 99999
 
-	aux_lon = 2.0 * ( lon_cen - (dlon * step_lon_deg + lon1) - step_lon_deg / 2.0 ) / step_lon_deg
-	aux_lat = 2.0 *( - lat_cen + ((cells_lat - 1.0 - dlat) * step_lat_deg + lat1) - step_lat_deg / 2.0 ) / step_lat_deg
+	aux_lon = 2.0 * ( lon_cen - ( dlon * step_lon_deg + lon1 ) - step_lon_deg / 2.0 ) / step_lon_deg
+	aux_lat = 2.0 *( - lat_cen + ( (cells_lat - 1.0 - dlat) * step_lat_deg + lat1 ) - step_lat_deg / 2.0 ) / step_lat_deg
 
-	dc = (Topography[dlat][dlon] + Topography[dlat][dlon+1] + Topography[dlat+1][dlon] + Topography[dlat+1][dlon+1]) / 4
+	dc = ( Topography[dlat][dlon] + Topography[dlat][dlon+1] + Topography[dlat+1][dlon] + Topography[dlat+1][dlon+1] ) / 4
 	[x3, y3, z3] = [0.0, 0.0, dc]
+
 	if( aux_lon >= 0.0 and abs(aux_lon) >= abs(aux_lat) ):
 		[x1,y1,z1] = [1.0, 1.0, Topography[dlat+1][dlon+1]] 
 		[x2,y2,z2] = [1.0, -1.0, Topography[dlat][dlon+1]] 
@@ -74,8 +75,8 @@ file_txt.close()
 
 [run_name, source_dem, lon1, lon2, lat1, lat2] = ['run_default', 1, np.nan, np.nan, np.nan, np.nan]
 [dist_source, var_cen, lon_cen, lat_cen, east_cen, north_cen, azimuth_lin] = [1, 0.0, np.nan, np.nan, np.nan, np.nan, np.nan]
-[length_lin, radius_rad, ang1_rad, ang2_rad, topography_file] = [np.nan, np.nan, np.nan, np.nan, 'Topography_3.txt']
-[height, hl, var_height, var_hl, N, cone_levels, save_data, distribution] = [np.nan, 0.2, 200.0, 0.05, 100, 1, 1, 1]
+[length_lin, radius_rad, ang1_rad, ang2_rad] = [np.nan, np.nan, np.nan, np.nan]
+[height, hl, var_height, var_hl, N, cone_levels, save_data, dist_input, redist_energy] = [np.nan, 0.2, 200.0, 0.05, 100, 1, 0, 1, 2]
 
 for i in range(0,len(line)):
 	line[i] = line[i].replace('=',' ')
@@ -86,8 +87,6 @@ for i in range(0,len(line)):
 				run_name = aux[1]
 			if( aux[0] == 'source_dem'):
 				source_dem = int(aux[1])
-			if( aux[0] == 'topography_file'):
-				topography_file = aux[1]
 			if( aux[0] == 'lon1'):
 				lon1 = float(aux[1])
 			if( aux[0] == 'lon2'):
@@ -132,8 +131,10 @@ for i in range(0,len(line)):
 				cone_levels = int(aux[1])
 			if( aux[0] == 'save_data'):
 				save_data = int(aux[1])
-			if( aux[0] == 'distribution'):
-				distribution = int(aux[1])
+			if( aux[0] == 'dist_input'):
+				dist_input = int(aux[1])
+			if( aux[0] == 'redist_energy'):
+				redist_energy = int(aux[1])
 
 try:
 	os.mkdir('Results')
@@ -145,15 +146,13 @@ except:
 	pass
 shutil.copyfile('input_data.py', 'Results/' + run_name + '/input_data.py') 
 
-if(source_dem == 1 and (np.isnan(lon1) or np.isnan(lon2) or np.isnan(lat1) or np.isnan(lat2) or np.isnan(lon_cen) or np.isnan(lat_cen) or np.isnan(height))):
+if(source_dem == 1 and ( np.isnan( lon1 ) or np.isnan( lon2 ) or np.isnan( lat1 ) or np.isnan( lat2 ) or np.isnan( lon_cen ) or np.isnan( lat_cen ) or np.isnan( height ) ) ):
 	print('Problems with input parameters')
 	sys.exit(0)
-
-if(source_dem == 2 and (np.isnan(east_cen) or np.isnan(north_cen) or np.isnan(height))):
+if(source_dem == 2 and ( np.isnan( east_cen ) or np.isnan( north_cen ) or np.isnan( height ) ) ):
 	print('Problems with input parameters')
 	sys.exit(0)
-
-if(source_dem == 3 and (np.isnan(lon_cen) or np.isnan(lat_cen) or np.isnan(height))):
+if(source_dem == 3 and ( np.isnan( lon_cen ) or np.isnan( lat_cen ) or np.isnan( height ) ) ):
 	print('Problems with input parameters')
 	sys.exit(0)
 
@@ -251,6 +250,7 @@ if(source_dem == 2):
 
 if(source_dem == 3):
 	print('Reading map')
+	topography_file = 'Topography_3.txt'
 	file_txt = open(topography_file)
 	line = file_txt.readlines()
 	file_txt.close()
@@ -349,17 +349,17 @@ if(source_dem == 2):
 print('Creating input vectors')
 
 if(var_height > 0.0):
-	if(distribution == 1):
+	if(dist_input == 1):
 		height_vector = np.random.normal(height, var_height, N)
-	elif(distribution == 2):
+	else:
 		height_vector = np.random.uniform(height - var_height, height + var_height, N)
 else:
 	height_vector = np.ones(N) * height
 
 if(var_hl > 0.0):
-	if(distribution == 1):
+	if(dist_input == 1):
 		hl_vector = np.random.normal(hl,var_hl,N)
-	elif(distribution == 2):
+	else:
 		hl_vector = np.random.uniform(hl - var_hl, hl + var_hl, N)
 else:
 	hl_vector = np.ones(N) * hl
@@ -369,9 +369,9 @@ if(var_height > 0.0):
 		aux_boolean = 0
 		for i in range(0,N):
 			if(height_vector[i] < 0):
-				if(distribution == 1):
+				if(dist_input == 1):
 					height_vector[i] = np.random.normal(height,var_height, 1)
-				elif(distribution == 2):
+				elif(dist_input == 2):
 					height_vector[i] = np.random.uniform(height - var_height, height + var_height, 1)
 				aux_boolean = 1
 		if(aux_boolean == 0):
@@ -382,9 +382,9 @@ if(var_hl > 0.0):
 		aux_boolean = 0
 		for i in range(0,N):
 			if(hl_vector[i] < 0.05):
-				if(distribution == 1):
+				if(dist_input == 1):
 					hl_vector[i] = np.random.normal(hl,var_hl,1)
-				elif(distribution == 2):
+				elif(dist_input == 2):
 					hl_vector[i] = np.random.uniform(hl - var_hl, hl + var_hl, 1)
 				aux_boolean = 1
 		if(aux_boolean == 0):
@@ -392,10 +392,10 @@ if(var_hl > 0.0):
 
 if(source_dem == 1 or source_dem == 3):
 	if( var_cen > 0.0 ):
-		if(distribution == 1):
+		if(dist_input == 1):
 			lon_cen_vector = np.random.normal(lon_cen, var_cen * step_lon_deg / step_lon_m, N)
 			lat_cen_vector = np.random.normal(lat_cen, var_cen * step_lat_deg / step_lat_m, N)
-		elif(distribution == 2):
+		elif(dist_input == 2):
 			lon_cen_vector = np.random.uniform(lon_cen - var_cen * step_lon_deg / step_lon_m, lon_cen + var_cen * step_lon_deg / step_lon_m, N)
 			lat_cen_vector = np.random.uniform(lat_cen - var_cen * step_lat_deg / step_lat_m, lat_cen + var_cen * step_lat_deg / step_lat_m, N)
 
@@ -426,10 +426,10 @@ if(source_dem == 1 or source_dem == 3):
 if(source_dem == 2):
 
 	if( var_cen > 0.0):
-		if(distribution == 1):
+		if(dist_input == 1):
 			east_cen_vector = np.random.normal(east_cen,var_cen,N)
 			north_cen_vector = np.random.normal(north_cen,var_cen,N)
-		elif(distribution == 2):
+		elif(dist_input == 2):
 			east_cen_vector = np.random.uniform(east_cen - var_cen, east_cen + var_cen, N)
 			north_cen_vector = np.random.uniform(north_cen - var_cen, north_cen + var_cen,N)
 			while( 1 == 1 ):
@@ -462,7 +462,7 @@ angstep = 10
 anglen = 360 / angstep
 pix_min = 0.0
 
-if( save_data == 2 ):
+if( save_data == 1 ):
 
 	summary_data = np.zeros((N,6))
 	summary_data[:,0] = height_vector
@@ -476,8 +476,10 @@ if( save_data == 2 ):
 		summary_data[:,2] = east_cen_vector
 		summary_data[:,3] = north_cen_vector
 		area_pixel = cellsize * cellsize * 1e-6
-		sim_data = str(N) + "\n" + cellsize + "\n" + cellsize + "\n" + str(source_dem) + "\n" + str(cone_levels) + "\n"
+		sim_data = str(N) + "\n" + str(cellsize) + "\n" + str(cellsize) + "\n" + str(source_dem) + "\n" + str(cone_levels) + "\n"
 	string_data = ""
+	if( N == 1):
+		string_cones = ""
 
 if(source_dem == 1 or source_dem == 3):
 
@@ -492,7 +494,7 @@ if(source_dem == 1 or source_dem == 3):
 		data_step = np.zeros((cells_lat,cells_lon))
 		polygon = []
 		height_eff = height_vector[i] + interpol_pos(lon1, lat1, step_lon_deg, step_lat_deg, lon_cen_vector[i], lat_cen_vector[i], cells_lon, cells_lat, Topography)
-		polygon.append((lon_cen_vector[i], lat_cen_vector[i],  height_eff, 1.0 ))
+		polygon.append((lon_cen_vector[i], lat_cen_vector[i],  height_eff, 1.0, -1, height_vector[i] ))
 		sum_pixels = 0
 		hl_current = hl_vector[i]		
 
@@ -519,9 +521,40 @@ if(source_dem == 1 or source_dem == 3):
 				for distance in range(0, 100000, 10):
 					h = interpol_pos(lon1, lat1, step_lon_deg, step_lat_deg, polygon[j][0] + distance * cos(angle_rad) * step_lon_deg / step_lon_m , polygon[j][1] + distance*sin(angle_rad)*step_lat_deg/step_lat_m , cells_lon, cells_lat, Topography)
 					if( h >= polygon[j][2] - hl_current * distance ):
-						polygon_xy.append((int((polygon[j][0] + distance*cos(angle_rad)*step_lon_deg/step_lon_m - lon1) * cells_lon / (lon2 - lon1)),int((polygon[j][1] + distance*sin(angle_rad)*step_lat_deg/step_lat_m - lat1) * cells_lat / (lat2 - lat1))))
-						polygons_new.append(distance)
+						polygon_xy.append((int((polygon[j][0] + (distance - 10)*cos(angle_rad)*step_lon_deg/step_lon_m - lon1) * cells_lon / (lon2 - lon1)),int((polygon[j][1] + (distance - 10)*sin(angle_rad)*step_lat_deg/step_lat_m - lat1) * cells_lat / (lat2 - lat1))))
+						polygons_new.append(distance - 10)
 						break
+
+			if( (redist_energy == 3 or redist_energy == 4) and polygon[j][4] > -1 ):
+				lim1 = np.int(polygon[j][4] - anglen/4)
+				lim2 = np.int(polygon[j][4] + anglen/4)
+				if( polygon[j][4] == np.int(polygon[j][4]) ):
+					if(lim1 < 0):
+						lim1 = lim1 + anglen
+					if(lim2 >= anglen):
+						lim2 = lim2 - anglen
+					for jj in range(anglen):
+						if(jj < lim1 and lim1 < lim2):
+							polygons_new[jj] = 0
+						elif(jj > lim2 and lim1 < lim2):
+							polygons_new[jj] = 0
+						elif(jj < lim1 and jj > lim2 and lim1 > lim2):
+							polygons_new[jj] = 0
+				else:
+					lim2 = lim2 + 1
+					if(lim1 < 0):
+						lim1 = lim1 + anglen
+					if(lim2 >= anglen):
+						lim2 = lim2 - anglen
+					for jj in range(anglen):
+						if(jj < lim1 and lim1 < lim2):
+							polygons_new[jj] = 0
+						elif(jj > lim2 and lim1 < lim2):
+							polygons_new[jj] = 0
+						elif(jj < lim1 and jj > lim2 and lim1 > lim2):
+							polygons_new[jj] = 0
+						elif( jj == lim1 or jj == lim2):
+							polygons_new[jj] = polygons_new[jj] / 2.0
 
 			img = Image.new('L', (cells_lon, cells_lat), 0)
 			if( len(polygon_xy) > 0 ):
@@ -529,6 +562,7 @@ if(source_dem == 1 or source_dem == 3):
 				data_step = np.maximum( np.minimum(data_aux_t, data_step + np.array(img)), data_aux_b)
 
 			if( cone_levels > polygon[j][3] and sum(sum(data_step)) > sum_pixels + pix_min ):
+
 				aux = np.zeros(len(polygons_new)+2) 
 				aux[1:len(polygons_new)+1] = np.array(polygons_new) 
 				aux[0] = polygons_new[len(polygons_new)-1]
@@ -539,15 +573,21 @@ if(source_dem == 1 or source_dem == 3):
 				wh2 = np.where(der2 >= 0)
 				wh_max = np.intersect1d(wh1[0], wh2[0])
 				wh_grouped = np.split(wh_max, np.where(np.diff(wh_max) > 1)[0] + 1 )
-				wh3 = np.where( abs(der1) + abs(der2) > 0)
-				wh4 = np.intersect1d(wh_max, wh3[0])
+				wh3 = np.where( abs(der1) > 0)
+				wh4 = np.where( abs(der2) > 0)
+				wh5 = np.intersect1d(wh_max, wh3[0])
+				wh6 = np.intersect1d(wh_max, wh4[0])
 				grouped_filter = np.zeros(len(wh_grouped))
 
 				for x_grouped in range(len(wh_grouped)):
-					if( len(np.intersect1d(wh_grouped[x_grouped],wh4)) > 0):
+					if( len(np.intersect1d(wh_grouped[x_grouped],wh5)) > 0 and len(np.intersect1d(wh_grouped[x_grouped],wh6)) > 0):
 						grouped_filter[x_grouped] = 1
 
-				if( (np.min(wh_grouped[0])) == 0 and (np.max(wh_grouped[len(wh_grouped)-1])) == len(polygons_new)-1 ):
+				if( np.min(wh_grouped[0]) == 0 and np.max(wh_grouped[len(wh_grouped)-1]) == anglen - 1):
+
+					if( len(np.intersect1d(wh_grouped[0],wh5)) > 0 and len(np.intersect1d(wh_grouped[len(wh_grouped)-1],wh6)) > 0):
+						grouped_filter[len(wh_grouped) - 1] = 1
+
 					aux_grouped = np.concatenate((wh_grouped[len(wh_grouped)-1], wh_grouped[0] + len(polygons_new)))
 					aux_filter = grouped_filter[len(wh_grouped)-1] + grouped_filter[0]
 					wh_grouped = wh_grouped[1:-1]
@@ -556,67 +596,201 @@ if(source_dem == 1 or source_dem == 3):
 
 				wh_max = []
 				for k in range(len(grouped_filter)):
-					if(grouped_filter[k] > 0):
-						if(np.mean(wh_grouped[k]) <= len(polygons_new) - 1.0):
+					if(grouped_filter[k] > 0 ):
+						if(np.mean(wh_grouped[k]) < len(polygons_new) and np.mean(wh_grouped[k]) >= 0.0):
 							wh_max.append(np.mean(wh_grouped[k]))
+						elif( np.mean(wh_grouped[k]) < len(polygons_new) ):
+							wh_max.append(len(polygons_new) + np.mean(wh_grouped[k]))
 						else:
-							wh_max.append(len(polygons_new) - np.mean(wh_grouped[k]))
+							wh_max.append(- len(polygons_new) + np.mean(wh_grouped[k]))
+
+				if( redist_energy == 2 or redist_energy == 4):
+
+					wh1 = np.where(der1 <= 0)
+					wh2 = np.where(der2 <= 0)
+					wh_min = np.intersect1d(wh1[0], wh2[0])
+					wh_grouped = np.split(wh_min, np.where(np.diff(wh_min) > 1)[0] + 1 )
+					wh3 = np.where( abs(der1) > 0)
+					wh4 = np.where( abs(der2) > 0)
+					wh5 = np.intersect1d(wh_min, wh3[0])
+					wh6 = np.intersect1d(wh_min, wh4[0])
+					grouped_filter = np.zeros(len(wh_grouped))
+
+					for x_grouped in range(len(wh_grouped)):
+						if( len(np.intersect1d(wh_grouped[x_grouped],wh5)) > 0 and len(np.intersect1d(wh_grouped[x_grouped],wh6)) > 0):
+							grouped_filter[x_grouped] = 1
+					
+					if( np.min(wh_grouped[0]) == 0 and np.max(wh_grouped[len(wh_grouped)-1]) == anglen - 1):
+						if( len(np.intersect1d(wh_grouped[0],wh5)) > 0 and len(np.intersect1d(wh_grouped[len(wh_grouped)-1],wh6)) > 0):
+							grouped_filter[len(wh_grouped) - 1] = 1
+
+						aux_grouped = np.concatenate((wh_grouped[len(wh_grouped)-1], wh_grouped[0] + len(polygons_new)))
+						aux_filter = grouped_filter[len(wh_grouped)-1] + grouped_filter[0]
+						wh_grouped = wh_grouped[1:-1]
+						wh_grouped.append(aux_grouped)
+						grouped_filter = np.append(grouped_filter[1:-1],aux_filter)
+
+					wh_min = []
+
+					for k in range(len(grouped_filter)):
+						if(grouped_filter[k] > 0 ):
+							if(np.mean(wh_grouped[k]) < len(polygons_new) and np.mean(wh_grouped[k]) >= 0.0):
+								wh_min.append(np.mean(wh_grouped[k]))
+							elif(np.mean(wh_grouped[k]) < len(polygons_new) ):
+								wh_min.append(len(polygons_new) + np.mean(wh_grouped[k]))
+							else:
+								wh_min.append(- len(polygons_new) + np.mean(wh_grouped[k]) )
 
 				wh_sum = np.zeros(len(polygons_new)) 
 
 				if(len(wh_max) > 0):
-					for l_max_real in wh_max:
-						lmax = np.int(l_max_real)
-						l_it = 	len(polygons_new) - 1		
-						for l in range(1,len(polygons_new)):
-							l_index = lmax + l
-							if(l_index >= len(polygons_new)):
-								l_index = l_index - len(polygons_new)
-							if( polygons_new[lmax] < polygons_new[l_index] ):
-								l_it = l
-								break
-							wh_sum[lmax] = wh_sum[lmax] + (polygons_new[lmax] - polygons_new[l_index])							
-						for l in range(1,len(polygons_new) - l_it):
-							l_index = lmax - l
-							if(l_index < 0):
-								l_index = l_index + len(polygons_new)
-							if( polygons_new[lmax] < polygons_new[l_index] ):
-								break							
-							wh_sum[lmax] = wh_sum[lmax] + (polygons_new[lmax] - polygons_new[l_index])
+					
+					if( redist_energy == 1 or  redist_energy == 3 or len(wh_max) == 1):
+						for l_max_real in wh_max:
+							lmax = np.int(l_max_real)
+							l_it = 	len(polygons_new) - 1		
+							for l in range(1,len(polygons_new)):
+								l_index = lmax + l
+								if(l_index >= len(polygons_new)):
+									l_index = l_index - len(polygons_new)
+								if( polygons_new[lmax] < polygons_new[l_index] ):
+									l_it = l
+									break
+								wh_sum[lmax] = wh_sum[lmax] + (polygons_new[lmax] - polygons_new[l_index])							
+							for l in range(1,len(polygons_new) - l_it):
+								l_index = lmax - l
+								if(l_index < 0):
+									l_index = l_index + len(polygons_new)
+								if( polygons_new[lmax] < polygons_new[l_index] ):
+									break							
+								wh_sum[lmax] = wh_sum[lmax] + (polygons_new[lmax] - polygons_new[l_index])
+
+					elif( redist_energy == 2 or redist_energy == 4):
+
+						wh_max = np.sort(wh_max)
+						wh_min = np.sort(wh_min)
+
+						if(wh_min[0] > wh_max[0]):
+
+							for l_ind in range(len(wh_max)):
+								l_max_real = wh_max[l_ind]	
+								l_max_int = np.int(l_max_real)
+								step_right = wh_min[l_ind] - l_max_int
+								l_right_real = wh_min[l_ind]
+								l_right_int = np.int(l_right_real)
+
+								if(l_ind == 0):
+									step_left = anglen + l_max_int - wh_min[len(wh_min)-1]
+									l_left_real = wh_min[len(wh_min) - 1]
+									left_index = len(wh_min) - 1
+								else:
+									step_left = l_max_int - wh_min[l_ind - 1]
+									l_left_real = wh_min[l_ind - 1]
+									left_index = l_ind - 1
+								
+								l_left_int = np.int(l_left_real)
+
+								for l in range(1,int(step_right)):
+									l_index = l_max_int + l
+									if(l_index >= len(polygons_new)):
+										l_index = l_index - len(polygons_new)
+									wh_sum[l_max_int] = wh_sum[l_max_int] + (polygons_new[l_max_int] - polygons_new[l_index])
+
+								if( int(step_right) == step_right ):
+									wh_sum[l_max_int] = wh_sum[l_max_int] + 0.5 * (polygons_new[l_max_int] - polygons_new[l_right_int])
+								else:
+									wh_sum[l_max_int] = wh_sum[l_max_int] + (polygons_new[l_max_int] - polygons_new[l_right_int])
+
+								for l in range(1,int(step_left)):
+									l_index = l_max_int - l
+									if( l_index < 0 ):
+										l_index = len(polygons_new) + l_index
+									wh_sum[l_max_int] = wh_sum[l_max_int] + (polygons_new[l_max_int] - polygons_new[l_index])
+
+								if( int(step_left) == step_left ):
+									wh_sum[l_max_int] = wh_sum[l_max_int] + 0.5 * (polygons_new[l_max_int] - polygons_new[l_left_int])
+								else:
+									wh_sum[l_max_int] = wh_sum[l_max_int] + (polygons_new[l_max_int] - polygons_new[l_left_int])
+
+						else:
+
+							for l_ind in range(len(wh_max)):
+								l_max_real = wh_max[l_ind]	
+								l_max_int = np.int(l_max_real)
+								step_left = l_max_int - wh_min[l_ind]
+								l_left_real = wh_min[l_ind]
+								l_left_int = np.int(l_left_real)
+
+								if(l_ind == len(wh_max) - 1 ):
+									step_right = anglen - l_max_int + wh_min[0]
+									l_right_real = wh_min[0]
+									right_index = 0
+								else:
+									step_right =  wh_min[l_ind + 1] - l_max_int
+									l_right_real = wh_min[l_ind + 1]
+									right_index = l_ind + 1
+
+								l_right_int = np.int(l_right_real)
+
+								for l in range(1,int(step_right)):
+									l_index = l_max_int + l
+									if(l_index >= len(polygons_new)):
+										l_index = l_index - len(polygons_new)
+									wh_sum[l_max_int] = wh_sum[l_max_int] + (polygons_new[l_max_int] - polygons_new[l_index])
+
+
+								if( int(step_right) == step_right ):
+									wh_sum[l_max_int] = wh_sum[l_max_int] + 0.5 * (polygons_new[l_max_int] - polygons_new[l_right_int])
+								else:
+									wh_sum[l_max_int] = wh_sum[l_max_int] + (polygons_new[l_max_int] - polygons_new[l_right_int])
+
+								for l in range(1,int(step_left)):
+									l_index = l_max_int - l
+									if( l_index < 0 ):
+										l_index = len(polygons_new) + l_index
+									wh_sum[l_max_int] = wh_sum[l_max_int] + (polygons_new[l_max_int] - polygons_new[l_index])
+
+								if( int(step_left) == step_left ):
+									wh_sum[l_max_int] = wh_sum[l_max_int] + 0.5 * (polygons_new[l_max_int] - polygons_new[l_left_int])
+								else:
+									wh_sum[l_max_int] = wh_sum[l_max_int] + (polygons_new[l_max_int] - polygons_new[l_left_int])
+
 
 					wh_sum = wh_sum * hl_current * angstep / 360
 
 					for l in wh_max:
 						lint = np.int(l)
 						if( wh_sum[lint] > 0 ):
+
 							new_x = polygon[j][0] + polygons_new[lint] * cos((vec_ang[lint] + angstep*(l-lint) ) * np.pi / 180 ) *step_lon_deg/step_lon_m ; 
 							new_y = polygon[j][1] + polygons_new[lint] * sin((vec_ang[lint] + angstep*(l-lint) ) * np.pi / 180 ) *step_lat_deg/step_lat_m ;
 							height_eff = wh_sum[lint] + interpol_pos(lon1, lat1, step_lon_deg, step_lat_deg, new_x, new_y, cells_lon, cells_lat, Topography)
-							if(interpol_pos(lon1, lat1, step_lon_deg, step_lat_deg, new_x, new_y, cells_lon, cells_lat, Topography) < 99999):
-								polygon.append(( new_x, new_y, height_eff, polygon[j][3] + 1 ))
+							if(interpol_pos(lon1, lat1, step_lon_deg, step_lat_deg, new_x, new_y, cells_lon, cells_lat, Topography) < 99999 and wh_sum[lint] >= hl_current * np.sqrt(step_lon_m * step_lat_m) ):
+								polygon.append(( new_x, new_y, height_eff, polygon[j][3] + 1, l, wh_sum[lint] ))
 			
 			sum_pixels = sum(sum(data_step))	
-			print((j, len(polygon), polygon[j][3], polygon[j][2], sum(sum(data_step))))
+			print((j, len(polygon), polygon[j][3], polygon[j][2], sum(sum(data_step)), polygon[j][4] ))
 
-			if( save_data == 2 ):
+			if( save_data == 1 ):
 				if(j == 0 or (j + 1 == len(polygon))):
 					distances = np.power(np.power(( matrix_lon - lon_cen_vector[i]) * (step_lon_m / step_lon_deg),2) + np.power(( matrix_lat - lat_cen_vector[i])*(step_lat_m / step_lat_deg),2),0.5) 
 					distances = distances * data_step[ range(len(data_cones[:,0]) -1 , -1 , -1 ) , : ]
 					string_data = string_data + "\n" + str(polygon[j][3]) + " " + str(sum(sum(data_step))* area_pixel) + " " + str(distances.max() / 1000.0)
+
 				elif(polygon[j][3] < polygon[j+1][3] ):
 					distances = np.power(np.power(( matrix_lon - lon_cen_vector[i]) * (step_lon_m / step_lon_deg),2) + np.power(( matrix_lat - lat_cen_vector[i])*(step_lat_m / step_lat_deg),2),0.5) 
 					distances = distances * data_step[ range(len(data_cones[:,0]) -1 , -1 , -1 ) , : ]
 					string_data = string_data + "\n" + str(polygon[j][3]) + " " + str(sum(sum(data_step))* area_pixel) + " " + str(distances.max() / 1000.0)
+				if( N == 1 ):
+					string_cones = string_cones + "\n"  + str(j) + " " + str(polygon[j][3]) + " " + str(polygon[j][2]) + " " + str(polygon[j][5]) 
 
 		if( N > 1 ):
 			data_cones = data_cones + data_step
 
-		if( save_data == 2):
+		if( save_data == 1 ):
 
 			distances = np.power(np.power(( matrix_lon - lon_cen_vector[i]) * (step_lon_m / step_lon_deg),2) + np.power(( matrix_lat - lat_cen_vector[i])*(step_lat_m / step_lat_deg),2),0.5) 
-
 			distances = distances * data_step[ range(len(data_cones[:,0]) -1 , -1 , -1 ) , : ]
-
 			summary_data[i,4] = sum(sum(data_step)) * area_pixel
 			summary_data[i,5] = distances.max() / 1000.0
 
@@ -634,7 +808,7 @@ if( source_dem == 2 ):
 		data_step = np.zeros((n_north,n_east))
 		polygon = []
 		height_eff = height_vector[i] + interpol_pos(east_cor, north_cor, cellsize, cellsize, east_cen_vector[i], north_cen_vector[i], n_east, n_north, Topography)
-		polygon.append((east_cen_vector[i], north_cen_vector[i],  height_eff, 1.0 ))
+		polygon.append((east_cen_vector[i], north_cen_vector[i],  height_eff, 1.0, -1, height_vector[i] ))
 		sum_pixels = 0
 		hl_current = hl_vector[i]
 
@@ -660,9 +834,40 @@ if( source_dem == 2 ):
 				for distance in range(0, 100000, 10):
 					h = interpol_pos(east_cor, north_cor, cellsize, cellsize, polygon[j][0] + distance * cos(angle_rad) , polygon[j][1] + distance*sin(angle_rad) , n_east, n_north, Topography)
 					if( h >= polygon[j][2] - hl_current * distance ):
-						polygon_xy.append((int((polygon[j][0] + distance* cos(angle_rad) - east_cor) * n_east / ( cellsize * ( n_east - 1 ) ) ), int((polygon[j][1] + distance*sin(angle_rad) - north_cor) * n_north / ( cellsize * ( n_north - 1 ) ))))
-						polygons_new.append(distance)
-						break
+						polygon_xy.append((int((polygon[j][0] + (distance-10)* cos(angle_rad) - east_cor) * n_east / ( cellsize * ( n_east - 1 ) ) ), int((polygon[j][1] + (distance-10)*sin(angle_rad) - north_cor) * n_north / ( cellsize * ( n_north - 1 ) ))))
+						polygons_new.append(distance - 10)
+						break						
+
+			if( (redist_energy == 3 or redist_energy == 4) and polygon[j][4] > -1 ):
+				lim1 = np.int(polygon[j][4] - anglen/4)
+				lim2 = np.int(polygon[j][4] + anglen/4)
+				if( polygon[j][4] == np.int(polygon[j][4]) ):
+					if(lim1 < 0):
+						lim1 = lim1 + anglen
+					if(lim2 >= anglen):
+						lim2 = lim2 - anglen
+					for jj in range(anglen):
+						if(jj < lim1 and lim1 < lim2):
+							polygons_new[jj] = 0
+						elif(jj > lim2 and lim1 < lim2):
+							polygons_new[jj] = 0
+						elif(jj < lim1 and jj > lim2 and lim1 > lim2):
+							polygons_new[jj] = 0
+				else:
+					lim2 = lim2 + 1
+					if(lim1 < 0):
+						lim1 = lim1 + anglen
+					if(lim2 >= anglen):
+						lim2 = lim2 - anglen
+					for jj in range(anglen):
+						if(jj < lim1 and lim1 < lim2):
+							polygons_new[jj] = 0
+						elif(jj > lim2 and lim1 < lim2):
+							polygons_new[jj] = 0
+						elif(jj < lim1 and jj > lim2 and lim1 > lim2):
+							polygons_new[jj] = 0
+						elif( jj == lim1 or jj == lim2):
+							polygons_new[jj] = polygons_new[jj] / 2.0
 
 			img = Image.new('L', (n_east, n_north), 0)
 			if( len(polygon_xy) > 0 ):
@@ -670,7 +875,7 @@ if( source_dem == 2 ):
 				data_step = np.maximum( np.minimum(data_aux_t, data_step + np.array(img)), data_aux_b)
 
 			if( cone_levels > polygon[j][3] and sum(sum(data_step)) > sum_pixels + pix_min ):
-				aux = np.zeros(len(polygons_new)+2) 
+				aux = np.zeros(len(polygons_new) + 2) 
 				aux[1:len(polygons_new)+1] = np.array(polygons_new) 
 				aux[0] = polygons_new[len(polygons_new)-1]
 				aux[len(polygons_new)+1] = polygons_new[0]
@@ -680,15 +885,19 @@ if( source_dem == 2 ):
 				wh2 = np.where(der2 >= 0)
 				wh_max = np.intersect1d(wh1[0], wh2[0])
 				wh_grouped = np.split(wh_max, np.where(np.diff(wh_max) > 1)[0] + 1 )
-				wh3 = np.where( abs(der1) + abs(der2) > 0)
-				wh4 = np.intersect1d(wh_max, wh3[0])
+				wh3 = np.where( abs(der1) > 0 )
+				wh4 = np.where( abs(der2) > 0 )
+				wh5 = np.intersect1d(wh_max, wh3[0])
+				wh6 = np.intersect1d(wh_max, wh4[0])
 				grouped_filter = np.zeros(len(wh_grouped))
 
 				for x_grouped in range(len(wh_grouped)):
-					if( len(np.intersect1d(wh_grouped[x_grouped],wh4)) > 0):
+					if( len(np.intersect1d(wh_grouped[x_grouped],wh5)) > 0 and len(np.intersect1d(wh_grouped[x_grouped],wh6)) > 0):
 						grouped_filter[x_grouped] = 1
 
-				if( (np.min(wh_grouped[0])) == 0 and (np.max(wh_grouped[len(wh_grouped)-1])) == len(polygons_new)-1 ):
+				if( np.min(wh_grouped[0]) == 0 and np.max(wh_grouped[len(wh_grouped)-1]) == anglen - 1 ):
+					if( len(np.intersect1d(wh_grouped[0],wh5)) > 0 and len(np.intersect1d(wh_grouped[len(wh_grouped)-1],wh6)) > 0):
+						grouped_filter[len(wh_grouped) - 1] = 1
 					aux_grouped = np.concatenate((wh_grouped[len(wh_grouped)-1], wh_grouped[0] + len(polygons_new)))
 					aux_filter = grouped_filter[len(wh_grouped)-1] + grouped_filter[0]
 					wh_grouped = wh_grouped[1:-1]
@@ -697,32 +906,162 @@ if( source_dem == 2 ):
 
 				wh_max = []
 				for k in range(len(grouped_filter)):
-					if(grouped_filter[k] > 0):
-						if(np.mean(wh_grouped[k]) <= len(polygons_new) - 1.0):
+					if(grouped_filter[k] > 0 ):
+						if(np.mean(wh_grouped[k]) < len(polygons_new) and np.mean(wh_grouped[k]) >= 0.0):
 							wh_max.append(np.mean(wh_grouped[k]))
+						elif( np.mean(wh_grouped[k]) < len(polygons_new) ):
+							wh_max.append(len(polygons_new) + np.mean(wh_grouped[k]))
 						else:
-							wh_max.append(len(polygons_new) - np.mean(wh_grouped[k]))
+							wh_max.append(- len(polygons_new) + np.mean(wh_grouped[k]))
+
+				if(redist_energy == 2 or redist_energy == 4):
+					wh1 = np.where(der1 <= 0)
+					wh2 = np.where(der2 <= 0)
+					wh_min = np.intersect1d(wh1[0], wh2[0])
+					wh_grouped = np.split(wh_min, np.where(np.diff(wh_min) > 1)[0] + 1 )
+					wh3 = np.where( abs(der1) > 0)
+					wh4 = np.where( abs(der2) > 0)
+					wh5 = np.intersect1d(wh_min, wh3[0])
+					wh6 = np.intersect1d(wh_min, wh4[0])
+					grouped_filter = np.zeros(len(wh_grouped))
+
+					for x_grouped in range(len(wh_grouped)):
+						if( len(np.intersect1d(wh_grouped[x_grouped],wh5)) > 0 and len(np.intersect1d(wh_grouped[x_grouped],wh6)) > 0):
+							grouped_filter[x_grouped] = 1
+					
+					if( np.min(wh_grouped[0]) == 0 and np.max(wh_grouped[len(wh_grouped)-1]) == anglen - 1):
+						if( len(np.intersect1d(wh_grouped[0],wh5)) > 0 and len(np.intersect1d(wh_grouped[len(wh_grouped)-1],wh6)) > 0):
+							grouped_filter[len(wh_grouped) - 1] = 1
+						aux_grouped = np.concatenate((wh_grouped[len(wh_grouped)-1], wh_grouped[0] + len(polygons_new)))
+						aux_filter = grouped_filter[len(wh_grouped)-1] + grouped_filter[0]
+						wh_grouped = wh_grouped[1:-1]
+						wh_grouped.append(aux_grouped)
+						grouped_filter = np.append(grouped_filter[1:-1],aux_filter)
+
+					wh_min = []
+
+					for k in range(len(grouped_filter)):
+						if(grouped_filter[k] > 0 ):
+							if(np.mean(wh_grouped[k]) < len(polygons_new) and np.mean(wh_grouped[k]) >= 0.0):
+								wh_min.append(np.mean(wh_grouped[k]))
+							elif(np.mean(wh_grouped[k]) < len(polygons_new) ):
+								wh_min.append(len(polygons_new) + np.mean(wh_grouped[k]))
+							else:
+								wh_min.append(- len(polygons_new) + np.mean(wh_grouped[k]) )
 
 				wh_sum = np.zeros(len(polygons_new)) 
+
 				if(len(wh_max) > 0):
-					for l_max_real in wh_max:
-						lmax = np.int(l_max_real)
-						l_it = 	len(polygons_new) - 1		
-						for l in range(1,len(polygons_new)):
-							l_index = lmax + l
-							if(l_index >= len(polygons_new)):
-								l_index = l_index - len(polygons_new)
-							if( polygons_new[lmax] < polygons_new[l_index] ):
-								l_it = l
-								break
-							wh_sum[lmax] = wh_sum[lmax] + (polygons_new[lmax] - polygons_new[l_index])							
-						for l in range(1,len(polygons_new) - l_it):
-							l_index = lmax - l
-							if(l_index < 0):
-								l_index = l_index + len(polygons_new)
-							if( polygons_new[lmax] < polygons_new[l_index] ):
-								break							
-							wh_sum[lmax] = wh_sum[lmax] + (polygons_new[lmax] - polygons_new[l_index])
+					
+					if( (redist_energy == 1 or redist_energy == 3) or len(wh_max) == 1):
+						for l_max_real in wh_max:
+							lmax = np.int(l_max_real)
+							l_it = 	len(polygons_new) - 1		
+							for l in range(1,len(polygons_new)):
+								l_index = lmax + l
+								if(l_index >= len(polygons_new)):
+									l_index = l_index - len(polygons_new)
+								if( polygons_new[lmax] < polygons_new[l_index] ):
+									l_it = l
+									break
+								wh_sum[lmax] = wh_sum[lmax] + (polygons_new[lmax] - polygons_new[l_index])							
+							for l in range(1,len(polygons_new) - l_it):
+								l_index = lmax - l
+								if(l_index < 0):
+									l_index = l_index + len(polygons_new)
+								if( polygons_new[lmax] < polygons_new[l_index] ):
+									break							
+								wh_sum[lmax] = wh_sum[lmax] + (polygons_new[lmax] - polygons_new[l_index])
+
+					elif( redist_energy == 2 or redist_energy == 4):
+
+						wh_max = np.sort(wh_max)
+						wh_min = np.sort(wh_min)
+
+						if(wh_min[0] > wh_max[0]):
+
+							for l_ind in range(len(wh_max)):
+								l_max_real = wh_max[l_ind]	
+								l_max_int = np.int(l_max_real)
+								step_right = wh_min[l_ind] - l_max_int
+								l_right_real = wh_min[l_ind]
+								l_right_int = np.int(l_right_real)
+
+								if(l_ind == 0):
+									step_left = anglen + l_max_int - wh_min[len(wh_min)-1]
+									l_left_real = wh_min[len(wh_min) - 1]
+									left_index = len(wh_min) - 1
+								else:
+									step_left = l_max_int - wh_min[l_ind - 1]
+									l_left_real = wh_min[l_ind - 1]
+									left_index = l_ind - 1
+								
+								l_left_int = np.int(l_left_real)
+
+								for l in range(1,int(step_right)):
+									l_index = l_max_int + l
+									if(l_index >= len(polygons_new)):
+										l_index = l_index - len(polygons_new)
+									wh_sum[l_max_int] = wh_sum[l_max_int] + (polygons_new[l_max_int] - polygons_new[l_index])
+
+								if( int(step_right) == step_right ):
+									wh_sum[l_max_int] = wh_sum[l_max_int] + 0.5 * (polygons_new[l_max_int] - polygons_new[l_right_int])
+								else:
+									wh_sum[l_max_int] = wh_sum[l_max_int] + (polygons_new[l_max_int] - polygons_new[l_right_int])
+
+								for l in range(1,int(step_left)):
+									l_index = l_max_int - l
+									if( l_index < 0 ):
+										l_index = len(polygons_new) + l_index
+									wh_sum[l_max_int] = wh_sum[l_max_int] + (polygons_new[l_max_int] - polygons_new[l_index])
+
+								if( int(step_left) == step_left ):
+									wh_sum[l_max_int] = wh_sum[l_max_int] + 0.5 * (polygons_new[l_max_int] - polygons_new[l_left_int])
+								else:
+									wh_sum[l_max_int] = wh_sum[l_max_int] + (polygons_new[l_max_int] - polygons_new[l_left_int])
+
+						else:
+
+							for l_ind in range(len(wh_max)):
+								l_max_real = wh_max[l_ind]	
+								l_max_int = np.int(l_max_real)
+								step_left = l_max_int - wh_min[l_ind]
+								l_left_real = wh_min[l_ind]
+								l_left_int = np.int(l_left_real)
+
+								if(l_ind == len(wh_max) - 1 ):
+									step_right = anglen - l_max_int + wh_min[0]
+									l_right_real = wh_min[0]
+									right_index = 0
+								else:
+									step_right =  wh_min[l_ind + 1] - l_max_int
+									l_right_real = wh_min[l_ind + 1]
+									right_index = l_ind + 1
+
+								l_right_int = np.int(l_right_real)
+
+								for l in range(1,int(step_right)):
+									l_index = l_max_int + l
+									if(l_index >= len(polygons_new)):
+										l_index = l_index - len(polygons_new)
+									wh_sum[l_max_int] = wh_sum[l_max_int] + (polygons_new[l_max_int] - polygons_new[l_index])
+
+
+								if( int(step_right) == step_right ):
+									wh_sum[l_max_int] = wh_sum[l_max_int] + 0.5 * (polygons_new[l_max_int] - polygons_new[l_right_int])
+								else:
+									wh_sum[l_max_int] = wh_sum[l_max_int] + (polygons_new[l_max_int] - polygons_new[l_right_int])
+
+								for l in range(1,int(step_left)):
+									l_index = l_max_int - l
+									if( l_index < 0 ):
+										l_index = len(polygons_new) + l_index
+									wh_sum[l_max_int] = wh_sum[l_max_int] + (polygons_new[l_max_int] - polygons_new[l_index])
+
+								if( int(step_left) == step_left ):
+									wh_sum[l_max_int] = wh_sum[l_max_int] + 0.5 * (polygons_new[l_max_int] - polygons_new[l_left_int])
+								else:
+									wh_sum[l_max_int] = wh_sum[l_max_int] + (polygons_new[l_max_int] - polygons_new[l_left_int])
 
 					wh_sum = wh_sum * hl_current * angstep / 360
 
@@ -732,13 +1071,13 @@ if( source_dem == 2 ):
 							new_x = polygon[j][0] + polygons_new[lint] * cos((vec_ang[lint] + angstep*(l-lint) ) * np.pi / 180 ) ; 
 							new_y = polygon[j][1] + polygons_new[lint] * sin((vec_ang[lint] + angstep*(l-lint) ) * np.pi / 180 ) ;
 							height_eff = wh_sum[lint] + interpol_pos(east_cor, north_cor, cellsize, cellsize, new_x, new_y, n_east, n_north, Topography)
-							if(interpol_pos(east_cor, north_cor, cellsize, cellsize, new_x, new_y, n_east, n_north, Topography) < 99999):
-								polygon.append(( new_x, new_y, height_eff, polygon[j][3] + 1 ))
+							if(interpol_pos(east_cor, north_cor, cellsize, cellsize, new_x, new_y, n_east, n_north, Topography) < 99999 and wh_sum[lint] >= hl_current * cellsize ):
+								polygon.append(( new_x, new_y, height_eff, polygon[j][3] + 1, l, wh_sum[lint] ))
 
 			sum_pixels = sum(sum(data_step))	
-			print((j, len(polygon), polygon[j][3], polygon[j][2], sum(sum(data_step))))
+			print((j, len(polygon), polygon[j][3], polygon[j][2], sum(sum(data_step)), polygon[j][4] ))
 
-			if( save_data == 2 ):
+			if( save_data == 1 ):
 				if(j == 1 or (j + 1 == len(polygon))):
 					distances = np.power(np.power(( matrix_east - east_cen_vector[i]),2) + np.power(( matrix_north - north_cen_vector[i]),2),0.5) 
 					distances = distances * data_step[ range(len(data_cones[:,0]) -1 , -1 , -1 ) , : ]
@@ -748,13 +1087,14 @@ if( source_dem == 2 ):
 					distances = np.power(np.power(( matrix_east - east_cen_vector[i]),2) + np.power(( matrix_north - north_cen_vector[i]),2),0.5) 
 					distances = distances * data_step[ range(len(data_cones[:,0]) -1 , -1 , -1 ) , : ]
 					string_data = string_data + "\n" + str(polygon[j][3]) + " " + str(sum(sum(data_step))* area_pixel) + " " + str(distances.max() / 1000.0)
+				if( N == 1 ):
+					string_cones = string_cones + "\n"  + str(j) + " " + str(polygon[j][3]) + " " + str(polygon[j][2]) + " " + str(polygon[j][5]) 
 
 		if( N > 1 ):
 			data_cones = data_cones + data_step
 
-		if( save_data == 2):
+		if( save_data == 1 ):
 			distances = np.power(np.power(( matrix_east - east_cen_vector[i]) ,2) + np.power(( matrix_north - north_cen_vector[i]) ,2),0.5) 
-
 			distances = distances * data_step[ range(len(data_cones[:,0]) -1 , -1 , -1 ) , : ]
 			summary_data[i,4] = sum(sum(data_step)) * area_pixel
 			summary_data[i,5] = distances.max() / 1000.0
@@ -762,13 +1102,17 @@ if( source_dem == 2 ):
 		print(' Simulation finished (N = ' + str(i+1) + ')')
 
 # SAVE DATA
-if(save_data == 2):
+if( save_data == 1 ):
 	np.savetxt('Results/' + run_name + '/' + 'data_cones.txt', data_cones, fmt='%.2e')
 	np.savetxt('Results/' + run_name + '/' + 'topography.txt', Topography, fmt='%.2e')
 	np.savetxt('Results/' + run_name + '/' + 'summary.txt', summary_data, fmt='%.5e')
 	text_file = open('Results/' + run_name + '/' + 'energy_cones.txt', 'w')
 	text_file.write(string_data)
 	text_file.close()
+	if(N == 1):
+		text_file = open('Results/' + run_name + '/' + 'energy_cones_h.txt', 'w')
+		text_file.write(string_cones)
+		text_file.close()
 	text_file = open('Results/' + run_name + '/' + 'sim_data.txt', 'w')
 	text_file.write(sim_data)
 	text_file.close()
@@ -799,7 +1143,7 @@ if(source_dem == 1 or source_dem == 3):
 	line_val = data_cones.max()
 	data_cones[data_cones[:,:] == 0] =  np.nan
 	val_up = np.floor((line_val + 0.1 - 1.0 / N ) * 10.0) / 20.0
-	val_down = np.maximum( val_up / 10.0 , 0.02 )
+	val_down = np.maximum( val_up / 10.0 , 0.1 )
 
 	plt.figure(1)
 	cmapg = plt.cm.get_cmap('Greys')

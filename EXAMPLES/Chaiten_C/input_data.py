@@ -3,9 +3,9 @@ run_name = Chaiten_C
 
 # Source of DEM 
 # source_dem = type of input data (1 => SRTM 30 m / 2 => Uploaded DEM (UTM) / 3 => Uploaded Data (lat,lon)). 
-#              (A default location is assumed for type 2: #input_DEM.asc, see an example in EXAMPLES/UploadDEM).
-# topography_file = name of the file with topography information (only considered if source_dem = 3).
-#              (Simulations with source_dem = 1 and save_data = 2 create a compatible file for source_dem = 3 in Results).
+#              (A default location is assumed for type 2: input_DEM.asc, see an example in EXAMPLES/Upload_DEM_UTM).
+#              (A default location is assumed for type 3: Topography_3.asc, see an example in EXAMPLES/Upload_DEM_deg).
+#              (Simulations with source_dem = 1 and save_data = 1 create a compatible file for source_dem = 3 in Results).
 source_dem = 1
 
 # Map limits (only considered if source_dem = 1)
@@ -25,8 +25,8 @@ cone_levels = 1
 dist_source = 1
 
 # Parameters of the collapse location
-# lon_cen = longitude of the collapse zone center (only considered if source_dem = 1)
-# lat_cen = latitude of the collapse zone center (only considered if source_dem = 1)
+# lon_cen = longitude of the collapse zone center (only considered if source_dem = 1 or 3)
+# lat_cen = latitude of the collapse zone center (only considered if source_dem = 1 or 3)
 # east_cen = east coordinate of collapse zone center (only considered if source_dem = 2)
 # north_cen = north coordinate of collapse zone center (only considered if source_dem = 2)
 # var_cen = uncertainty of collapse position (in meters)
@@ -44,15 +44,18 @@ var_cen = 300.0
 # hl = H/L for the energy cones
 # var_height = uncertainty of collapse height (in meters)
 # var_hl = uncertainty of hl
-# distribution = type of distribution (1 => Gaussian / 2 => Uniform)
+# dist_input = type of distribution for height and H/L (1 => Gaussian / 2 => Uniform)
 height = 500.0
 hl = 0.30
-var_height = 300.0
-var_hl = 0.03
-distribution = 1
+var_height = 500.0
+var_hl = 0.05
+dist_input = 2
 
 # Number of simulations computed by the code
-N = 300
+N = 100
 
-# Save results in files txt (1 => No / 2 => Yes)
+# Save results in files txt ( 1 => Yes / 0 => No )
 save_data = 1
+
+# Assumption for redistributing potential energy (1, 2, 3 or 4. Please use 3)
+redist_energy = 3
