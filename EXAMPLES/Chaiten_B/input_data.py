@@ -37,7 +37,7 @@ dist_source = 1
 # ang2_rad = initial angle of the circumference arch that define the collapse zone (in degrees, only considered if dist_source = 3. Anticlockwise)
 lon_cen = -72.650
 lat_cen = -42.835
-var_cen = 300.0
+var_cen = 500.0
 
 # Other parameters of energy cones
 # height = expected height of collapse (above the surface, in meters)
@@ -45,9 +45,9 @@ var_cen = 300.0
 # var_height = uncertainty of collapse height (in meters)
 # var_hl = uncertainty of hl
 # dist_input = type of distribution for height and H/L (1 => Gaussian / 2 => Uniform)
-height = 500.0
-hl = 0.40
-var_height = 500.0
+height = 600.0
+hl = 0.4
+var_height = 400.0
 var_hl = 0.05
 dist_input = 2
 
@@ -57,5 +57,5 @@ N = 100
 # Save results in files txt ( 1 => Yes / 0 => No )
 save_data = 1
 
-# Assumption for redistributing potential energy (1, 2, 3 or 4. Please use 3)
-redist_energy = 3
+# Assumption for redistributing potential energy (1, 2, 3 or 4. Please use 4)
+redist_energy = 4

@@ -57,5 +57,5 @@ N = 100
 # Save results in files txt ( 1 => Yes / 0 => No )
 save_data = 1
 
-# Assumption for redistributing potential energy (1, 2, 3 or 4. Please use 3)
-redist_energy = 3
+# Assumption for redistributing potential energy (1, 2, 3 or 4. Please use 4)
+redist_energy = 4

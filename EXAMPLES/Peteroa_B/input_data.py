@@ -47,17 +47,17 @@ length_lin = 3000.0
 # var_height = uncertainty of collapse height (in meters)
 # var_hl = uncertainty of hl
 # dist_input = type of distribution for height and H/L (1 => Gaussian / 2 => Uniform)
-height = 200.0
-hl = 0.6
-var_height = 200.0
+height = 300.0
+hl = 0.5
+var_height = 300.0
 var_hl = 0.05
 dist_input = 2
 
 # Number of simulations computed by the code
-N = 50
+N = 100
 
 # Save results in files txt ( 1 => Yes / 0 => No )
 save_data = 1
 
-# Assumption for redistributing potential energy (1, 2, 3 or 4. Please use 3)
-redist_energy = 3
+# Assumption for redistributing potential energy (1, 2, 3 or 4. Please use 4)
+redist_energy = 4

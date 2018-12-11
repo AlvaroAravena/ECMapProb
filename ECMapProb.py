@@ -408,7 +408,6 @@ if(source_dem == 1 or source_dem == 3):
 						aux_boolean = 1
 				if(aux_boolean == 0):
 					break
-
 	else:
 		lon_cen_vector = np.ones(N) * lon_cen
 		lat_cen_vector = np.ones(N) * lat_cen
@@ -459,6 +458,7 @@ if(source_dem == 2):
 print('Computing energy cones')
 
 angstep = 10
+distep = 5
 anglen = 360 / angstep
 pix_min = 0.0
 
@@ -518,11 +518,11 @@ if(source_dem == 1 or source_dem == 3):
 
 			for angle_deg in vec_ang:
 				angle_rad = angle_deg * np.pi /180
-				for distance in range(0, 100000, 10):
+				for distance in range(0, 100000, distep):
 					h = interpol_pos(lon1, lat1, step_lon_deg, step_lat_deg, polygon[j][0] + distance * cos(angle_rad) * step_lon_deg / step_lon_m , polygon[j][1] + distance*sin(angle_rad)*step_lat_deg/step_lat_m , cells_lon, cells_lat, Topography)
 					if( h >= polygon[j][2] - hl_current * distance ):
-						polygon_xy.append((int((polygon[j][0] + (distance - 10)*cos(angle_rad)*step_lon_deg/step_lon_m - lon1) * cells_lon / (lon2 - lon1)),int((polygon[j][1] + (distance - 10)*sin(angle_rad)*step_lat_deg/step_lat_m - lat1) * cells_lat / (lat2 - lat1))))
-						polygons_new.append(distance - 10)
+						polygon_xy.append((int((polygon[j][0] + (distance - distep)*cos(angle_rad)*step_lon_deg/step_lon_m - lon1) * cells_lon / (lon2 - lon1)),int((polygon[j][1] + (distance - distep)*sin(angle_rad)*step_lat_deg/step_lat_m - lat1) * cells_lat / (lat2 - lat1))))
+						polygons_new.append(distance - distep)
 						break
 
 			if( (redist_energy == 3 or redist_energy == 4) and polygon[j][4] > -1 ):
@@ -765,7 +765,7 @@ if(source_dem == 1 or source_dem == 3):
 							new_x = polygon[j][0] + polygons_new[lint] * cos((vec_ang[lint] + angstep*(l-lint) ) * np.pi / 180 ) *step_lon_deg/step_lon_m ; 
 							new_y = polygon[j][1] + polygons_new[lint] * sin((vec_ang[lint] + angstep*(l-lint) ) * np.pi / 180 ) *step_lat_deg/step_lat_m ;
 							height_eff = wh_sum[lint] + interpol_pos(lon1, lat1, step_lon_deg, step_lat_deg, new_x, new_y, cells_lon, cells_lat, Topography)
-							if(interpol_pos(lon1, lat1, step_lon_deg, step_lat_deg, new_x, new_y, cells_lon, cells_lat, Topography) < 99999 and wh_sum[lint] >= hl_current * np.sqrt(step_lon_m * step_lat_m) ):
+							if(interpol_pos(lon1, lat1, step_lon_deg, step_lat_deg, new_x, new_y, cells_lon, cells_lat, Topography) < 99999 ):
 								polygon.append(( new_x, new_y, height_eff, polygon[j][3] + 1, l, wh_sum[lint] ))
 			
 			sum_pixels = sum(sum(data_step))	
@@ -831,11 +831,11 @@ if( source_dem == 2 ):
 
 			for angle_deg in vec_ang:
 				angle_rad = angle_deg * np.pi /180
-				for distance in range(0, 100000, 10):
+				for distance in range(0, 100000, distep):
 					h = interpol_pos(east_cor, north_cor, cellsize, cellsize, polygon[j][0] + distance * cos(angle_rad) , polygon[j][1] + distance*sin(angle_rad) , n_east, n_north, Topography)
 					if( h >= polygon[j][2] - hl_current * distance ):
-						polygon_xy.append((int((polygon[j][0] + (distance-10)* cos(angle_rad) - east_cor) * n_east / ( cellsize * ( n_east - 1 ) ) ), int((polygon[j][1] + (distance-10)*sin(angle_rad) - north_cor) * n_north / ( cellsize * ( n_north - 1 ) ))))
-						polygons_new.append(distance - 10)
+						polygon_xy.append((int((polygon[j][0] + (distance-distep)* cos(angle_rad) - east_cor) * n_east / ( cellsize * ( n_east - 1 ) ) ), int((polygon[j][1] + (distance-distep)*sin(angle_rad) - north_cor) * n_north / ( cellsize * ( n_north - 1 ) ))))
+						polygons_new.append(distance - distep)
 						break						
 
 			if( (redist_energy == 3 or redist_energy == 4) and polygon[j][4] > -1 ):
@@ -1071,7 +1071,7 @@ if( source_dem == 2 ):
 							new_x = polygon[j][0] + polygons_new[lint] * cos((vec_ang[lint] + angstep*(l-lint) ) * np.pi / 180 ) ; 
 							new_y = polygon[j][1] + polygons_new[lint] * sin((vec_ang[lint] + angstep*(l-lint) ) * np.pi / 180 ) ;
 							height_eff = wh_sum[lint] + interpol_pos(east_cor, north_cor, cellsize, cellsize, new_x, new_y, n_east, n_north, Topography)
-							if(interpol_pos(east_cor, north_cor, cellsize, cellsize, new_x, new_y, n_east, n_north, Topography) < 99999 and wh_sum[lint] >= hl_current * cellsize ):
+							if(interpol_pos(east_cor, north_cor, cellsize, cellsize, new_x, new_y, n_east, n_north, Topography) < 99999 ):
 								polygon.append(( new_x, new_y, height_eff, polygon[j][3] + 1, l, wh_sum[lint] ))
 
 			sum_pixels = sum(sum(data_step))	
