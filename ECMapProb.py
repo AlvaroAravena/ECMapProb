@@ -156,6 +156,13 @@ if(source_dem == 3 and ( np.isnan( lon_cen ) or np.isnan( lat_cen ) or np.isnan(
 	print('Problems with input parameters')
 	sys.exit(0)
 
+save_direction = 0
+direction = [0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 110, 120, 130, 140, 150, 160, 170, 180, 190, 200, 210, 220, 230, 240, 250, 260, 270, 280, 290, 300, 310, 320, 330, 340, 350]
+if(save_direction == 0):
+	length_direction = 0
+else:
+	length_direction = len(direction)
+
 # IMPORT MAP
 if(source_dem == 1):
 	print('Importing map')
@@ -458,13 +465,30 @@ if(source_dem == 2):
 print('Computing energy cones')
 
 angstep = 10
-distep = 5
+distep = 10
 anglen = 360 / angstep
 pix_min = 0.0
 
-if( save_data == 1 ):
+if( redist_energy == 3 or redist_energy == 4 ):
+	factor_mult = 50.0
+	center_elim = 0.5
+	aux_backward = 1 / (1 + np.exp(factor_mult * (np.linspace(0.0, 1.0, anglen/2 + 1) - center_elim) ) )
+	vector_backward_1 = np.zeros(anglen)
+	vector_backward_1[0:anglen/2 - 1] = aux_backward[anglen/2-1:0:-1]
+	vector_backward_1[anglen/2-1:] = aux_backward[:]
+	vector_backward_1[vector_backward_1 < 1e-3] = 0
+	vector_backward_1[vector_backward_1 > 1.0 - 1e-3] = 1.0
+	aux_backward = 1 / (1 + np.exp(factor_mult * (np.linspace(1.0/(anglen/2), 1.0 - 1.0/(anglen/2), anglen/2 ) - center_elim) ) )
+	vector_backward_2 = np.zeros(anglen)
+	vector_backward_2[0:anglen/2] = aux_backward[::-1]
+	vector_backward_2[anglen/2:] = aux_backward[:]
+	vector_backward_2[vector_backward_2 < 1e-3] = 0
+	vector_backward_2[vector_backward_2 > 1.0 - 1e-3] = 1.0
+	index_max = anglen/2 - 1
+	vector_correc = np.zeros(anglen)
 
-	summary_data = np.zeros((N,6))
+if( save_data == 1 ):
+	summary_data = np.zeros((N,6 + length_direction))
 	summary_data[:,0] = height_vector
 	summary_data[:,1] = hl_vector
 	if( source_dem == 1 or source_dem == 3):
@@ -478,7 +502,7 @@ if( save_data == 1 ):
 		area_pixel = cellsize * cellsize * 1e-6
 		sim_data = str(N) + "\n" + str(cellsize) + "\n" + str(cellsize) + "\n" + str(source_dem) + "\n" + str(cone_levels) + "\n"
 	string_data = ""
-	if( N == 1):
+	if(N == 1):
 		string_cones = ""
 
 if(source_dem == 1 or source_dem == 3):
@@ -496,7 +520,29 @@ if(source_dem == 1 or source_dem == 3):
 		height_eff = height_vector[i] + interpol_pos(lon1, lat1, step_lon_deg, step_lat_deg, lon_cen_vector[i], lat_cen_vector[i], cells_lon, cells_lat, Topography)
 		polygon.append((lon_cen_vector[i], lat_cen_vector[i],  height_eff, 1.0, -1, height_vector[i] ))
 		sum_pixels = 0
-		hl_current = hl_vector[i]		
+		hl_current = hl_vector[i]
+
+		if(save_direction == 1):
+			data_direction = np.zeros((cells_lat,cells_lon,length_direction))
+			wh_negative = np.where( (matrix_lat - lat_cen) <= 0 )
+			ang_direction = 180 * np.arctan( (matrix_lon - lon_cen ) * (step_lon_m / step_lon_deg ) / (matrix_lat - lat_cen ) / (step_lat_m / step_lat_deg ) ) / np.pi
+			ang_direction[wh_negative] = ang_direction[wh_negative] + 180.0
+			ang_direction[np.where(ang_direction < 0)] = ang_direction[np.where(ang_direction < 0)] + 360.0	
+			for ii in range(length_direction):
+				matrix_aux_1 = np.zeros((cells_lat,cells_lon))
+				matrix_aux_2 = np.zeros((cells_lat,cells_lon))
+				if(ii < length_direction - 1):
+					wh_direction_1 = np.where(ang_direction > direction[ii])
+					wh_direction_2 = np.where(ang_direction <= direction[ii + 1])
+					matrix_aux_1[wh_direction_1] = 1
+					matrix_aux_2[wh_direction_2] = 1
+					data_direction[:,:,ii] = matrix_aux_1 * matrix_aux_2
+				else:
+					wh_direction_1 = np.where(ang_direction > direction[ii])
+					wh_direction_2 = np.where(ang_direction <= direction[0])
+					matrix_aux_1[wh_direction_1] = 1
+					matrix_aux_2[wh_direction_2] = 1
+					data_direction[:,:,ii] = np.maximum(matrix_aux_1, matrix_aux_2)
 
 		for j in range(10000): 
 
@@ -526,35 +572,16 @@ if(source_dem == 1 or source_dem == 3):
 						break
 
 			if( (redist_energy == 3 or redist_energy == 4) and polygon[j][4] > -1 ):
-				lim1 = np.int(polygon[j][4] - anglen/4)
-				lim2 = np.int(polygon[j][4] + anglen/4)
+				lim = np.int(polygon[j][4])
 				if( polygon[j][4] == np.int(polygon[j][4]) ):
-					if(lim1 < 0):
-						lim1 = lim1 + anglen
-					if(lim2 >= anglen):
-						lim2 = lim2 - anglen
-					for jj in range(anglen):
-						if(jj < lim1 and lim1 < lim2):
-							polygons_new[jj] = 0
-						elif(jj > lim2 and lim1 < lim2):
-							polygons_new[jj] = 0
-						elif(jj < lim1 and jj > lim2 and lim1 > lim2):
-							polygons_new[jj] = 0
+					for ii in range(anglen):
+						vector_correc[ii] = vector_backward_1[int((ii - polygon[j][4] + index_max) % anglen)]
+
 				else:
-					lim2 = lim2 + 1
-					if(lim1 < 0):
-						lim1 = lim1 + anglen
-					if(lim2 >= anglen):
-						lim2 = lim2 - anglen
-					for jj in range(anglen):
-						if(jj < lim1 and lim1 < lim2):
-							polygons_new[jj] = 0
-						elif(jj > lim2 and lim1 < lim2):
-							polygons_new[jj] = 0
-						elif(jj < lim1 and jj > lim2 and lim1 > lim2):
-							polygons_new[jj] = 0
-						elif( jj == lim1 or jj == lim2):
-							polygons_new[jj] = polygons_new[jj] / 2.0
+					for ii in range(anglen):
+						vector_correc[ii] = vector_backward_2[int((ii - polygon[j][4] + index_max) % anglen)]
+
+				polygons_new = polygons_new * vector_correc
 
 			img = Image.new('L', (cells_lon, cells_lat), 0)
 			if( len(polygon_xy) > 0 ):
@@ -790,6 +817,13 @@ if(source_dem == 1 or source_dem == 3):
 		if( save_data == 1 ):
 
 			distances = np.power(np.power(( matrix_lon - lon_cen_vector[i]) * (step_lon_m / step_lon_deg),2) + np.power(( matrix_lat - lat_cen_vector[i])*(step_lat_m / step_lat_deg),2),0.5) 
+
+			if(save_direction == 1):
+				for ii in range(length_direction):
+					distances_corrected = distances * data_direction[:,:,ii]
+					distances_corrected = distances_corrected * data_step[ range(len(data_cones[:,0]) -1 , -1 , -1 ) , : ]
+					summary_data[i,6 + ii]  = distances_corrected.max() / 1000.0
+
 			distances = distances * data_step[ range(len(data_cones[:,0]) -1 , -1 , -1 ) , : ]
 			summary_data[i,4] = sum(sum(data_step)) * area_pixel
 			summary_data[i,5] = distances.max() / 1000.0
@@ -836,38 +870,19 @@ if( source_dem == 2 ):
 					if( h >= polygon[j][2] - hl_current * distance ):
 						polygon_xy.append((int((polygon[j][0] + (distance-distep)* cos(angle_rad) - east_cor) * n_east / ( cellsize * ( n_east - 1 ) ) ), int((polygon[j][1] + (distance-distep)*sin(angle_rad) - north_cor) * n_north / ( cellsize * ( n_north - 1 ) ))))
 						polygons_new.append(distance - distep)
-						break						
-
+						break		
+				
 			if( (redist_energy == 3 or redist_energy == 4) and polygon[j][4] > -1 ):
-				lim1 = np.int(polygon[j][4] - anglen/4)
-				lim2 = np.int(polygon[j][4] + anglen/4)
+				lim = np.int(polygon[j][4])
 				if( polygon[j][4] == np.int(polygon[j][4]) ):
-					if(lim1 < 0):
-						lim1 = lim1 + anglen
-					if(lim2 >= anglen):
-						lim2 = lim2 - anglen
-					for jj in range(anglen):
-						if(jj < lim1 and lim1 < lim2):
-							polygons_new[jj] = 0
-						elif(jj > lim2 and lim1 < lim2):
-							polygons_new[jj] = 0
-						elif(jj < lim1 and jj > lim2 and lim1 > lim2):
-							polygons_new[jj] = 0
+					for ii in range(anglen):
+						vector_correc[ii] = vector_backward_1[int((ii - polygon[j][4] + index_max) % anglen)]
+
 				else:
-					lim2 = lim2 + 1
-					if(lim1 < 0):
-						lim1 = lim1 + anglen
-					if(lim2 >= anglen):
-						lim2 = lim2 - anglen
-					for jj in range(anglen):
-						if(jj < lim1 and lim1 < lim2):
-							polygons_new[jj] = 0
-						elif(jj > lim2 and lim1 < lim2):
-							polygons_new[jj] = 0
-						elif(jj < lim1 and jj > lim2 and lim1 > lim2):
-							polygons_new[jj] = 0
-						elif( jj == lim1 or jj == lim2):
-							polygons_new[jj] = polygons_new[jj] / 2.0
+					for ii in range(anglen):
+						vector_correc[ii] = vector_backward_2[int((ii - polygon[j][4] + index_max) % anglen)]
+
+				polygons_new = polygons_new * vector_correc
 
 			img = Image.new('L', (n_east, n_north), 0)
 			if( len(polygon_xy) > 0 ):
@@ -1143,7 +1158,7 @@ if(source_dem == 1 or source_dem == 3):
 	line_val = data_cones.max()
 	data_cones[data_cones[:,:] == 0] =  np.nan
 	val_up = np.floor((line_val + 0.1 - 1.0 / N ) * 10.0) / 20.0
-	val_down = np.maximum( val_up / 10.0 , 0.1 )
+	val_down = np.maximum( val_up / 10.0 , 0.05 )
 
 	plt.figure(1)
 	cmapg = plt.cm.get_cmap('Greys')
@@ -1200,7 +1215,7 @@ if(source_dem == 2):
 	line_val = data_cones.max()
 	data_cones[data_cones[:,:] == 0] =  np.nan
 	val_up = np.floor((line_val + 0.1 - 1.0 / N ) * 10.0) / 20.0
-	val_down = np.maximum( val_up / 10.0 , 0.02 )
+	val_down = np.maximum( val_up / 10.0 , 0.05 )
 
 	plt.figure(1)
 

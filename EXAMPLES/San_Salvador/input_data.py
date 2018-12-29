@@ -45,14 +45,14 @@ var_cen = 500.0
 # var_height = uncertainty of collapse height (in meters)
 # var_hl = uncertainty of hl
 # dist_input = type of distribution for height and H/L (1 => Gaussian / 2 => Uniform)
-height = 750.0
+height = 800.0
 hl = 0.4
-var_height = 250.0
+var_height = 200.0
 var_hl = 0.05
 dist_input = 2
 
 # Number of simulations computed by the code
-N = 100
+N = 200
 
 # Save results in files txt ( 1 => Yes / 0 => No )
 save_data = 1
