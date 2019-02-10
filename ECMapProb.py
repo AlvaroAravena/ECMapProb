@@ -195,12 +195,7 @@ if(source_dem == 1):
 if(source_dem == 1):
 	print('Processing map')
 	fp = run_name + '.tif'
-	with tifffile.TIFFfile(fp) as tif:
-		data = tif.asarray()
-		for page in tif:
-			for tag in page.tags.values():
-				t = tag.name, tag.value
-			image = page.asarray()
+	image = tifffile.imread(fp)
 	elevation.clean()
 	Topography = np.array(image)
 
@@ -1192,7 +1187,7 @@ if(source_dem == 1 or source_dem == 3):
 
 	if( N == 1 ):
 		for i in range(1,len(polygon)):
-			plt.plot( polygon[i][0],polygon[i][1], 'b.', markersize=2)
+			plt.plot( polygon[i][0],polygon[i][1], 'b.', markersize=4)
 
 	plt.savefig('Results/' + run_name + '/Map.png')
 
