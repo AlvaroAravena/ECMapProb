@@ -102,7 +102,7 @@ end
 
 colorbar;
 
-val = [0.8, 0.4, 0.1];
+val = [min(0.8,max(max(Probability))), min(0.4,max(max(Probability))/2), 0.1];
 contour(Y,X,Probability,[val(1),val(1)],'Color',[0.5 0 0]); hold on;
 contour(Y,X,Probability,[val(2),val(2)],'Color',[1 0.0 0]); hold on;
 contour(Y,X,Probability,[val(3),val(3)],'Color',[1 1 0]);
