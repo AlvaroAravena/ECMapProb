@@ -78,7 +78,7 @@ file_txt.close()
 [run_name, source_dem, lon1, lon2, lat1, lat2] = ['run_default', 1, np.nan, np.nan, np.nan, np.nan]
 [dist_source, var_cen, lon_cen, lat_cen, east_cen, north_cen, azimuth_lin] = [1, 0.0, np.nan, np.nan, np.nan, np.nan, np.nan]
 [length_lin, radius_rad, ang1_rad, ang2_rad] = [np.nan, np.nan, np.nan, np.nan]
-[height, hl, var_height, var_hl, N, cone_levels, save_data, dist_input, redist_energy] = [np.nan, 0.2, 200.0, 0.05, 100, 1, 0, 1, 2]
+[height, hl, var_height, var_hl, N, cone_levels, save_data, dist_input, redist_energy, plot_flag, sea_flag] = [np.nan, 0.2, 200.0, 0.05, 100, 1, 0, 1, 2, 1, 0]
 
 for i in range(0,len(line)):
 	line[i] = line[i].replace('=',' ')
@@ -137,6 +137,10 @@ for i in range(0,len(line)):
 				dist_input = int(aux[1])
 			if( aux[0] == 'redist_energy'):
 				redist_energy = int(aux[1])
+			if( aux[0] == 'plot_flag'):
+				plot_flag = int(aux[1])
+			if( aux[0] == 'sea_flag'):
+				sea_flag = int(aux[1])
 
 try:
 	os.mkdir('Results')
@@ -1118,6 +1122,8 @@ if( save_data == 1 ):
 	np.savetxt('Results/' + run_name + '/' + 'data_cones.txt', data_cones, fmt='%.2e')
 	np.savetxt('Results/' + run_name + '/' + 'topography.txt', Topography, fmt='%.2e')
 	np.savetxt('Results/' + run_name + '/' + 'summary.txt', summary_data, fmt='%.5e')
+	if(sea_flag == 1):
+		np.savetxt('Results/' + run_name + '/' + 'topography_sea.txt', Topography_Sea, fmt='%.5e')
 	text_file = open('Results/' + run_name + '/' + 'energy_cones.txt', 'w')
 	text_file.write(string_data)
 	text_file.close()
@@ -1149,7 +1155,7 @@ if( save_data == 1 ):
 		np.savetxt('Results/' + run_name + '/' + 'matrix_north.txt', matrix_north, fmt='%.5e')
 
 # FIGURES
-if(source_dem == 1 or source_dem == 3):
+if((source_dem == 1 or source_dem == 3) and (plot_flag == 1)):
 
 	data_cones = data_cones[ range(len(data_cones[:,0]) -1 , -1 , -1 ) , : ] / N
 	line_val = data_cones.max()
@@ -1206,7 +1212,7 @@ if(source_dem == 1 or source_dem == 3):
 
 	plt.show()
 
-if(source_dem == 2):
+if(source_dem == 2 and plot_flag == 1):
 
 	data_cones = data_cones[ range(len(data_cones[:,0]) -1 , -1 , -1 ) , : ] / N
 	line_val = data_cones.max()
