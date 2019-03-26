@@ -124,10 +124,10 @@ class MyFirstGUI:
 	self.label18 = Label(master, text="Final angle (Circumference arch) [deg]", state = 'disabled')
 	self.label18.grid(row=17, column=0, columnspan=2, sticky=W)
 
-	self.label19 = Label(master, text="Uncertainty of vent position (m)")
+	self.label19 = Label(master, text="Uncertainty of vent position [m]")
 	self.label19.grid(row=18, column=0, columnspan=2, sticky=W)
 
-	self.label20 = Label(master, text="Collapse height (m)")
+	self.label20 = Label(master, text="Collapse height [m]")
 	self.label20.grid(row=19, column=0, columnspan=2, sticky=W)
 
 	self.label21 = Label(master, text="Uncertainty collapse height [m]")
