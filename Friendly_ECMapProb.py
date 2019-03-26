@@ -130,7 +130,7 @@ class MyFirstGUI:
 	self.label20 = Label(master, text="Collapse height (m)")
 	self.label20.grid(row=19, column=0, columnspan=2, sticky=W)
 
-	self.label21 = Label(master, text="Uncertainty collapse height (m)")
+	self.label21 = Label(master, text="Uncertainty collapse height [m]")
 	self.label21.grid(row=20, column=0, columnspan=2, sticky=W)
 
 	self.label22 = Label(master, text="H/L")
