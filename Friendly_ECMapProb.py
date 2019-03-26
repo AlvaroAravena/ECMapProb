@@ -739,6 +739,7 @@ class MyFirstGUI:
 
 	plot_flag = 1
 	sea_flag = 0
+	save_data = 0
 	for i in range(0,len(line)):
 		line[i] = line[i].replace('=',' ')
 		aux = line[i].split()
@@ -748,13 +749,19 @@ class MyFirstGUI:
 					plot_flag = int(aux[1])
 				if( aux[0] == 'sea_flag'):
 					sea_flag = int(aux[1])
+				if( aux[0] == 'save_data'):
+					save_data = int(aux[1])
 
-	if( plot_flag == 1 or sea_flag == 0):
+	if( plot_flag == 1 or sea_flag == 0 or save_data == 0):
 		f = open('input_data.py', 'a')
 		f.write('\n')
-		f.write('# Additional inputs (only for friendly version)' + '\n')
-		f.write('plot_flag = 0' + '\n')
-		f.write('sea_flag = 1' + '\n')
+		f.write('# Additional inputs (only for user-friendly version)' + '\n')
+		if( plot_flag == 1 ):
+			f.write('plot_flag = 0' + '\n')
+		if( sea_flag == 0 ):
+			f.write('sea_flag = 1' + '\n')
+		if( save_data == 0 ):
+			f.write('save_data = 1' + '\n')
 		f.close()
 
 root = Tk()
