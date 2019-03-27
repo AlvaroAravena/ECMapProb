@@ -1094,7 +1094,7 @@ if( source_dem == 2 ):
 			print((j, len(polygon), polygon[j][3], polygon[j][2], sum(sum(data_step)), polygon[j][4] ))
 
 			if( save_data == 1 ):
-				if(j == 1 or (j + 1 == len(polygon))):
+				if(j == 0 or (j + 1 == len(polygon))):
 					distances = np.power(np.power(( matrix_east - east_cen_vector[i]),2) + np.power(( matrix_north - north_cen_vector[i]),2),0.5) 
 					distances = distances * data_step[ range(len(data_cones[:,0]) -1 , -1 , -1 ) , : ]
 					string_data = string_data + "\n" + str(polygon[j][3]) + " " + str(sum(sum(data_step))* area_pixel) + " " + str(distances.max() / 1000.0)
