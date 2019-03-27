@@ -1,4 +1,4 @@
-from tkinter import Tk, Label, Button, W, E, Entry, OptionMenu, StringVar, DoubleVar, IntVar, Canvas, Scrollbar, VERTICAL, Frame
+from tkinter import Tk, Label, Button, W, E, Entry, OptionMenu, StringVar, DoubleVar, IntVar, Canvas, Scrollbar, VERTICAL, Frame, messagebox
 import os
 import sys
 import numpy as np
@@ -538,14 +538,36 @@ class MyFirstGUI:
 
     def runcode(self):
 
+	print('\n Run simulation \n')
+
+	self.current_path = os.getcwd()
 	if(self.var_input.get() == 'Input File'):
+		try:
+			file_txt = open('input_data.py')
+			file_txt.close()
+		except: 
+			messagebox.showerror("Error", 'input_data.py not found in ' + str(self.current_path))
+			return
 		self.modify_input()
 		os.system('python ECMapProb.py')
 	else:
+		if(self.var_dem.get() == "Input DEM (utm)"):
+			try:
+				file_txt = open('input_DEM.asc')
+				file_txt.close()
+			except: 
+				messagebox.showerror("Error", 'input_DEM.asc not found in ' + str(self.current_path))
+				return
+		if(self.var_dem.get() == "Input DEM (lat,lon)"):
+			try:
+				file_txt = open('Topography_3.asc')
+				file_txt.close()
+			except: 
+				messagebox.showerror("Error", 'Topography_3.asc not found in ' + str(self.current_path))
+				return
 		self.create_input()
 		os.system('python ECMapProb.py')
 
-	self.current_path = os.getcwd()
 	file_txt = open('input_data.py')
 	line = file_txt.readlines()
 	file_txt.close()
@@ -564,6 +586,25 @@ class MyFirstGUI:
 					self.N = int(aux[1])
 				if( aux[0] == 'source_dem'):
 					self.s_dem = int(aux[1])
+
+
+	try:
+		file_txt = open('Results/' + self.run_name + '/log.txt')
+		line = file_txt.readlines()
+		file_txt.close()
+	except:
+		self.plot1.configure(state = 'disabled')
+		self.plot2.configure(state = 'disabled')
+		self.plot3.configure(state = 'disabled')
+		messagebox.showerror("Error", 'Simulations were not performed. Problems with input parameters')
+		return
+
+	if( float(line[0]) == 0):
+		self.plot1.configure(state = 'disabled')
+		self.plot2.configure(state = 'disabled')
+		self.plot3.configure(state = 'disabled')
+		messagebox.showerror("Error", 'Simulations were not performed. Problems with input parameters')
+		return
 
 	if( self.s_dem == 1 or self.s_dem == 3):
 		self.matrix_lat = np.loadtxt(self.current_path + "/Results/" + self.run_name + "/matrix_lat.txt")

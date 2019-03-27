@@ -71,7 +71,13 @@ def interpol_pos(lon1, lat1, step_lon_deg, step_lat_deg, lon_cen, lat_cen, cells
 print('Reading input file')
 
 current_path = os.getcwd()
-file_txt = open('input_data.py')
+
+try:
+	file_txt = open('input_data.py')
+except:
+	print('input_data.py not found in ' + str(current_path))
+	sys.exit(0)
+
 line = file_txt.readlines()
 file_txt.close()
 
@@ -150,7 +156,10 @@ try:
 	os.mkdir('Results/' + run_name)
 except:
 	pass
-shutil.copyfile('input_data.py', 'Results/' + run_name + '/input_data.py') 
+shutil.copyfile('input_data.py', 'Results/' + run_name + '/input_data.py')
+file_log = open('Results/' + run_name + '/log.txt','w')
+file_log.write('0')
+file_log.close()
 
 if(source_dem == 1 and ( np.isnan( lon1 ) or np.isnan( lon2 ) or np.isnan( lat1 ) or np.isnan( lat2 ) or np.isnan( lon_cen ) or np.isnan( lat_cen ) or np.isnan( height ) ) ):
 	print('Problems with input parameters')
@@ -216,7 +225,11 @@ if(source_dem == 1):
 
 if(source_dem == 2):
 	print('Reading map')
-	file_txt = open('input_DEM.asc')
+	try:
+		file_txt = open('input_DEM.asc')
+	except:
+		print('input_DEM.asc not found in ' + str(current_path))
+		sys.exit(0)
 	line = file_txt.readlines()
 	file_txt.close()
 
@@ -258,8 +271,11 @@ if(source_dem == 2):
 
 if(source_dem == 3):
 	print('Reading map')
-	topography_file = 'Topography_3.txt'
-	file_txt = open(topography_file)
+	try:
+		file_txt = open('Topography_3.txt')
+	except:
+		print('Topography_3.txt not found in ' + str(current_path))
+		sys.exit(0)
 	line = file_txt.readlines()
 	file_txt.close()
 
@@ -1266,3 +1282,7 @@ if(source_dem == 2 and plot_flag == 1):
 		plt.savefig('Results/' + run_name + '/Histogram.png')
 
 	plt.show()
+
+file_log = open('Results/' + run_name + '/log.txt','w')
+file_log.write('1')
+file_log.close()
