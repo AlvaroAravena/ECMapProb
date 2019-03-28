@@ -725,7 +725,6 @@ class MyFirstGUI:
 	f.write('# azimuth_lin = azimuth of the line that define the collapse zone (in degrees, only considered if dist_source = 2)' + '\n')
 	f.write('# length_lin = length of the line that define the collapse zone (in meters, only considered if dist_source = 2)' + '\n')
 	f.write('# radius_rad = radius of the circumference arch that define the collapse zone (in meters, only considered if dist_source = 3)' + '\n')
-	f.write('# radius_rad = radius of the circumference arch that define the collapse zone (in meters, only considered if dist_source = 3)' + '\n')
 	f.write('# ang1_rad = initial angle of the circumference arch that define the collapse zone (in degrees, only considered if dist_source = 3. Anticlockwise)' + '\n')
 	f.write('# ang2_rad = initial angle of the circumference arch that define the collapse zone (in degrees, only considered if dist_source = 3. Anticlockwise)' + '\n')
 	if( self.var_dem.get() == "Input DEM (utm)"):
