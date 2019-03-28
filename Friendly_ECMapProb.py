@@ -92,55 +92,55 @@ class MyFirstGUI:
 	self.label7.grid(row=6, column=0, columnspan=2, sticky=W)
 
 	self.label8 = Label(master, text="Cone levels")
-	self.label8.grid(row=7, column=0, columnspan=2, sticky=W)
+	self.label8.grid(row=23, column=0, columnspan=2, sticky=W)
 
 	self.label9 = Label(master, text="Geometry of expected vent position")
-	self.label9.grid(row=12, column=0, columnspan=2, sticky=W)
+	self.label9.grid(row=11, column=0, columnspan=2, sticky=W)
 
 	self.label10 = Label(master, text="Longitude Collapse [deg]")
-	self.label10.grid(row=8, column=0, columnspan=2, sticky=W)
+	self.label10.grid(row=7, column=0, columnspan=2, sticky=W)
 
 	self.label11 = Label(master, text="Latitude Collapse [deg]")
-	self.label11.grid(row=9, column=0, columnspan=2, sticky=W)
+	self.label11.grid(row=8, column=0, columnspan=2, sticky=W)
 
 	self.label12 = Label(master, text="East Coordinate Colapse [m]", state = 'disabled')
-	self.label12.grid(row=10, column=0, columnspan=2, sticky=W)
+	self.label12.grid(row=9, column=0, columnspan=2, sticky=W)
 
 	self.label13 = Label(master, text="North Coordinate Colapse [m]", state = 'disabled')
-	self.label13.grid(row=11, column=0, columnspan=2, sticky=W)
+	self.label13.grid(row=10, column=0, columnspan=2, sticky=W)
 
 	self.label14 = Label(master, text="Azimuth Line [deg]", state = 'disabled')
-	self.label14.grid(row=13, column=0, columnspan=2, sticky=W)
+	self.label14.grid(row=12, column=0, columnspan=2, sticky=W)
 
 	self.label15 = Label(master, text="Length Line [m]", state = 'disabled')
-	self.label15.grid(row=14, column=0, columnspan=2, sticky=W)
+	self.label15.grid(row=13, column=0, columnspan=2, sticky=W)
 
 	self.label16 = Label(master, text="Radius (Circumference arch) [m]", state = 'disabled')
-	self.label16.grid(row=15, column=0, columnspan=2, sticky=W)
+	self.label16.grid(row=14, column=0, columnspan=2, sticky=W)
 
 	self.label17 = Label(master, text="Initial angle (Circumference arch) [deg]", state = 'disabled')
-	self.label17.grid(row=16, column=0, columnspan=2, sticky=W)
+	self.label17.grid(row=15, column=0, columnspan=2, sticky=W)
 
 	self.label18 = Label(master, text="Final angle (Circumference arch) [deg]", state = 'disabled')
-	self.label18.grid(row=17, column=0, columnspan=2, sticky=W)
+	self.label18.grid(row=16, column=0, columnspan=2, sticky=W)
 
 	self.label19 = Label(master, text="Uncertainty of vent position [m]")
-	self.label19.grid(row=18, column=0, columnspan=2, sticky=W)
+	self.label19.grid(row=17, column=0, columnspan=2, sticky=W)
 
 	self.label20 = Label(master, text="Collapse height [m]")
-	self.label20.grid(row=19, column=0, columnspan=2, sticky=W)
+	self.label20.grid(row=18, column=0, columnspan=2, sticky=W)
 
 	self.label21 = Label(master, text="Uncertainty collapse height [m]")
-	self.label21.grid(row=20, column=0, columnspan=2, sticky=W)
+	self.label21.grid(row=19, column=0, columnspan=2, sticky=W)
 
 	self.label22 = Label(master, text="H/L")
-	self.label22.grid(row=21, column=0, columnspan=2, sticky=W)
+	self.label22.grid(row=20, column=0, columnspan=2, sticky=W)
 
 	self.label23 = Label(master, text="Uncertainty H/L")
-	self.label23.grid(row=22, column=0, columnspan=2, sticky=W)
+	self.label23.grid(row=21, column=0, columnspan=2, sticky=W)
 
 	self.label24 = Label(master, text="Probability distribution of input parameters")
-	self.label24.grid(row=23, column=0, columnspan=2, sticky=W)
+	self.label24.grid(row=22, column=0, columnspan=2, sticky=W)
 
 	self.label25 = Label(master, text="Number of simulations")
 	self.label25.grid(row=24, column=0, columnspan=2, sticky=W)
@@ -167,55 +167,55 @@ class MyFirstGUI:
 	self.lat2.grid(row=6, column=2, sticky=W+E)
 
 	self.cone_levels = Entry(master, textvariable=cone_levels)
-	self.cone_levels.grid(row=7, column=2, sticky=W+E)
+	self.cone_levels.grid(row=23, column=2, sticky=W+E)
 
 	self.vent_dist = OptionMenu(master, self.var_ds, "Punctual", "Linear", "Circumference arch", command = self.opt_geom)
-	self.vent_dist.grid(row=12, column=2, sticky=W+E)
+	self.vent_dist.grid(row=11, column=2, sticky=W+E)
 
 	self.lon_cen = Entry(master, textvariable=lon_cen)
-	self.lon_cen.grid(row=8, column=2, sticky=W+E)
+	self.lon_cen.grid(row=7, column=2, sticky=W+E)
 
 	self.lat_cen = Entry(master, textvariable=lat_cen)
-	self.lat_cen.grid(row=9, column=2, sticky=W+E)
+	self.lat_cen.grid(row=8, column=2, sticky=W+E)
 
 	self.east_cen = Entry(master, textvariable=east_cen, state = 'disabled')
-	self.east_cen.grid(row=10, column=2, sticky=W+E)
+	self.east_cen.grid(row=9, column=2, sticky=W+E)
 
 	self.north_cen = Entry(master, textvariable=north_cen, state = 'disabled')
-	self.north_cen.grid(row=11, column=2, sticky=W+E)
+	self.north_cen.grid(row=10, column=2, sticky=W+E)
 
 	self.azimuth_line = Entry(master, textvariable=azimuth_line, state = 'disabled')
-	self.azimuth_line.grid(row=13, column=2, sticky=W+E)
+	self.azimuth_line.grid(row=12, column=2, sticky=W+E)
 
 	self.length_line = Entry(master, textvariable=length_line, state = 'disabled')
-	self.length_line.grid(row=14, column=2, sticky=W+E)
+	self.length_line.grid(row=13, column=2, sticky=W+E)
 
 	self.radius_rad = Entry(master, textvariable=radius_rad, state = 'disabled')
-	self.radius_rad.grid(row=15, column=2, sticky=W+E)
+	self.radius_rad.grid(row=14, column=2, sticky=W+E)
 
 	self.ang1_rad = Entry(master, textvariable=ang1_rad, state = 'disabled')
-	self.ang1_rad.grid(row=16, column=2, sticky=W+E)
+	self.ang1_rad.grid(row=15, column=2, sticky=W+E)
 
 	self.ang2_rad = Entry(master, textvariable=ang2_rad, state = 'disabled')
-	self.ang2_rad.grid(row=17, column=2, sticky=W+E)
+	self.ang2_rad.grid(row=16, column=2, sticky=W+E)
 
 	self.cen_var = Entry(master, textvariable=cen_var)
-	self.cen_var.grid(row=18, column=2, sticky=W+E)
+	self.cen_var.grid(row=17, column=2, sticky=W+E)
 
 	self.height = Entry(master, textvariable=height)
-	self.height.grid(row=19, column=2, sticky=W+E)
+	self.height.grid(row=18, column=2, sticky=W+E)
 
 	self.var_height = Entry(master, textvariable=var_height)
-	self.var_height.grid(row=20, column=2, sticky=W+E)
+	self.var_height.grid(row=19, column=2, sticky=W+E)
 
 	self.hl = Entry(master, textvariable=hl)
-	self.hl.grid(row=21, column=2, sticky=W+E)
+	self.hl.grid(row=20, column=2, sticky=W+E)
 
 	self.var_hl = Entry(master, textvariable=var_hl)
-	self.var_hl.grid(row=22, column=2, sticky=W+E)
+	self.var_hl.grid(row=21, column=2, sticky=W+E)
 
 	self.input_dist = OptionMenu(master, self.var_d_input, "Uniform", "Gaussian")
-	self.input_dist.grid(row=23, column=2, sticky=W+E)
+	self.input_dist.grid(row=22, column=2, sticky=W+E)
 
 	self.Nsim = Entry(master, textvariable=N)
 	self.Nsim.grid(row=24,column=2, sticky=W+E)
@@ -438,7 +438,7 @@ class MyFirstGUI:
 			CS = plt.contourf(self.matrix_lon, self.matrix_lat, self.data_cones, 100, vmin = 0.0, vmax = 1.0,  alpha= 0.3, interpolation='linear', cmap=cmapr, antialiased=True)	
 			fmt = '%.2f'
 			plt.colorbar()
-			CS_lines = plt.contour(self.matrix_lon,self.matrix_lat,self.data_cones, np.array([self.val_down, self.val_up]), colors='r', interpolation='linear')
+			CS_lines = plt.contour(self.matrix_lon,self.matrix_lat,self.data_cones, np.array([self.val_down, self.val_up]), colors='r', interpolation='linear', linewidths = 0.1)
 			plt.clabel(CS_lines, inline=0.1, fontsize = 7, colors='k', fmt=fmt)
 
 			plt.axes().set_aspect(self.step_lat_m/self.step_lon_m)
@@ -465,7 +465,7 @@ class MyFirstGUI:
 			CS = plt.contourf(self.matrix_east, self.matrix_north, self.data_cones, 100, vmin = 0.0, vmax = 1.0,  alpha= 0.3, interpolation='linear', cmap=cmapr, antialiased=True)	
 			fmt = '%.2f'
 			plt.colorbar()
-			CS_lines = plt.contour(self.matrix_east,self.matrix_north,self.data_cones, np.array([self.val_down, self.val_up]), colors='r', interpolation='linear')
+			CS_lines = plt.contour(self.matrix_east,self.matrix_north,self.data_cones, np.array([self.val_down, self.val_up]), colors='r', interpolation='linear', linewidths = 0.1)
 			plt.clabel(CS_lines, inline=0.1, fontsize = 7, colors='k', fmt=fmt)
 
 			plt.axes().set_aspect(1.0)
