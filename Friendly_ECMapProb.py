@@ -91,7 +91,7 @@ class MyFirstGUI:
 	self.label7 = Label(master, text="Latitude 2 [deg]")
 	self.label7.grid(row=6, column=0, columnspan=2, sticky=W)
 
-	self.label8 = Label(master, text="Cone levels")
+	self.label8 = Label(master, text="Maximum order of energy cones")
 	self.label8.grid(row=23, column=0, columnspan=2, sticky=W)
 
 	self.label9 = Label(master, text="Geometry of expected vent position")

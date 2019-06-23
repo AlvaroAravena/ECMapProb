@@ -1209,8 +1209,75 @@ if((source_dem == 1 or source_dem == 3) and (plot_flag == 1)):
 		plt.plot( lon_cen_vector[i], lat_cen_vector[i], 'r.', markersize=2)
 
 	if( N == 1 ):
+		data_cones_2 = np.nan_to_num(data_cones)
+		data_cones_3 = np.nan_to_num(data_cones)
+		data_cones_4 = np.nan_to_num(data_cones)
+		data_cones_5 = np.nan_to_num(data_cones)
+		data_cones_6 = np.nan_to_num(data_cones)
+		data_cones_7 = np.nan_to_num(data_cones)
+		data_cones_8 = np.nan_to_num(data_cones)
+		data_cones_9 = np.nan_to_num(data_cones)
+		data_cones_10 = np.nan_to_num(data_cones)
+		data_cones_11 = np.nan_to_num(data_cones)
+		data_cones_12 = np.nan_to_num(data_cones)
+		data_cones_13 = np.nan_to_num(data_cones)
+		data_cones_14 = np.nan_to_num(data_cones)
+
+		data_cones_2[data_cones_2[:,:] < 1.0] = 0.0  
+		data_cones_2[data_cones_2[:,:] >= 1.0] = 1.0  
+		CS_lines = plt.contour(matrix_lon,matrix_lat,data_cones_2, 1.0 , colors='r', interpolation='nearest', linewidths = 1.0)
+
+		data_cones_3[data_cones_3[:,:] < 2.0] = 0.0  
+		data_cones_3[data_cones_3[:,:] >= 2.0] = 1.0  
+		CS_lines = plt.contour(matrix_lon,matrix_lat,data_cones_3, 1.0 , colors='r', interpolation='nearest', linewidths = 1.0)
+
+		data_cones_4[data_cones_4[:,:] < 3.0] = 0.0  
+		data_cones_4[data_cones_4[:,:] >= 3.0] = 1.0  
+		CS_lines = plt.contour(matrix_lon,matrix_lat,data_cones_4, 1.0 , colors='r', interpolation='nearest', linewidths = 1.0)
+
+		data_cones_5[data_cones_5[:,:] < 4.0] = 0.0  
+		data_cones_5[data_cones_5[:,:] >= 4.0] = 1.0  
+		CS_lines_2 = plt.contour(matrix_lon,matrix_lat,data_cones_5, 1.0 , colors='r', interpolation='nearest', linewidths = 1.0)
+
+		data_cones_6[data_cones_6[:,:] < 5.0] = 0.0  
+		data_cones_6[data_cones_6[:,:] >= 5.0] = 1.0  
+		CS_lines = plt.contour(matrix_lon,matrix_lat,data_cones_6, 1.0 , colors='r', interpolation='nearest', linewidths = 1.0)
+
+		data_cones_7[data_cones_7[:,:] < 6.0] = 0.0  
+		data_cones_7[data_cones_7[:,:] >= 6.0] = 1.0  
+		CS_lines = plt.contour(matrix_lon,matrix_lat,data_cones_7, 1.0 , colors='r', interpolation='nearest', linewidths = 1.0)
+
+		data_cones_8[data_cones_8[:,:] < 7.0] = 0.0  
+		data_cones_8[data_cones_8[:,:] >= 7.0] = 1.0  
+		CS_lines = plt.contour(matrix_lon,matrix_lat,data_cones_8, 1.0 , colors='r', interpolation='nearest', linewidths = 1.0)
+
+		data_cones_9[data_cones_9[:,:] < 8.0] = 0.0  
+		data_cones_9[data_cones_9[:,:] >= 8.0] = 1.0  
+		CS_lines_2 = plt.contour(matrix_lon,matrix_lat,data_cones_9, 1.0 , colors='r', interpolation='nearest', linewidths = 1.0)
+
+		data_cones_10[data_cones_10[:,:] < 9.0] = 0.0  
+		data_cones_10[data_cones_10[:,:] >= 9.0] = 1.0  
+		CS_lines = plt.contour(matrix_lon,matrix_lat,data_cones_10, 1.0 , colors='r', interpolation='nearest', linewidths = 1.0)
+
+		data_cones_11[data_cones_11[:,:] < 10.0] = 0.0  
+		data_cones_11[data_cones_11[:,:] >= 10.0] = 1.0  
+		CS_lines = plt.contour(matrix_lon,matrix_lat,data_cones_11, 1.0 , colors='r', interpolation='nearest', linewidths = 1.0)
+
+		data_cones_12[data_cones_12[:,:] < 11.0] = 0.0  
+		data_cones_12[data_cones_12[:,:] >= 11.0] = 1.0  
+		CS_lines_2 = plt.contour(matrix_lon,matrix_lat,data_cones_12, 1.0 , colors='r', interpolation='nearest', linewidths = 1.0)
+
+		data_cones_13[data_cones_13[:,:] < 12.0] = 0.0  
+		data_cones_13[data_cones_13[:,:] >= 12.0] = 1.0  
+		CS_lines_2 = plt.contour(matrix_lon,matrix_lat,data_cones_13, 1.0 , colors='r', interpolation='nearest', linewidths = 1.0)
+
+		data_cones_14[data_cones_14[:,:] < 13.0] = 0.0  
+		data_cones_14[data_cones_14[:,:] >= 13.0] = 1.0  
+		CS_lines_2 = plt.contour(matrix_lon,matrix_lat,data_cones_14, 1.0 , colors='r', interpolation='nearest', linewidths = 1.0)
+
+
 		for i in range(1,len(polygon)):
-			plt.plot( polygon[i][0],polygon[i][1], 'b.', markersize=4)
+			plt.plot( polygon[i][0],polygon[i][1], 'b.', markersize=2)
 
 	plt.savefig('Results/' + run_name + '/Map.png')
 
