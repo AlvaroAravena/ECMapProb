@@ -489,19 +489,19 @@ if( redist_energy == 3 or redist_energy == 4 ):
 	factor_mult = 50.0
 	center_elim = 0.5
 	aux_backward = 1 / (1 + np.exp(factor_mult * (np.linspace(0.0, 1.0, anglen/2 + 1) - center_elim) ) )
-	vector_backward_1 = np.zeros(anglen)
-	vector_backward_1[0:anglen/2 - 1] = aux_backward[anglen/2-1:0:-1]
-	vector_backward_1[anglen/2-1:] = aux_backward[:]
+	vector_backward_1 = np.zeros(int(anglen))
+	vector_backward_1[0:int(anglen/2 - 1)] = aux_backward[int(anglen/2-1):0:-1]
+	vector_backward_1[int(anglen/2-1):] = aux_backward[:]
 	vector_backward_1[vector_backward_1 < 1e-3] = 0
 	vector_backward_1[vector_backward_1 > 1.0 - 1e-3] = 1.0
 	aux_backward = 1 / (1 + np.exp(factor_mult * (np.linspace(1.0/(anglen/2), 1.0 - 1.0/(anglen/2), anglen/2 ) - center_elim) ) )
-	vector_backward_2 = np.zeros(anglen)
-	vector_backward_2[0:anglen/2] = aux_backward[::-1]
-	vector_backward_2[anglen/2:] = aux_backward[:]
+	vector_backward_2 = np.zeros(int(anglen))
+	vector_backward_2[0:int(anglen/2)] = aux_backward[::-1]
+	vector_backward_2[int(anglen/2):] = aux_backward[:]
 	vector_backward_2[vector_backward_2 < 1e-3] = 0
 	vector_backward_2[vector_backward_2 > 1.0 - 1e-3] = 1.0
-	index_max = anglen/2 - 1
-	vector_correc = np.zeros(anglen)
+	index_max = int(anglen/2 - 1)
+	vector_correc = np.zeros(int(anglen))
 
 if( save_data == 1 ):
 	summary_data = np.zeros((N,6 + length_direction))
@@ -590,11 +590,11 @@ if(source_dem == 1 or source_dem == 3):
 			if( (redist_energy == 3 or redist_energy == 4) and polygon[j][4] > -1 ):
 				lim = np.int(polygon[j][4])
 				if( polygon[j][4] == np.int(polygon[j][4]) ):
-					for ii in range(anglen):
+					for ii in range(int(anglen)):
 						vector_correc[ii] = vector_backward_1[int((ii - polygon[j][4] + index_max) % anglen)]
 
 				else:
-					for ii in range(anglen):
+					for ii in range(int(anglen)):
 						vector_correc[ii] = vector_backward_2[int((ii - polygon[j][4] + index_max) % anglen)]
 
 				polygons_new = polygons_new * vector_correc
@@ -891,11 +891,11 @@ if( source_dem == 2 ):
 			if( (redist_energy == 3 or redist_energy == 4) and polygon[j][4] > -1 ):
 				lim = np.int(polygon[j][4])
 				if( polygon[j][4] == np.int(polygon[j][4]) ):
-					for ii in range(anglen):
+					for ii in range(int(anglen)):
 						vector_correc[ii] = vector_backward_1[int((ii - polygon[j][4] + index_max) % anglen)]
 
 				else:
-					for ii in range(anglen):
+					for ii in range(int(anglen)):
 						vector_correc[ii] = vector_backward_2[int((ii - polygon[j][4] + index_max) % anglen)]
 
 				polygons_new = polygons_new * vector_correc
