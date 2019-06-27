@@ -240,9 +240,9 @@ if(source_dem == 2):
 
 	for i in range(0,10):
 		aux = line[i].split()
-		if(aux[0] == 'ncols'):
-			n_north = int(aux[1])
 		if(aux[0] == 'nrows'):
+			n_north = int(aux[1])
+		if(aux[0] == 'ncols'):
 			n_east = int(aux[1])
 		if(aux[0] == 'cellsize'):
 			cellsize = float(aux[1])
@@ -344,6 +344,8 @@ if(source_dem == 1 or source_dem == 3):
 		distance_lon = distance_two_points(lat1,lat1,lon1,lon2)
 		distance_lat = distance_two_points(lat1,lat2,lon1,lon1)
 
+	utm_save = utm.from_latlon( min(lat1, lat2), min(lon1, lon2) )
+
 	step_lon_m = distance_lon / (cells_lon-1)
 	step_lat_m = distance_lat / (cells_lat-1)
 
@@ -366,7 +368,9 @@ if(source_dem == 2):
 		matrix_east[:,i] = (east_cor + cellsize * i)
 	for j in range(0,n_north):
 		matrix_north[j,:] = (north_cor + cellsize * j)
+
 	matrix_north = matrix_north[ range(len(matrix_north[:,0]) -1 , -1 , -1 ) , : ]
+	utm_save = [east_cor , north_cor]
 
 # CREATE VECTORS OF INPUT PARAMETERS AND DELETE NEGATIVE DATA
 print('Creating input vectors')
@@ -1134,6 +1138,45 @@ if( source_dem == 2 ):
 
 # SAVE DATA
 if( save_data == 1 ):
+
+	print('Saving data')
+	if(source_dem == 1 or source_dem == 3):
+
+		cellsize =  max(step_lon_m, step_lat_m)
+		if( cellsize == step_lon_m ):
+			output_cells_lon = cells_lon - 1
+			output_cells_lat = np.int(cells_lat * step_lat_m / step_lon_m)
+		else:
+			output_cells_lon = np.int(cells_lon * step_lon_m / step_lat_m)
+			output_cells_lat = cells_lat - 1
+
+	else:
+		output_cells_lat = n_north
+		output_cells_lon = n_east
+
+	text_file = open('Results/' + run_name + '/' + 'output_map.asc', 'w')
+	text_file.write('ncols' + ' ' + str(output_cells_lon) + '\n')
+	text_file.write('nrows' + ' ' + str(output_cells_lat) +'\n')
+	text_file.write('xllcorner'+' '+ str(utm_save[0]) +'\n')
+	text_file.write('yllcorner'+' '+ str(utm_save[1]) +'\n')
+	text_file.write('cellsize'+' '+ str(cellsize) +'\n')
+	text_file.write('NODATA_value' +' ' +'-9999');
+
+	if(source_dem == 1 or source_dem == 3):
+		for j in range(0, output_cells_lat):
+			text_file.write('\n')
+			for i in range(0, output_cells_lon):
+				matrix_output = interpol_pos(utm_save[0], utm_save[1], step_lon_m, step_lat_m, utm_save[0] + i*cellsize , utm_save[1] + j*cellsize , cells_lon, cells_lat, data_cones)
+				text_file.write(' ' + str(matrix_output))
+		text_file.close()
+
+	else:
+		for i in range(output_cells_lat-1,-1,-1):
+			text_file.write('\n')
+			for j in range(0, output_cells_lon):
+				text_file.write(' ' + str(data_cones[i,j]))
+		text_file.close()
+
 	np.savetxt('Results/' + run_name + '/' + 'data_cones.txt', data_cones, fmt='%.2e')
 	np.savetxt('Results/' + run_name + '/' + 'topography.txt', Topography, fmt='%.2e')
 	np.savetxt('Results/' + run_name + '/' + 'summary.txt', summary_data, fmt='%.5e')
