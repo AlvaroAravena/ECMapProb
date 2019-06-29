@@ -1162,11 +1162,12 @@ if( save_data == 1 ):
 	text_file.write('cellsize'+' '+ str(cellsize) +'\n')
 	text_file.write('NODATA_value' +' ' +'-9999');
 
+	data_cones_save = data_cones / N
 	if(source_dem == 1 or source_dem == 3):
 		for j in range(0, output_cells_lat):
 			text_file.write('\n')
 			for i in range(0, output_cells_lon):
-				matrix_output = interpol_pos(utm_save[0], utm_save[1], step_lon_m, step_lat_m, utm_save[0] + i*cellsize , utm_save[1] + j*cellsize , cells_lon, cells_lat, data_cones)
+				matrix_output = interpol_pos(utm_save[0], utm_save[1], step_lon_m, step_lat_m, utm_save[0] + i*cellsize , utm_save[1] + j*cellsize , cells_lon, cells_lat, data_cones_save )
 				text_file.write(' ' + str(matrix_output))
 		text_file.close()
 
@@ -1174,10 +1175,10 @@ if( save_data == 1 ):
 		for i in range(output_cells_lat-1,-1,-1):
 			text_file.write('\n')
 			for j in range(0, output_cells_lon):
-				text_file.write(' ' + str(data_cones[i,j]))
+				text_file.write(' ' + str( data_cones_save[i,j] ))
 		text_file.close()
 
-	np.savetxt('Results/' + run_name + '/' + 'data_cones.txt', data_cones, fmt='%.2e')
+	np.savetxt('Results/' + run_name + '/' + 'data_cones.txt', data_cones_save, fmt='%.2e')
 	np.savetxt('Results/' + run_name + '/' + 'topography.txt', Topography, fmt='%.2e')
 	np.savetxt('Results/' + run_name + '/' + 'summary.txt', summary_data, fmt='%.5e')
 	if(sea_flag == 1):
