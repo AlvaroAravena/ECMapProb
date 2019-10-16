@@ -1,12 +1,14 @@
 # Name of the run (used to save the parameters and the output)
 run_name = Upload_DEM_UTM
 
-# Source of DEM 
-# source_dem = type of input data (1 => SRTM 30 m / 2 => Uploaded DEM (UTM) / 3 => Uploaded Data (lat,lon)). 
-#              (A default location is assumed for type 2: input_DEM.asc, see an example in EXAMPLES/Upload_DEM_UTM).
-#              (A default location is assumed for type 3: Topography_3.asc, see an example in EXAMPLES/Upload_DEM_deg).
-#              (Simulations with source_dem = 1 and save_data = 1 create a compatible file for source_dem = 3 in Results).
+# Source of DEM
+# source_dem = type of input data (1 => SRTM 30 m / 2 => Uploaded DEM (UTM) / 3 => Uploaded Data (lat,lon)).
+# topography_file = location of file containing topography (only used when source_dem = 2 or source_dem = 3).
+# (see examples of source_dem = 2 in EXAMPLES/Upload_DEM_UTM and of source_dem = 3 in EXAMPLES/Upload_DEM_deg).
+# (Simulations with source_dem = 1 and save_data = 1 create a compatible topography file for source_dem = 3 in Results
+# called Topography_3.txt).
 source_dem = 2
+topography_file = input_DEM.asc
 
 # Map limits (only considered if source_dem = 1)
 # lon1 = longitude of the first limit of the map

@@ -79,8 +79,9 @@ except:
 	sys.exit(0)
 line = file_txt.readlines()
 file_txt.close()
+boolean_compare = 0
 
-[run_name, source_dem, lon1, lon2, lat1, lat2] = ['run_default', 1, np.nan, np.nan, np.nan, np.nan]
+[run_name, source_dem, lon1, lon2, lat1, lat2, topography_file] = ['run_default', 1, np.nan, np.nan, np.nan, np.nan, 'Topography_3.txt']
 [dist_source, var_cen, lon_cen, lat_cen, east_cen, north_cen, azimuth_lin] = [1, 0.0, np.nan, np.nan, np.nan, np.nan, np.nan]
 [length_lin, radius_rad, ang1_rad, ang2_rad] = [np.nan, np.nan, np.nan, np.nan]
 [height, hl, var_height, var_hl, N, cone_levels, save_data, dist_input, redist_energy, plot_flag, sea_flag] = [np.nan, 0.2, 200.0, 0.05, 100, 1, 0, 1, 4, 1, 0]
@@ -94,6 +95,9 @@ for i in range(0,len(line)):
 				run_name = aux[1]
 			if( aux[0] == 'source_dem'):
 				source_dem = int(aux[1])
+			if( aux[0] == 'topography_file'):
+				topography_file = aux[1]
+				topography_file = topography_file.replace("'","")
 			if( aux[0] == 'lon1'):
 				lon1 = float(aux[1])
 			if( aux[0] == 'lon2'):
@@ -225,9 +229,9 @@ if(source_dem == 1):
 if(source_dem == 2):
 	print('Reading map')
 	try:
-		file_txt = open('input_DEM.asc')
+ 		file_txt = open(topography_file)
 	except:
-		print('input_DEM.asc not found in ' + str(current_path))
+ 		print(topography_file +' not found in ' + str(current_path))
 		sys.exit(0)
 	line = file_txt.readlines()
 	file_txt.close()
@@ -271,9 +275,9 @@ if(source_dem == 2):
 if(source_dem == 3):
 	print('Reading map')
 	try:
-		file_txt = open('Topography_3.txt')
+ 		file_txt = open(topography_file)
 	except:
-		print('Topography_3.txt not found in ' + str(current_path))
+ 		print(topography_file +' not found in ' + str(current_path))
 		sys.exit(0)
 	line = file_txt.readlines()
 	file_txt.close()
@@ -371,6 +375,20 @@ if(source_dem == 2):
 
 	matrix_north = matrix_north[ range(len(matrix_north[:,0]) -1 , -1 , -1 ) , : ]
 	utm_save = [east_cor , north_cor]
+
+if(boolean_compare > 0):
+	points = np.loadtxt('Chaiten_points.txt')
+	polygon_compare = []
+	for i in range(0,len(points)):
+		polygon_compare.append((int( (points[i,0]-lon1) * cells_lon / (lon2 - lon1)),int( (points[i,1]-lat1) * cells_lat / (lat2 - lat1))))
+	img_compare = Image.new('L', (cells_lon, cells_lat), 0)
+	draw = ImageDraw.Draw(img_compare).polygon(polygon_compare, outline = 1 , fill = 1)
+	matrix_compare = np.array(img_compare)
+	string_compare = ""	
+	line_compare = plt.contour(matrix_lon, matrix_lat, matrix_compare, np.array([0]), colors='r', interpolation='linear')
+	path_compare = line_compare.collections[0].get_paths()[0]
+	ver_compare = path_compare.vertices
+	plt.close()
 
 # CREATE VECTORS OF INPUT PARAMETERS AND DELETE NEGATIVE DATA
 print('Creating input vectors')
@@ -609,7 +627,6 @@ if(source_dem == 1 or source_dem == 3):
 				data_step = np.maximum( np.minimum(data_aux_t, data_step + np.array(img)), data_aux_b)
 
 			if( cone_levels > polygon[j][3] and sum(sum(data_step)) > sum_pixels + pix_min ):
-
 				aux = np.zeros(len(polygons_new)+2) 
 				aux[1:len(polygons_new)+1] = np.array(polygons_new) 
 				aux[0] = polygons_new[len(polygons_new)-1]
@@ -832,6 +849,23 @@ if(source_dem == 1 or source_dem == 3):
 					string_cones = string_cones + "\n"  + str(j) + " " + str(polygon[j][3]) + " " + str(polygon[j][2]) + " " + str(polygon[j][5]) 
 
 		if( N > 1 ):
+			if( boolean_compare > 0):
+				line_new = plt.contour(matrix_lon, matrix_lat, data_step, np.array([0]), colors='r', interpolation='linear')
+				path_new = line_new.collections[0].get_paths()[0]
+				ver_new = path_new.vertices
+				sum_differences = 0
+				for ic in range(0,len(ver_compare)):
+					distance_lines = np.abs( ver_compare[ic,:] - ver_new )
+					distance_lines = (distance_lines[:,0]*step_lon_m/step_lon_deg  * distance_lines[:,0]*step_lon_m/step_lon_deg  ) + (distance_lines[:,1]*step_lat_m/step_lat_deg  * distance_lines[:,1]*step_lat_m/step_lat_deg  )
+					sum_differences = sum_differences + (np.min(distance_lines)) / (len(ver_compare) + len(ver_new))
+				for ic in range(0,len(ver_new)):
+					distance_lines = np.abs( ver_new[ic,:] - ver_compare )
+					distance_lines = (distance_lines[:,0]*step_lon_m/step_lon_deg  * distance_lines[:,0]*step_lon_m/step_lon_deg  ) + (distance_lines[:,1]*step_lat_m/step_lat_deg  * distance_lines[:,1]*step_lat_m/step_lat_deg  )
+					sum_differences = sum_differences + (np.min(distance_lines)) / (len(ver_compare) + len(ver_new))
+
+				plt.close()
+
+				string_compare = string_compare + str(height_vector[i]) + " " + str(hl_vector[i]) + " " +  str(sum(sum(data_step))) + " " + str(sum(sum(matrix_compare))) + " " + str(sum(sum(data_step * matrix_compare))) + " " + str( sum(sum( np.maximum(data_step, matrix_compare)  ))) + " " + str(sum_differences) + "\n"
 			data_cones = data_cones + data_step
 
 		if( save_data == 1 ):
@@ -1136,6 +1170,11 @@ if( source_dem == 2 ):
 
 		print(' Simulation finished (N = ' + str(i+1) + ')')
 
+if(boolean_compare > 0):
+		text_file = open('Results/' + run_name + '/' + 'comparison.txt', 'w')
+		text_file.write(string_compare)
+		text_file.close()
+
 # SAVE DATA
 if( save_data == 1 ):
 
@@ -1153,7 +1192,6 @@ if( save_data == 1 ):
 	else:
 		output_cells_lat = n_north
 		output_cells_lon = n_east
-
 	text_file = open('Results/' + run_name + '/' + 'output_map.asc', 'w')
 	text_file.write('ncols' + ' ' + str(output_cells_lon) + '\n')
 	text_file.write('nrows' + ' ' + str(output_cells_lat) +'\n')
@@ -1161,7 +1199,6 @@ if( save_data == 1 ):
 	text_file.write('yllcorner'+' '+ str(utm_save[1]) +'\n')
 	text_file.write('cellsize'+' '+ str(cellsize) +'\n')
 	text_file.write('NODATA_value' +' ' +'-9999');
-
 	data_cones_save = data_cones / N
 	if(source_dem == 1 or source_dem == 3):
 		for j in range(0, output_cells_lat):
@@ -1177,7 +1214,6 @@ if( save_data == 1 ):
 			for j in range(0, output_cells_lon):
 				text_file.write(' ' + str( data_cones_save[i,j] ))
 		text_file.close()
-
 	np.savetxt('Results/' + run_name + '/' + 'data_cones.txt', data_cones_save, fmt='%.2e')
 	np.savetxt('Results/' + run_name + '/' + 'topography.txt', Topography, fmt='%.2e')
 	np.savetxt('Results/' + run_name + '/' + 'summary.txt', summary_data, fmt='%.5e')
@@ -1239,6 +1275,9 @@ if((source_dem == 1 or source_dem == 3) and (plot_flag == 1)):
 		CS_Topo = plt.contourf(matrix_lon,matrix_lat,Topography, 100, alpha = 1.0, cmap = cmapg ,antialiased=True)
 		CS_Sea = plt.contourf(matrix_lon,matrix_lat,Topography_Sea, 100, alpha = 0.5, cmap = cmaps ,antialiased=True)
 		CS = plt.contourf(matrix_lon, matrix_lat, data_cones, 100, alpha= 0.3, cmap=cmapr, antialiased=True)
+		if( boolean_compare == 2 ):
+			matrix_compare = matrix_compare[ range(len(matrix_compare[:,0]) -1 , -1 , -1 ) , : ]
+			line_compare = plt.contour(matrix_lon, matrix_lat, matrix_compare, np.array([0]), colors='b', interpolation='linear')
 
 	plt.axes().set_aspect(step_lat_m/step_lon_m)
 	plt.xlabel('Longitude $[^\circ]$')

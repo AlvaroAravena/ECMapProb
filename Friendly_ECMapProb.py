@@ -560,10 +560,10 @@ class MyFirstGUI:
                     return
             if(self.var_dem.get() == "Input DEM (lat,lon)"):
                 try:
-                    file_txt = open('Topography_3.asc')
+                    file_txt = open('Topography_3.txt')
                     file_txt.close()
                 except: 
-                    messagebox.showerror("Error", 'Topography_3.asc not found in ' + str(self.current_path))
+                    messagebox.showerror("Error", 'Topography_3.txt not found in ' + str(self.current_path))
                     return
             self.create_input()
             os.system('python ECMapProb.py')
@@ -687,15 +687,20 @@ class MyFirstGUI:
         f.write('\n')
         f.write('# Source of DEM' + '\n')
         f.write('# source_dem = type of input data (1 => SRTM 30 m / 2 => Uploaded DEM (UTM) / 3 => Uploaded Data (lat,lon)).'+'\n')
-        f.write('#        (A default location is assumed for type 2: input_DEM.asc, see an example in EXAMPLES/Upload_DEM_UTM).'+'\n')
-        f.write('#        (A default location is assumed for type 3: Topography_3.asc, see an example in EXAMPLES/Upload_DEM_deg).'+'\n')
-        f.write('#        (Simulations with source_dem = 1 and save_data = 1 create a compatible file for source_dem = 3 in Results).' + '\n')
+        f.write('# topography_file = location of file containing topography (only used when source_dem = 2 or source_dem = 3).'+'\n')
+        f.write('# (see examples of source_dem = 2 in EXAMPLES/Upload_DEM_UTM and of source_dem = 3 in EXAMPLES/Upload_DEM_deg).'+'\n')
+        f.write('# (Simulations with source_dem = 1 and save_data = 1 create a compatible topography file for source_dem = 3 in Results' + '\n')
+        f.write('# called Topography_3.txt).'+'\n')
+
+
         if( self.var_dem.get() == "STRM 30 m"):
             f.write('source_dem = 1' + '\n')
         elif( self.var_dem.get() =="Input DEM (utm)"):
             f.write('source_dem = 2' + '\n')
+            f.write('topography_file = input_DEM.asc' + '\n')
         else:
             f.write('source_dem = 3' + '\n')
+            f.write('topography_file = Topography_3.txt' + '\n')
         f.write('\n')
         f.write('# Map limits (only considered if source_dem = 1)' + '\n')
         f.write('# lon1 = longitude of the first limit of the map' + '\n')
