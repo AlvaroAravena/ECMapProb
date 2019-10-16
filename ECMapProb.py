@@ -227,50 +227,50 @@ if(source_dem == 1):
 	cells_lat = Topography.shape[0]
 
 if(source_dem == 2):
-	print('Reading map')
-	try:
- 		file_txt = open(topography_file)
-	except:
- 		print(topography_file +' not found in ' + str(current_path))
-		sys.exit(0)
-	line = file_txt.readlines()
-	file_txt.close()
+        print('Reading map')
+        try:
+                file_txt = open(topography_file)
+        except:
+                print(topography_file +' not found in ' + str(current_path))
+                sys.exit(0)
+        line = file_txt.readlines()
+        file_txt.close()
 
-	n_north = -1
-	n_east = -1
-	cellsize = -1
-	indexini = -1
-	nodata = -9999
+        n_north = -1
+        n_east = -1
+        cellsize = -1
+        indexini = -1
+        nodata = -9999
 
-	for i in range(0,10):
-		aux = line[i].split()
-		if(aux[0] == 'nrows'):
-			n_north = int(aux[1])
-		if(aux[0] == 'ncols'):
-			n_east = int(aux[1])
-		if(aux[0] == 'cellsize'):
-			cellsize = float(aux[1])
-		if(aux[0] == 'xllcorner'):
-			east_cor = float(aux[1])
-		if(aux[0] == 'yllcorner'):
-			north_cor = float(aux[1])
-		if(aux[0] == 'NODATA_value'):
-			nodata = float(aux[1])
-		if(len(aux) >= 10):
-			indexini = i
-			break
+        for i in range(0,10):
+                aux = line[i].split()
+                if(aux[0] == 'nrows'):
+                        n_north = int(aux[1])
+                if(aux[0] == 'ncols'):
+                        n_east = int(aux[1])
+                if(aux[0] == 'cellsize'):
+                        cellsize = float(aux[1])
+                if(aux[0] == 'xllcorner'):
+                        east_cor = float(aux[1])
+                if(aux[0] == 'yllcorner'):
+                        north_cor = float(aux[1])
+                if(aux[0] == 'NODATA_value'):
+                        nodata = float(aux[1])
+                if(len(aux) >= 10):
+                        indexini = i
+                        break
 
-	Topography = np.zeros((n_north,n_east))
-	for i in range(indexini, indexini + n_north):
-		aux = line[i].split()
-		for j in range(0, n_east):
-			Topography[i-indexini,j] = float(aux[j])
+        Topography = np.zeros((n_north,n_east))
+        for i in range(indexini, indexini + n_north):
+                aux = line[i].split()
+                for j in range(0, n_east):
+                        Topography[i-indexini,j] = float(aux[j])
 
-	Topography_Sea = Topography + 0.0
-	Topography_Sea[ Topography_Sea[:,:] <= 0] = -1.0 * np.sqrt(-1.0 * Topography_Sea[ Topography_Sea[:,:] <= 0])
-	Topography_Sea[ Topography_Sea[:,:] > 0] =  np.nan
-	Topography_Sea = Topography_Sea * -1.0
-	Topography  = (Topography  + abs(Topography)) / 2.0
+        Topography_Sea = Topography + 0.0
+        Topography_Sea[ Topography_Sea[:,:] <= 0] = -1.0 * np.sqrt(-1.0 * Topography_Sea[ Topography_Sea[:,:] <= 0])
+        Topography_Sea[ Topography_Sea[:,:] > 0] =  np.nan
+        Topography_Sea = Topography_Sea * -1.0
+        Topography  = (Topography  + abs(Topography)) / 2.0
 
 if(source_dem == 3):
 	print('Reading map')
@@ -278,7 +278,7 @@ if(source_dem == 3):
  		file_txt = open(topography_file)
 	except:
  		print(topography_file +' not found in ' + str(current_path))
-		sys.exit(0)
+ 		sys.exit(0)
 	line = file_txt.readlines()
 	file_txt.close()
 

@@ -661,10 +661,10 @@ class MyFirstGUI:
         self.line_val = self.data_cones.max()
         self.data_cones[self.data_cones[:,:] == 0] =  np.nan
         self.val_up = np.floor((self.line_val + 0.1 - 1.0 / self.N ) * 10.0) / 20.0
-	if( self.val_up > 0.05 ):
-		self.val_down = np.maximum( self.val_up / 10.0 , 0.05 )
-	else:
-		self.val_down = self.val_up / 2.0
+        if( self.val_up > 0.05 ):
+            self.val_down = np.maximum( self.val_up / 10.0 , 0.05 )
+        else:
+            self.val_down = self.val_up / 2.0
 
         if( self.N > 1 ):
             self.height_vector = summary[0:self.N,0]
