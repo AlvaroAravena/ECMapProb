@@ -435,10 +435,10 @@ class MyFirstGUI:
             if( self.N > 1 ):
                 CS_Topo = plt.contourf(self.matrix_lon,self.matrix_lat,self.topography, 100, alpha = 1.0, cmap = cmapg ,antialiased=True)
                 CS_Sea = plt.contourf(self.matrix_lon,self.matrix_lat,self.topography_sea, 100, alpha = 0.5, cmap = cmaps ,antialiased=True)
-                CS = plt.contourf(self.matrix_lon, self.matrix_lat, self.data_cones, 100, vmin = 0.0, vmax = 1.0,  alpha= 0.3, interpolation='linear', cmap=cmapr, antialiased=True)	
+                CS = plt.contourf(self.matrix_lon, self.matrix_lat, self.N * self.data_cones, 100, vmin = 0.0, vmax = 1.0,  alpha= 0.3, interpolation='linear', cmap=cmapr, antialiased=True)	
                 fmt = '%.2f'
                 plt.colorbar()
-                CS_lines = plt.contour(self.matrix_lon,self.matrix_lat,self.data_cones, np.array([self.val_down, self.val_up]), colors='r', interpolation='linear', linewidths = 0.1)
+                CS_lines = plt.contour(self.matrix_lon,self.matrix_lat, self.N * self.data_cones, np.array([self.val_down, self.val_up]), colors='r', interpolation='linear', linewidths = 0.1)
                 plt.clabel(CS_lines, inline=0.1, fontsize = 7, colors='k', fmt=fmt)
 
                 plt.axes().set_aspect(self.step_lat_m/self.step_lon_m)
@@ -462,10 +462,10 @@ class MyFirstGUI:
             if( self.N > 1 ):
                 CS_Topo = plt.contourf(self.matrix_east,self.matrix_north,self.topography, 100, alpha = 1.0, cmap = cmapg ,antialiased=True)
                 CS_Sea = plt.contourf(self.matrix_east,self.matrix_north,self.topography_sea, 100, alpha = 0.5, cmap = cmaps ,antialiased=True)
-                CS = plt.contourf(self.matrix_east, self.matrix_north, self.data_cones, 100, vmin = 0.0, vmax = 1.0,  alpha= 0.3, interpolation='linear', cmap=cmapr, antialiased=True)	
+                CS = plt.contourf(self.matrix_east, self.matrix_north, self.N * self.data_cones, 100, vmin = 0.0, vmax = 1.0,  alpha= 0.3, interpolation='linear', cmap=cmapr, antialiased=True)	
                 fmt = '%.2f'
                 plt.colorbar()
-                CS_lines = plt.contour(self.matrix_east,self.matrix_north,self.data_cones, np.array([self.val_down, self.val_up]), colors='r', interpolation='linear', linewidths = 0.1)
+                CS_lines = plt.contour(self.matrix_east,self.matrix_north,self.N * self.data_cones, np.array([self.val_down, self.val_up]), colors='r', interpolation='linear', linewidths = 0.1)
                 plt.clabel(CS_lines, inline=0.1, fontsize = 7, colors='k', fmt=fmt)
 
                 plt.axes().set_aspect(1.0)
