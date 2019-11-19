@@ -91,12 +91,6 @@ class MyFirstGUI:
         self.label7 = Label(master, text="Latitude 2 [deg]")
         self.label7.grid(row=6, column=0, columnspan=2, sticky=W)
 
-        self.label8 = Label(master, text="Maximum order of energy cones")
-        self.label8.grid(row=23, column=0, columnspan=2, sticky=W)
-
-        self.label9 = Label(master, text="Geometry of expected vent position")
-        self.label9.grid(row=11, column=0, columnspan=2, sticky=W)
-
         self.label10 = Label(master, text="Longitude Collapse [deg]")
         self.label10.grid(row=7, column=0, columnspan=2, sticky=W)
 
@@ -108,6 +102,9 @@ class MyFirstGUI:
 
         self.label13 = Label(master, text="North Coordinate Colapse [m]", state = 'disabled')
         self.label13.grid(row=10, column=0, columnspan=2, sticky=W)
+
+        self.label9 = Label(master, text="Geometry of expected vent position")
+        self.label9.grid(row=11, column=0, columnspan=2, sticky=W)
 
         self.label14 = Label(master, text="Azimuth Line [deg]", state = 'disabled')
         self.label14.grid(row=12, column=0, columnspan=2, sticky=W)
@@ -142,6 +139,9 @@ class MyFirstGUI:
         self.label24 = Label(master, text="Probability distribution of input parameters")
         self.label24.grid(row=22, column=0, columnspan=2, sticky=W)
 
+        self.label8 = Label(master, text="Maximum order of energy cones")
+        self.label8.grid(row=23, column=0, columnspan=2, sticky=W)
+
         self.label25 = Label(master, text="Number of simulations")
         self.label25.grid(row=24, column=0, columnspan=2, sticky=W)
 
@@ -166,12 +166,6 @@ class MyFirstGUI:
         self.lat2 = Entry(master, textvariable=lat2)
         self.lat2.grid(row=6, column=2, sticky=W+E)
 
-        self.cone_levels = Entry(master, textvariable=cone_levels)
-        self.cone_levels.grid(row=23, column=2, sticky=W+E)
-
-        self.vent_dist = OptionMenu(master, self.var_ds, "Punctual", "Linear", "Circumference arch", command = self.opt_geom)
-        self.vent_dist.grid(row=11, column=2, sticky=W+E)
-
         self.lon_cen = Entry(master, textvariable=lon_cen)
         self.lon_cen.grid(row=7, column=2, sticky=W+E)
 
@@ -183,6 +177,9 @@ class MyFirstGUI:
 
         self.north_cen = Entry(master, textvariable=north_cen, state = 'disabled')
         self.north_cen.grid(row=10, column=2, sticky=W+E)
+
+        self.vent_dist = OptionMenu(master, self.var_ds, "Punctual", "Linear", "Circumference arch", command = self.opt_geom)
+        self.vent_dist.grid(row=11, column=2, sticky=W+E)
 
         self.azimuth_line = Entry(master, textvariable=azimuth_line, state = 'disabled')
         self.azimuth_line.grid(row=12, column=2, sticky=W+E)
@@ -216,6 +213,9 @@ class MyFirstGUI:
 
         self.input_dist = OptionMenu(master, self.var_d_input, "Uniform", "Gaussian")
         self.input_dist.grid(row=22, column=2, sticky=W+E)
+
+        self.cone_levels = Entry(master, textvariable=cone_levels)
+        self.cone_levels.grid(row=23, column=2, sticky=W+E)
 
         self.Nsim = Entry(master, textvariable=N)
         self.Nsim.grid(row=24,column=2, sticky=W+E)
@@ -658,7 +658,7 @@ class MyFirstGUI:
         self.topography_sea = np.loadtxt(self.current_path + "/Results/" + self.run_name + "/topography_sea.txt")
 	
         self.data_cones = self.data_cones[ range(len(self.data_cones[:,0]) -1 , -1 , -1 ) , : ] / self.N
-        self.line_val = self.data_cones.max()
+        self.line_val = self.data_cones.max() * self.N
         self.data_cones[self.data_cones[:,:] == 0] =  np.nan
         self.val_up = np.floor((self.line_val + 0.1 - 1.0 / self.N ) * 10.0) / 20.0
         if( self.val_up > 0.05 ):
