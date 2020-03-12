@@ -506,6 +506,10 @@ angstep = 10
 distep = 10
 anglen = 360 / angstep
 pix_min = 0.0
+angstep_res2 = 2
+angstep_res3 = 0.4
+anglen_res2 = 360 / angstep_res2
+anglen_res3 = 360 / angstep_res3
 
 if( redist_energy == 3 or redist_energy == 4 ):
 	factor_mult = 50.0
@@ -526,7 +530,7 @@ if( redist_energy == 3 or redist_energy == 4 ):
 	vector_correc = np.zeros(int(anglen))
 
 if( save_data == 1 ):
-	summary_data = np.zeros((N,6 + length_direction))
+	summary_data = np.zeros((N,7 + length_direction))
 	summary_data[:,0] = height_vector
 	summary_data[:,1] = hl_vector
 	if( source_dem == 1 or source_dem == 3):
@@ -548,10 +552,13 @@ if(source_dem == 1 or source_dem == 3):
 	data_cones = np.zeros((cells_lat,cells_lon))
 	data_aux_t = np.ones((cells_lat,cells_lon))
 	data_aux_b = np.zeros((cells_lat,cells_lon))
-	vec_ang = range(0, 360, angstep)
+	vec_ang = np.arange(0, 360, angstep)
+	vec_ang_res2 = np.arange(0, 360, angstep_res2)
+	vec_ang_res3 = np.arange(0, 360, angstep_res3)
 
 	for i in range(0,N):
 
+		runout_min = -1
 		current_level = 0
 		data_step = np.zeros((cells_lat,cells_lon))
 		polygon = []
@@ -599,6 +606,8 @@ if(source_dem == 1 or source_dem == 3):
 
 			polygon_xy = []
 			polygons_new = []
+			polygon_xy_res2 = []
+			polygon_xy_res3 = []
 
 			for angle_deg in vec_ang:
 				angle_rad = angle_deg * np.pi /180
@@ -614,16 +623,38 @@ if(source_dem == 1 or source_dem == 3):
 				if( polygon[j][4] == np.int(polygon[j][4]) ):
 					for ii in range(int(anglen)):
 						vector_correc[ii] = vector_backward_1[int((ii - polygon[j][4] + index_max) % anglen)]
-
 				else:
 					for ii in range(int(anglen)):
 						vector_correc[ii] = vector_backward_2[int((ii - polygon[j][4] + index_max) % anglen)]
-
 				polygons_new = polygons_new * vector_correc
+			if( j == 0 ):
+				runout_min = min(polygons_new)
+
+			if( max(polygons_new) > 500 and max(polygons_new) < 5000 ):
+				for angle_deg in vec_ang_res2:
+					angle_rad = angle_deg * np.pi /180
+					for distance in range(0, 100000, distep):
+						h = interpol_pos(lon1, lat1, step_lon_deg, step_lat_deg, polygon[j][0] + distance * cos(angle_rad) * step_lon_deg / step_lon_m , polygon[j][1] + distance*sin(angle_rad)*step_lat_deg/step_lat_m , cells_lon, cells_lat, Topography)
+						if( h >= polygon[j][2] - hl_current * distance ):
+							polygon_xy_res2.append((int((polygon[j][0] + (distance - distep)*cos(angle_rad)*step_lon_deg/step_lon_m - lon1) * cells_lon / (lon2 - lon1)),int((polygon[j][1] + (distance - distep)*sin(angle_rad)*step_lat_deg/step_lat_m - lat1) * cells_lat / (lat2 - lat1))))
+							break
+			elif( max(polygons_new) >= 5000 ):
+				for angle_deg in vec_ang_res3:
+					angle_rad = angle_deg * np.pi /180
+					for distance in range(0, 100000, distep):
+						h = interpol_pos(lon1, lat1, step_lon_deg, step_lat_deg, polygon[j][0] + distance * cos(angle_rad) * step_lon_deg / step_lon_m , polygon[j][1] + distance*sin(angle_rad)*step_lat_deg/step_lat_m , cells_lon, cells_lat, Topography)
+						if( h >= polygon[j][2] - hl_current * distance ):
+							polygon_xy_res3.append((int((polygon[j][0] + (distance - distep)*cos(angle_rad)*step_lon_deg/step_lon_m - lon1) * cells_lon / (lon2 - lon1)),int((polygon[j][1] + (distance - distep)*sin(angle_rad)*step_lat_deg/step_lat_m - lat1) * cells_lat / (lat2 - lat1))))
+							break
 
 			img = Image.new('L', (cells_lon, cells_lat), 0)
 			if( len(polygon_xy) > 0 ):
-				draw = ImageDraw.Draw(img).polygon(polygon_xy, outline = 1 , fill = 1)
+				if(  max(polygons_new) <= 500 ):
+					draw = ImageDraw.Draw(img).polygon(polygon_xy, outline = 1 , fill = 1)
+				elif( max(polygons_new) > 500 and max(polygons_new) < 5000 ):
+					draw = ImageDraw.Draw(img).polygon(polygon_xy_res2, outline = 1 , fill = 1)
+				else:
+					draw = ImageDraw.Draw(img).polygon(polygon_xy_res3, outline = 1 , fill = 1)
 				data_step = np.maximum( np.minimum(data_aux_t, data_step + np.array(img)), data_aux_b)
 
 			if( cone_levels > polygon[j][3] and sum(sum(data_step)) > sum_pixels + pix_min ):
@@ -876,11 +907,12 @@ if(source_dem == 1 or source_dem == 3):
 				for ii in range(length_direction):
 					distances_corrected = distances * data_direction[:,:,ii]
 					distances_corrected = distances_corrected * data_step[ range(len(data_cones[:,0]) -1 , -1 , -1 ) , : ]
-					summary_data[i,6 + ii]  = distances_corrected.max() / 1000.0
+					summary_data[i,7 + ii]  = distances_corrected.max() / 1000.0
 
 			distances = distances * data_step[ range(len(data_cones[:,0]) -1 , -1 , -1 ) , : ]
 			summary_data[i,4] = sum(sum(data_step)) * area_pixel
 			summary_data[i,5] = distances.max() / 1000.0
+			summary_data[i,6] = runout_min / 1000.0
 
 		print(' Simulation finished (N = ' + str(i+1) + ')')
 
@@ -890,8 +922,11 @@ if( source_dem == 2 ):
 	data_aux_t = np.ones((n_north,n_east))
 	data_aux_b = np.zeros((n_north,n_east))
 	vec_ang = range(0, 360, angstep)
+	vec_ang_res2 = np.arange(0, 360, angstep_res2)
+	vec_ang_res3 = np.arange(0, 360, angstep_res3)
 
 	for i in range(0,N):
+		runout_min = -1
 		current_level = 0
 		data_step = np.zeros((n_north,n_east))
 		polygon = []
@@ -916,6 +951,8 @@ if( source_dem == 2 ):
 
 			polygon_xy = []
 			polygons_new = []
+			polygon_xy_res2 = []
+			polygon_xy_res3 = []
 
 			for angle_deg in vec_ang:
 				angle_rad = angle_deg * np.pi /180
@@ -937,10 +974,33 @@ if( source_dem == 2 ):
 						vector_correc[ii] = vector_backward_2[int((ii - polygon[j][4] + index_max) % anglen)]
 
 				polygons_new = polygons_new * vector_correc
+			if( j == 0 ):
+				runout_min = min(polygons_new)
+			if( max(polygons_new) > 500 and max(polygons_new) < 5000 ):
+				for angle_deg in vec_ang_res2:
+					angle_rad = angle_deg * np.pi /180
+					for distance in range(0, 100000, distep):
+						h = interpol_pos(east_cor, north_cor, cellsize, cellsize, polygon[j][0] + distance * cos(angle_rad) , polygon[j][1] + distance*sin(angle_rad) , n_east, n_north, Topography)
+						if( h >= polygon[j][2] - hl_current * distance ):
+							polygon_xy_res2.append((int((polygon[j][0] + (distance-distep)* cos(angle_rad) - east_cor) * n_east / ( cellsize * ( n_east - 1 ) ) ), int((polygon[j][1] + (distance-distep)*sin(angle_rad) - north_cor) * n_north / ( cellsize * ( n_north - 1 ) ))))
+							break
+			elif( max(polygons_new) >= 5000 ):
+				for angle_deg in vec_ang_res3:
+					angle_rad = angle_deg * np.pi /180
+					for distance in range(0, 100000, distep):
+						h = interpol_pos(east_cor, north_cor, cellsize, cellsize, polygon[j][0] + distance * cos(angle_rad) , polygon[j][1] + distance*sin(angle_rad) , n_east, n_north, Topography)
+						if( h >= polygon[j][2] - hl_current * distance ):
+							polygon_xy_res3.append((int((polygon[j][0] + (distance-distep)* cos(angle_rad) - east_cor) * n_east / ( cellsize * ( n_east - 1 ) ) ), int((polygon[j][1] + (distance-distep)*sin(angle_rad) - north_cor) * n_north / ( cellsize * ( n_north - 1 ) ))))
+							break
 
 			img = Image.new('L', (n_east, n_north), 0)
 			if( len(polygon_xy) > 0 ):
-				draw = ImageDraw.Draw(img).polygon(polygon_xy, outline = 0 , fill = 1)
+				if(  max(polygons_new) <= 500 ):
+					draw = ImageDraw.Draw(img).polygon(polygon_xy, outline = 1 , fill = 1)
+				elif( max(polygons_new) > 500 and max(polygons_new) < 5000 ):
+					draw = ImageDraw.Draw(img).polygon(polygon_xy_res2, outline = 1 , fill = 1)
+				else:
+					draw = ImageDraw.Draw(img).polygon(polygon_xy_res3, outline = 1 , fill = 1)
 				data_step = np.maximum( np.minimum(data_aux_t, data_step + np.array(img)), data_aux_b)
 
 			if( cone_levels > polygon[j][3] and sum(sum(data_step)) > sum_pixels + pix_min ):
@@ -1167,6 +1227,7 @@ if( source_dem == 2 ):
 			distances = distances * data_step[ range(len(data_cones[:,0]) -1 , -1 , -1 ) , : ]
 			summary_data[i,4] = sum(sum(data_step)) * area_pixel
 			summary_data[i,5] = distances.max() / 1000.0
+			summary_data[i,6] = runout_min / 1000.0
 
 		print(' Simulation finished (N = ' + str(i+1) + ')')
 
