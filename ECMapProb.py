@@ -71,7 +71,6 @@ def interpol_pos(lon1, lat1, step_lon_deg, step_lat_deg, lon_cen, lat_cen, cells
 print('Reading input file')
 
 current_path = os.getcwd()
-
 try:
 	file_txt = open('input_data.py')
 except:
@@ -79,12 +78,11 @@ except:
 	sys.exit(0)
 line = file_txt.readlines()
 file_txt.close()
-boolean_compare = 0
-
-[run_name, source_dem, lon1, lon2, lat1, lat2, topography_file] = ['run_default', 1, np.nan, np.nan, np.nan, np.nan, 'Topography_3.txt']
+[run_name, type_sim, source_dem, lon1, lon2, lat1, lat2, topography_file] = ['run_default', 1, 1, np.nan, np.nan, np.nan, np.nan, 'Topography_3.txt']
 [dist_source, var_cen, lon_cen, lat_cen, east_cen, north_cen, azimuth_lin] = [1, 0.0, np.nan, np.nan, np.nan, np.nan, np.nan]
 [length_lin, radius_rad, ang1_rad, ang2_rad] = [np.nan, np.nan, np.nan, np.nan]
 [height, hl, var_height, var_hl, N, cone_levels, save_data, dist_input, redist_energy, plot_flag, sea_flag] = [np.nan, 0.2, 200.0, 0.05, 100, 1, 0, 1, 4, 1, 0]
+[comparison_polygon, ang_cal, ang2_sigma_cal, input_file] = ['', np.nan, np.nan, '']
 
 for i in range(0,len(line)):
 	line[i] = line[i].replace('=',' ')
@@ -93,11 +91,20 @@ for i in range(0,len(line)):
 		if( aux[0][0] != '#'):
 			if( aux[0] == 'run_name'):
 				run_name = aux[1]
+			if( aux[0] == 'type_sim'):
+				type_sim = int(aux[1])
 			if( aux[0] == 'source_dem'):
 				source_dem = int(aux[1])
 			if( aux[0] == 'topography_file'):
 				topography_file = aux[1]
 				topography_file = topography_file.replace("'","")
+			if( aux[0] == 'comparison_polygon'):
+				comparison_polygon = aux[1]
+				comparison_polygon = comparison_polygon.replace("'","")
+			if( aux[0] == 'ang_cal'):
+				ang_cal = float(aux[1]) % 360.0
+			if( aux[0] == 'ang_sigma_cal'):
+				ang_sigma_cal = min(float(aux[1]), 360.0)
 			if( aux[0] == 'lon1'):
 				lon1 = float(aux[1])
 			if( aux[0] == 'lon2'):
@@ -128,6 +135,8 @@ for i in range(0,len(line)):
 				ang1_rad = float(aux[1])
 			if( aux[0] == 'ang2_rad'):
 				ang2_rad = float(aux[1])
+			if( aux[0] == 'dist_input'):
+				dist_input = int(aux[1])
 			if( aux[0] == 'height'):
 				height = float(aux[1])
 			if( aux[0] == 'hl'):
@@ -136,14 +145,15 @@ for i in range(0,len(line)):
 				var_height = float(aux[1])
 			if( aux[0] == 'var_hl'):
 				var_hl = float(aux[1])
+			if( aux[0] == 'input_file'):
+				input_file = aux[1]
+				input_file = input_file.replace("'","")
 			if( aux[0] == 'N'):
 				N = int(aux[1])
 			if( aux[0] == 'cone_levels'):
 				cone_levels = int(aux[1])
 			if( aux[0] == 'save_data'):
 				save_data = int(aux[1])
-			if( aux[0] == 'dist_input'):
-				dist_input = int(aux[1])
 			if( aux[0] == 'redist_energy'):
 				redist_energy = int(aux[1])
 			if( aux[0] == 'plot_flag'):
@@ -173,13 +183,6 @@ if(source_dem == 2 and ( np.isnan( east_cen ) or np.isnan( north_cen ) or np.isn
 if(source_dem == 3 and ( np.isnan( lon_cen ) or np.isnan( lat_cen ) or np.isnan( height ) ) ):
 	print('Problems with input parameters')
 	sys.exit(0)
-
-save_direction = 0
-direction = [0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 110, 120, 130, 140, 150, 160, 170, 180, 190, 200, 210, 220, 230, 240, 250, 260, 270, 280, 290, 300, 310, 320, 330, 340, 350]
-if(save_direction == 0):
-	length_direction = 0
-else:
-	length_direction = len(direction)
 
 # IMPORT MAP
 if(source_dem == 1):
@@ -376,8 +379,13 @@ if(source_dem == 2):
 	matrix_north = matrix_north[ range(len(matrix_north[:,0]) -1 , -1 , -1 ) , : ]
 	utm_save = [east_cor , north_cor]
 
-if(boolean_compare > 0):
-	points = np.loadtxt('Chaiten_points.txt')
+# READ COMPARISON POLYGON
+if( type_sim == 2 ):
+	print('Reading polygon for comparison')
+	var_cen = 0
+	dist_input = 2
+	N = max( N , 2 )
+	points = np.loadtxt( comparison_polygon )
 	polygon_compare = []
 	for i in range(0,len(points)):
 		polygon_compare.append((int( (points[i,0]-lon1) * cells_lon / (lon2 - lon1)),int( (points[i,1]-lat1) * cells_lat / (lat2 - lat1))))
@@ -385,66 +393,138 @@ if(boolean_compare > 0):
 	draw = ImageDraw.Draw(img_compare).polygon(polygon_compare, outline = 1 , fill = 1)
 	matrix_compare = np.array(img_compare)
 	string_compare = ""	
-	line_compare = plt.contour(matrix_lon, matrix_lat, matrix_compare, np.array([0]), colors='r', interpolation='linear')
+	line_compare = plt.contour(matrix_lon, matrix_lat, matrix_compare[ range(len(matrix_compare[:,0]) -1 , -1 , -1 ) , : ], np.array([0]), colors='r', interpolation='linear')
+	plt.close()
 	path_compare = line_compare.collections[0].get_paths()[0]
 	ver_compare = path_compare.vertices
-	plt.close()
+	dist_compare = np.zeros( len(ver_compare) - 1 )
+	for i in range( len( ver_compare ) - 1):
+		utm1 = utm.from_latlon( ver_compare[i,1] , ver_compare[i,0] )
+		utm2 = utm.from_latlon( ver_compare[i+1,1] , ver_compare[i+1,0] )
+		distance_lon_1 = abs(utm2[0] - utm1[0])
+		distance_lat_1 = abs(utm2[1] - utm1[1])
+		dist_compare[i] = np.sqrt( distance_lon_1 ** 2 + distance_lat_1 ** 2)
+	dist_tot = sum(dist_compare)
+	dist_step = np.arange( 0 , dist_tot , dist_tot / 1000 )
+	cum_compare = 0.0 * dist_compare
+	for i in range( len( dist_compare ) ):
+		cum_compare[i] = sum( dist_compare[0:i+1] )
+	vertices_compare = np.zeros(( len(dist_step) , 2 ))
+	for i in range( len(dist_step) ):
+		for j in range( len( cum_compare )):
+			if( dist_step[i] < cum_compare[j] ):
+				if( j == 0 ):
+					factor = (cum_compare[j] - dist_step[i]) / cum_compare[j]
+				else:
+					factor = (cum_compare[j] - dist_step[i]) / (cum_compare[j] - cum_compare[j-1] )
+				vertices_compare[i,0] = ver_compare[j+1][0] * (1 - factor) + ver_compare[j][0] * (factor)
+				vertices_compare[i,1] = ver_compare[j+1][1] * (1 - factor) + ver_compare[j][1] * (factor)
+				break
 
+	if( ang_sigma_cal == 360 ):
+		data_direction = np.ones((cells_lat,cells_lon))
+	else:
+		wh_negative = np.where( (matrix_lat - lat_cen) <= 0 )
+		ang_direction = 180 * np.arctan( (matrix_lon - lon_cen ) * (step_lon_m / step_lon_deg ) / (matrix_lat - lat_cen ) / (step_lat_m / step_lat_deg ) ) / 	np.pi
+		ang_direction[wh_negative] = ang_direction[wh_negative] + 180.0
+		ang_direction[np.where(ang_direction < 0)] = ang_direction[np.where(ang_direction < 0)] + 360.0	
+		matrix_aux_1 = np.zeros((cells_lat,cells_lon))
+		matrix_aux_2 = np.zeros((cells_lat,cells_lon))
+
+		if( ang_cal - ang_sigma_cal / 2.0 < 0 ):
+			wh_direction_1 = np.where(ang_direction <= ang_cal + ang_sigma_cal / 2.0 )
+			wh_direction_2 = np.where(ang_direction >= ang_cal - ang_sigma_cal / 2.0 + 360.0 )
+			matrix_aux_1[wh_direction_1] = 1
+			matrix_aux_1[wh_direction_2] = 1
+			data_direction = matrix_aux_1
+		elif( ang_cal + ang_sigma_cal / 2.0 >= 360 ):
+			wh_direction_1 = np.where(ang_direction <= ang_cal + ang_sigma_cal / 2.0 - 360.0 )
+			wh_direction_2 = np.where(ang_direction >= ang_cal - ang_sigma_cal / 2.0 )
+			matrix_aux_1[wh_direction_1] = 1
+			matrix_aux_1[wh_direction_2] = 1
+			data_direction = matrix_aux_1
+		else:
+			wh_direction_1 = np.where(ang_direction >= ang_cal - ang_sigma_cal / 2.0 )
+			wh_direction_2 = np.where(ang_direction <= ang_cal + ang_sigma_cal / 2.0 )
+			matrix_aux_1[wh_direction_1] = 1
+			matrix_aux_2[wh_direction_2] = 1
+			data_direction = matrix_aux_1 * matrix_aux_2
+	
 # CREATE VECTORS OF INPUT PARAMETERS AND DELETE NEGATIVE DATA
 print('Creating input vectors')
-
-if(var_height > 0.0):
-	if(dist_input == 1):
-		height_vector = np.random.normal(height, var_height, N)
-	else:
-		height_vector = np.random.uniform(height - var_height, height + var_height, N)
+if( type_sim == 1 and dist_input == 3 ):
+	file_data = np.loadtxt( input_file )
+	N = np.minimum( N , len(file_data[:]) )
+	height_vector = file_data[range(0,N),0]
+	hl_vector = file_data[range(0,N),1]
 else:
-	height_vector = np.ones(N) * height
-
-if(var_hl > 0.0):
-	if(dist_input == 1):
-		hl_vector = np.random.normal(hl,var_hl,N)
+	if(var_height > 0.0):
+		if( type_sim == 1 ):
+			if(dist_input == 1):
+				height_vector = np.random.normal(height, var_height, N)
+			else:
+				height_vector = np.random.uniform(height - var_height, height + var_height, N)
+		else:
+			height_vector = np.linspace( height - var_height, height + var_height, num = N )
 	else:
-		hl_vector = np.random.uniform(hl - var_hl, hl + var_hl, N)
-else:
-	hl_vector = np.ones(N) * hl
+		height_vector = np.ones(N) * height
 
-if(var_height > 0.0):
-	while( 1 == 1 ):
-		aux_boolean = 0
-		for i in range(0,N):
-			if(height_vector[i] < 0):
-				if(dist_input == 1):
-					height_vector[i] = np.random.normal(height,var_height, 1)
-				elif(dist_input == 2):
-					height_vector[i] = np.random.uniform(height - var_height, height + var_height, 1)
-				aux_boolean = 1
-		if(aux_boolean == 0):
-			break
+	if(var_hl > 0.0):
+		if( type_sim == 1 ):
+			if(dist_input == 1):
+		 		hl_vector = np.random.normal(hl,var_hl,N)
+			else:
+				hl_vector = np.random.uniform(hl - var_hl, hl + var_hl, N)
+		else:
+			hl_vector = np.linspace( hl - var_hl , hl + var_hl , num = N )
+	else:
+		hl_vector = np.ones(N) * hl
 
-if(var_hl > 0.0):
-	while( 1 == 1 ):
-		aux_boolean = 0
-		for i in range(0,N):
-			if(hl_vector[i] < 0.05):
-				if(dist_input == 1):
-					hl_vector[i] = np.random.normal(hl,var_hl,1)
-				elif(dist_input == 2):
-					hl_vector[i] = np.random.uniform(hl - var_hl, hl + var_hl, 1)
-				aux_boolean = 1
-		if(aux_boolean == 0):
-			break
+	if(var_height > 0.0):
+		while( 1 == 1 ):
+			aux_boolean = 0
+			for i in range(0,N):
+				if(height_vector[i] < 0):
+					if(dist_input == 1):
+						height_vector[i] = np.random.normal(height,var_height, 1)
+					elif(dist_input == 2):
+						height_vector[i] = np.random.uniform(height - var_height, height + var_height, 1)
+					aux_boolean = 1
+			if(aux_boolean == 0):
+				break
+
+	if(var_hl > 0.0):
+		while( 1 == 1 ):
+			aux_boolean = 0
+			for i in range(0,N):
+				if(hl_vector[i] < 0.05):
+					if(dist_input == 1):
+						hl_vector[i] = np.random.normal(hl,var_hl,1)
+					elif(dist_input == 2):
+						hl_vector[i] = np.random.uniform(hl - var_hl, hl + var_hl, 1)
+					aux_boolean = 1
+			if(aux_boolean == 0):
+				break
+
+	if( type_sim == 2 ):
+		height_vector_i = height_vector
+		hl_vector_i = np.zeros(N * N)
+		hl_vector_i[0:N] = hl_vector[0]
+		for i in range(1,N):
+			height_vector = np.concatenate(( height_vector , height_vector_i ))
+			hl_vector_i[i * N : ( i + 1 ) * N] = hl_vector[i]
+		hl_vector = hl_vector_i
+		N = N * N
 
 if(source_dem == 1 or source_dem == 3):
 	if( var_cen > 0.0 ):
-		if(dist_input == 1):
+		if(dist_input == 1 or dist_input == 3):
 			lon_cen_vector = np.random.normal(lon_cen, var_cen * step_lon_deg / step_lon_m, N)
 			lat_cen_vector = np.random.normal(lat_cen, var_cen * step_lat_deg / step_lat_m, N)
 		elif(dist_input == 2):
 			lon_cen_vector = np.random.uniform(lon_cen - var_cen * step_lon_deg / step_lon_m, lon_cen + var_cen * step_lon_deg / step_lon_m, N)
 			lat_cen_vector = np.random.uniform(lat_cen - var_cen * step_lat_deg / step_lat_m, lat_cen + var_cen * step_lat_deg / step_lat_m, N)
-
-			while( 1 == 1 ):
+			while( 1 == 1 ): 
 				aux_boolean = 0
 				for i in range(0,N):
 					if(np.power((lon_cen_vector[i] - lon_cen) * step_lon_m / step_lon_deg ,2) + np.power((lat_cen_vector[i] - lat_cen) * step_lat_m / step_lat_deg , 2) > np.power(var_cen,2)):
@@ -530,7 +610,7 @@ if( redist_energy == 3 or redist_energy == 4 ):
 	vector_correc = np.zeros(int(anglen))
 
 if( save_data == 1 ):
-	summary_data = np.zeros((N,7 + length_direction))
+	summary_data = np.zeros((N , 7))
 	summary_data[:,0] = height_vector
 	summary_data[:,1] = hl_vector
 	if( source_dem == 1 or source_dem == 3):
@@ -566,28 +646,6 @@ if(source_dem == 1 or source_dem == 3):
 		polygon.append((lon_cen_vector[i], lat_cen_vector[i],  height_eff, 1.0, -1, height_vector[i] ))
 		sum_pixels = 0
 		hl_current = hl_vector[i]
-
-		if(save_direction == 1):
-			data_direction = np.zeros((cells_lat,cells_lon,length_direction))
-			wh_negative = np.where( (matrix_lat - lat_cen) <= 0 )
-			ang_direction = 180 * np.arctan( (matrix_lon - lon_cen ) * (step_lon_m / step_lon_deg ) / (matrix_lat - lat_cen ) / (step_lat_m / step_lat_deg ) ) / np.pi
-			ang_direction[wh_negative] = ang_direction[wh_negative] + 180.0
-			ang_direction[np.where(ang_direction < 0)] = ang_direction[np.where(ang_direction < 0)] + 360.0	
-			for ii in range(length_direction):
-				matrix_aux_1 = np.zeros((cells_lat,cells_lon))
-				matrix_aux_2 = np.zeros((cells_lat,cells_lon))
-				if(ii < length_direction - 1):
-					wh_direction_1 = np.where(ang_direction > direction[ii])
-					wh_direction_2 = np.where(ang_direction <= direction[ii + 1])
-					matrix_aux_1[wh_direction_1] = 1
-					matrix_aux_2[wh_direction_2] = 1
-					data_direction[:,:,ii] = matrix_aux_1 * matrix_aux_2
-				else:
-					wh_direction_1 = np.where(ang_direction > direction[ii])
-					wh_direction_2 = np.where(ang_direction <= direction[0])
-					matrix_aux_1[wh_direction_1] = 1
-					matrix_aux_2[wh_direction_2] = 1
-					data_direction[:,:,ii] = np.maximum(matrix_aux_1, matrix_aux_2)
 
 		for j in range(10000): 
 
@@ -870,46 +928,67 @@ if(source_dem == 1 or source_dem == 3):
 				if(j == 0 or (j + 1 == len(polygon))):
 					distances = np.power(np.power(( matrix_lon - lon_cen_vector[i]) * (step_lon_m / step_lon_deg),2) + np.power(( matrix_lat - lat_cen_vector[i])*(step_lat_m / step_lat_deg),2),0.5) 
 					distances = distances * data_step[ range(len(data_cones[:,0]) -1 , -1 , -1 ) , : ]
-					string_data = string_data + "\n" + str(polygon[j][3]) + " " + str(sum(sum(data_step))* area_pixel) + " " + str(distances.max() / 1000.0)
+					string_data = string_data + "\n" + str(polygon[j][3]) + " " + str(sum(sum(data_step))* area_pixel) + " " + str(distances.max() / 1000.0) + " " + str(distances.min() / 1000.0)
 
 				elif(polygon[j][3] < polygon[j+1][3] ):
 					distances = np.power(np.power(( matrix_lon - lon_cen_vector[i]) * (step_lon_m / step_lon_deg),2) + np.power(( matrix_lat - lat_cen_vector[i])*(step_lat_m / step_lat_deg),2),0.5) 
 					distances = distances * data_step[ range(len(data_cones[:,0]) -1 , -1 , -1 ) , : ]
-					string_data = string_data + "\n" + str(polygon[j][3]) + " " + str(sum(sum(data_step))* area_pixel) + " " + str(distances.max() / 1000.0)
+					string_data = string_data + "\n" + str(polygon[j][3]) + " " + str(sum(sum(data_step))* area_pixel) + " " + str(distances.max() / 1000.0) + " " + str(distances.min() / 1000.0)
 				if( N == 1 ):
 					string_cones = string_cones + "\n"  + str(j) + " " + str(polygon[j][3]) + " " + str(polygon[j][2]) + " " + str(polygon[j][5]) 
 
 		if( N > 1 ):
-			if( boolean_compare > 0):
-				line_new = plt.contour(matrix_lon, matrix_lat, data_step, np.array([0]), colors='r', interpolation='linear')
+			if( type_sim == 2 ):
+				line_new = plt.contour(matrix_lon, matrix_lat, data_step[ range(len(data_step[:,0]) -1 , -1 , -1 ) , : ], np.array([0]), colors='r', interpolation='linear')
 				path_new = line_new.collections[0].get_paths()[0]
 				ver_new = path_new.vertices
+				dist_new = np.zeros( len(ver_new ) - 1 )
+				plt.close()
+				for ic in range( len( ver_new ) - 1):
+					utm1 = utm.from_latlon( ver_new[ic,1] , ver_new[ic,0] )
+					utm2 = utm.from_latlon( ver_new[ic+1,1] , ver_new[ic+1,0] )
+					distance_lon_1 = abs(utm2[0] - utm1[0])
+					distance_lat_1 = abs(utm2[1] - utm1[1])
+					dist_new[ic] = np.sqrt( distance_lon_1 ** 2 + distance_lat_1 ** 2)
+				dist_new_tot = sum(dist_new)
+				dist_new_step = np.arange( 0 , dist_new_tot - 1e-5, dist_new_tot / 1000 )
+				cum_new_compare = 0.0 * dist_new
+				for ic in range( len( dist_new ) ):
+					cum_new_compare[ic] = sum( dist_new[0:ic+1] )
+				vertices_new = np.zeros(( len(dist_new_step) , 2))
+				for ic in range( len(dist_new_step) ):
+					for jc in range( len( cum_new_compare )):
+						if( dist_new_step[ic] < cum_new_compare[jc] ):
+							if( jc == 0 ):
+								factor = (cum_new_compare[jc] - dist_new_step[ic]) / cum_new_compare[jc]
+							else:
+								factor = (cum_new_compare[jc] - dist_new_step[ic]) / (cum_new_compare[jc] - cum_new_compare[jc-1] )
+							vertices_new[ic,0] = ver_new[jc+1][0] * (1 - factor) + ver_new[jc][0] * (factor)
+							vertices_new[ic,1] = ver_new[jc+1][1] * (1 - factor) + ver_new[jc][1] * (factor)
+							break
 				sum_differences = 0
-				for ic in range(0,len(ver_compare)):
-					distance_lines = np.abs( ver_compare[ic,:] - ver_new )
+				dist_dir1 = np.zeros(( len(vertices_compare) , 1))
+				for ic in range(0,len(vertices_compare)):
+					distance_lines = np.abs( vertices_compare[ic,:] - vertices_new )
 					distance_lines = (distance_lines[:,0]*step_lon_m/step_lon_deg  * distance_lines[:,0]*step_lon_m/step_lon_deg  ) + (distance_lines[:,1]*step_lat_m/step_lat_deg  * distance_lines[:,1]*step_lat_m/step_lat_deg  )
-					sum_differences = sum_differences + (np.min(distance_lines)) / (len(ver_compare) + len(ver_new))
-				for ic in range(0,len(ver_new)):
-					distance_lines = np.abs( ver_new[ic,:] - ver_compare )
+					dist_dir1[ic] = np.sqrt(np.min(distance_lines))
+					sum_differences = sum_differences + (np.min(distance_lines)) / (len(vertices_compare) + len(vertices_new))
+				dist_dir2 = np.zeros(( len(vertices_new) , 1))
+				for ic in range(0,len(vertices_new)):
+					distance_lines = np.abs( vertices_new[ic,:] - vertices_compare )
 					distance_lines = (distance_lines[:,0]*step_lon_m/step_lon_deg  * distance_lines[:,0]*step_lon_m/step_lon_deg  ) + (distance_lines[:,1]*step_lat_m/step_lat_deg  * distance_lines[:,1]*step_lat_m/step_lat_deg  )
-					sum_differences = sum_differences + (np.min(distance_lines)) / (len(ver_compare) + len(ver_new))
-
+					dist_dir2[ic] = np.sqrt(np.min(distance_lines))
+					sum_differences = sum_differences + (np.min(distance_lines)) / (len(vertices_compare) + len(vertices_new))
 				plt.close()
 
-				string_compare = string_compare + str(height_vector[i]) + " " + str(hl_vector[i]) + " " +  str(sum(sum(data_step))) + " " + str(sum(sum(matrix_compare))) + " " + str(sum(sum(data_step * matrix_compare))) + " " + str( sum(sum( np.maximum(data_step, matrix_compare)  ))) + " " + str(sum_differences) + "\n"
+				string_compare = string_compare + str(height_vector[i]) + " " + str(hl_vector[i]) + " " +  str( (sum(sum(data_step * matrix_compare))) / (sum(sum( np.maximum(data_step, matrix_compare)))) ) + " " + str( np.sqrt(sum_differences )) + " " + str( str( max( max( dist_dir1[:] ) , max(dist_dir2[:] ) )[0] )  ) + " " + str( distances.max() / runout_min ) + " " + str( distances.max() ) + " " + str( runout_min ) + " " +  str( (sum(sum(data_step * matrix_compare * data_direction[ range(len(data_direction[:,0]) -1 , -1 , -1 ) , : ] ) ) ) / (sum(sum( np.maximum(data_step, matrix_compare) * data_direction[ range(len(data_direction[:,0]) -1 , -1 , -1 ) , : ] )) ) ) + " " + str( (distances * data_direction).max() ) + "\n"
 			data_cones = data_cones + data_step
 
 		if( save_data == 1 ):
 
 			distances = np.power(np.power(( matrix_lon - lon_cen_vector[i]) * (step_lon_m / step_lon_deg),2) + np.power(( matrix_lat - lat_cen_vector[i])*(step_lat_m / step_lat_deg),2),0.5) 
-
-			if(save_direction == 1):
-				for ii in range(length_direction):
-					distances_corrected = distances * data_direction[:,:,ii]
-					distances_corrected = distances_corrected * data_step[ range(len(data_cones[:,0]) -1 , -1 , -1 ) , : ]
-					summary_data[i,7 + ii]  = distances_corrected.max() / 1000.0
-
 			distances = distances * data_step[ range(len(data_cones[:,0]) -1 , -1 , -1 ) , : ]
+
 			summary_data[i,4] = sum(sum(data_step)) * area_pixel
 			summary_data[i,5] = distances.max() / 1000.0
 			summary_data[i,6] = runout_min / 1000.0
@@ -1231,17 +1310,11 @@ if( source_dem == 2 ):
 
 		print(' Simulation finished (N = ' + str(i+1) + ')')
 
-if(boolean_compare > 0):
-		text_file = open('Results/' + run_name + '/' + 'comparison.txt', 'w')
-		text_file.write(string_compare)
-		text_file.close()
-
 # SAVE DATA
 if( save_data == 1 ):
 
 	print('Saving data')
 	if(source_dem == 1 or source_dem == 3):
-
 		cellsize =  max(step_lon_m, step_lat_m)
 		if( cellsize == step_lon_m ):
 			output_cells_lon = cells_lon - 1
@@ -1249,7 +1322,6 @@ if( save_data == 1 ):
 		else:
 			output_cells_lon = np.int(cells_lon * step_lon_m / step_lat_m)
 			output_cells_lat = cells_lat - 1
-
 	else:
 		output_cells_lat = n_north
 		output_cells_lon = n_east
@@ -1268,7 +1340,6 @@ if( save_data == 1 ):
 				matrix_output = interpol_pos(utm_save[0], utm_save[1], step_lon_m, step_lat_m, utm_save[0] + i*cellsize , utm_save[1] + j*cellsize , cells_lon, cells_lat, data_cones_save )
 				text_file.write(' ' + str(matrix_output))
 		text_file.close()
-
 	else:
 		for i in range(output_cells_lat-1,-1,-1):
 			text_file.write('\n')
@@ -1309,6 +1380,10 @@ if( save_data == 1 ):
 	elif(source_dem == 2):		
 		np.savetxt('Results/' + run_name + '/' + 'matrix_east.txt', matrix_east, fmt='%.5e')
 		np.savetxt('Results/' + run_name + '/' + 'matrix_north.txt', matrix_north, fmt='%.5e')
+	if( type_sim == 2 ):
+		text_file = open('Results/' + run_name + '/' + 'comparison.txt', 'w')
+		text_file.write(string_compare)
+		text_file.close()
 
 # FIGURES
 if((source_dem == 1 or source_dem == 3) and (plot_flag == 1)):
@@ -1336,9 +1411,6 @@ if((source_dem == 1 or source_dem == 3) and (plot_flag == 1)):
 		CS_Topo = plt.contourf(matrix_lon,matrix_lat,Topography, 100, alpha = 1.0, cmap = cmapg ,antialiased=True)
 		CS_Sea = plt.contourf(matrix_lon,matrix_lat,Topography_Sea, 100, alpha = 0.5, cmap = cmaps ,antialiased=True)
 		CS = plt.contourf(matrix_lon, matrix_lat, data_cones, 100, alpha= 0.3, cmap=cmapr, antialiased=True)
-		if( boolean_compare == 2 ):
-			matrix_compare = matrix_compare[ range(len(matrix_compare[:,0]) -1 , -1 , -1 ) , : ]
-			line_compare = plt.contour(matrix_lon, matrix_lat, matrix_compare, np.array([0]), colors='b', interpolation='linear')
 
 	plt.axes().set_aspect(step_lat_m/step_lon_m)
 	plt.xlabel('Longitude $[^\circ]$')
@@ -1356,6 +1428,11 @@ if((source_dem == 1 or source_dem == 3) and (plot_flag == 1)):
 
 		for i in range(1,len(polygon)):
 			plt.plot( polygon[i][0],polygon[i][1], 'b.', markersize=2)
+
+	if( type_sim == 2 ):
+		line_compare = plt.contour(matrix_lon, matrix_lat, matrix_compare[ range(len(matrix_compare[:,0]) -1 , -1 , -1 ) , : ], np.array([0]), colors='b', interpolation='linear')
+		if( ang_sigma_cal < 360 ):
+			line_direction = plt.contour(matrix_lon, matrix_lat, data_direction , np.array([0]), colors='g', interpolation='linear')
 
 	plt.savefig('Results/' + run_name + '/Map.png')
 
