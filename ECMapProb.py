@@ -82,7 +82,7 @@ file_txt.close()
 [dist_source, var_cen, lon_cen, lat_cen, east_cen, north_cen, azimuth_lin] = [1, 0.0, np.nan, np.nan, np.nan, np.nan, np.nan]
 [length_lin, radius_rad, ang1_rad, ang2_rad] = [np.nan, np.nan, np.nan, np.nan]
 [height, hl, var_height, var_hl, N, cone_levels, save_data, dist_input, redist_energy, plot_flag, sea_flag] = [np.nan, 0.2, 200.0, 0.05, 100, 1, 0, 1, 4, 1, 0]
-[comparison_polygon, ang_cal, ang2_sigma_cal, input_file] = ['', np.nan, np.nan, '']
+[comparison_polygon, ang_cal, ang_sigma_cal, input_file] = ['', np.nan, np.nan, '']
 
 for i in range(0,len(line)):
 	line[i] = line[i].replace('=',' ')
