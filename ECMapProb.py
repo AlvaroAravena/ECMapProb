@@ -6,7 +6,6 @@ from math import sin, cos, sqrt, atan2, radians, log, factorial, tan
 import sys
 import os
 from PIL import Image, ImageDraw
-from io import open
 import shutil
 import utm
 import warnings
