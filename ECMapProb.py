@@ -71,7 +71,6 @@ def interpol_pos(lon1, lat1, step_lon_deg, step_lat_deg, lon_cen, lat_cen, cells
 print('Reading input file')
 
 current_path = os.getcwd()
-file_txt = open('input_data.py', encoding = 'utf-8')
 try:
 	file_txt = open('input_data.py', encoding = 'utf-8')
 except:
