@@ -53,7 +53,7 @@ var_hl = 0.05
 dist_input = 2
 
 # Number of simulations computed by the code
-N = 300
+N = 30
 
 # Save results in files txt ( 1 => Yes / 0 => No )
 save_data = 1
