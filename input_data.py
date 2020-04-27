@@ -1,5 +1,5 @@
 # Name of the run (used to save the parameters and the output)
-run_name = Example
+run_name = Default
 
 # Source of DEM 
 # source_dem = type of input data (1 => SRTM 30 m / 2 => Uploaded DEM (UTM) / 3 => Uploaded Data (lat,lon)).

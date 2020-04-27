@@ -6,6 +6,7 @@ from math import sin, cos, sqrt, atan2, radians, log, factorial, tan
 import sys
 import os
 from PIL import Image, ImageDraw
+from io import open
 import shutil
 import utm
 import warnings
@@ -71,8 +72,9 @@ def interpol_pos(lon1, lat1, step_lon_deg, step_lat_deg, lon_cen, lat_cen, cells
 print('Reading input file')
 
 current_path = os.getcwd()
+file_txt = open('input_data.py', encoding = 'utf-8')
 try:
-	file_txt = open('input_data.py')
+	file_txt = open('input_data.py', encoding = 'utf-8')
 except:
 	print('input_data.py not found in ' + str(current_path))
 	sys.exit(0)
@@ -594,13 +596,13 @@ anglen_res3 = 360 / angstep_res3
 if( redist_energy == 3 or redist_energy == 4 ):
 	factor_mult = 50.0
 	center_elim = 0.5
-	aux_backward = 1 / (1 + np.exp(factor_mult * (np.linspace(0.0, 1.0, anglen/2 + 1) - center_elim) ) )
+	aux_backward = 1 / (1 + np.exp(factor_mult * (np.linspace(0.0, 1.0, num = int( anglen/2 + 1 ) ) - center_elim) ) )
 	vector_backward_1 = np.zeros(int(anglen))
 	vector_backward_1[0:int(anglen/2 - 1)] = aux_backward[int(anglen/2-1):0:-1]
 	vector_backward_1[int(anglen/2-1):] = aux_backward[:]
 	vector_backward_1[vector_backward_1 < 1e-3] = 0
 	vector_backward_1[vector_backward_1 > 1.0 - 1e-3] = 1.0
-	aux_backward = 1 / (1 + np.exp(factor_mult * (np.linspace(1.0/(anglen/2), 1.0 - 1.0/(anglen/2), anglen/2 ) - center_elim) ) )
+	aux_backward = 1 / (1 + np.exp(factor_mult * (np.linspace(1.0/(anglen/2), 1.0 - 1.0/(anglen/2), num = int( anglen/2 ) ) - center_elim) ) )
 	vector_backward_2 = np.zeros(int(anglen))
 	vector_backward_2[0:int(anglen/2)] = aux_backward[::-1]
 	vector_backward_2[int(anglen/2):] = aux_backward[:]
@@ -1331,7 +1333,7 @@ if( save_data == 1 ):
 	text_file.write('xllcorner'+' '+ str(utm_save[0]) +'\n')
 	text_file.write('yllcorner'+' '+ str(utm_save[1]) +'\n')
 	text_file.write('cellsize'+' '+ str(cellsize) +'\n')
-	text_file.write('NODATA_value' +' ' +'-9999');
+	text_file.write('NODATA_value' +' ' +'-9999')
 	data_cones_save = data_cones / N
 	if(source_dem == 1 or source_dem == 3):
 		for j in range(0, output_cells_lat):
@@ -1374,8 +1376,8 @@ if( save_data == 1 ):
 			text_file.write('cells_lat ' + str(cells_lat) + '\n')
 			for i in range(cells_lat):
 				for j in range(cells_lon):
-					text_file.write(str(Topography[i,j]) + ' ')
-				text_file.write('\n')		
+					text_file.write( str(Topography[i,j]) + ' ')
+				text_file.write('\n')	
 			text_file.close()
 	elif(source_dem == 2):		
 		np.savetxt('Results/' + run_name + '/' + 'matrix_east.txt', matrix_east, fmt='%.5e')
