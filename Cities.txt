@@ -5,7 +5,7 @@ ad,encamp,Encamp,03,11224,42.5333333,1.5833333
 ad,la massana,La Massana,04,7211,42.55,1.5166667
 ad,les escaldes,Les Escaldes,08,15854,42.5,1.5333333
 ad,ordino,Ordino,05,2553,42.55,1.5333333
-ad,sant julia de loria,Sant Julià de Lòria,06,8020,42.4666667,1.5
+ad,sant julia de loria,Sant Julia de Loria,06,8020,42.4666667,1.5
 ae,abu dhabi,Abu Dhabi,01,603687,24.466667,54.366667
 ae,dubai,Dubai,03,1137376,25.258172,55.304717
 ae,sharjah,Sharjah,06,543942,25.35731,55.403304
@@ -1723,7 +1723,7 @@ be,perwez,Perwez,02,7340,50.616667,4.816667
 be,philippeville,Philippeville,07,8051,50.2,4.533333
 be,pittem,Pittem,09,6589,51,3.266667
 be,plombieres,Plombières,04,9596,50.733333,5.95
-be,pont-a-celles,Pont-à-Celles,03,15909,50.5,4.35
+be,pont-a-celles,Pont-a-Celles,03,15909,50.5,4.35
 be,poperinge,Poperinge,09,19537,50.85,2.716667
 be,profondeville,Profondeville,07,11401,50.383333,4.866667
 be,putte,Putte,01,15276,51.066667,4.633333
@@ -2274,7 +2274,7 @@ br,acopiara,Acopiara,06,24562,-6.1,-39.45
 br,acu,Açu,22,36126,-5.577222,-36.9075
 br,acucena,Açucena,15,14506,-19.066667,-42.533333
 br,adamantina,Adamantina,27,31079,-21.683333,-51.066667
-br,afogados da ingazeira,Afogados da Ingàzeira,30,25060,-7.75,-37.65
+br,afogados da ingazeira,Afogados da Ingazeira,30,25060,-7.75,-37.65
 br,afonso bezerra,Afonso Bezerra,22,6947,-5.498056,-36.509167
 br,afonso claudio,Afonso Claudio,08,13543,-20.083333,-41.133333
 br,afua,Afua,16,7031,-.166667,-50.383333
@@ -2596,7 +2596,7 @@ br,caico,Caico,22,54935,-6.45,-37.1
 br,caieiras,Caieiras,27,87199,-23.36193,-46.740681
 br,cajamar,Cajamar,27,56684,-23.35,-46.883333
 br,cajati,Cajati,27,27566,-24.728502,-48.110541
-br,cajazeiras,Cajàzeiras,17,43914,-6.9,-38.566667
+br,cajazeiras,Cajazeiras,17,43914,-6.9,-38.566667
 br,cajueiro,Cajueiro,02,15063,-9.716667,-36.45
 br,cajuru,Cajuru,27,19540,-21.283333,-47.3
 br,caldas novas,Caldas Novas,29,63681,-17.75,-48.633333
@@ -2682,7 +2682,7 @@ br,caratinga,Caratinga,15,60067,-19.783333,-42.133333
 br,carauari,Carauari,04,18059,-4.879167,-66.898056
 br,caraubas,Caraúbas,22,12462,-5.53,-37.303056
 br,caravelas,Caravelas,05,11322,-17.75,-39.25
-br,carazinho,Caràzinho,23,59418,-28.3,-52.8
+br,carazinho,Carazinho,23,59418,-28.3,-52.8
 br,cardoso,Cardoso,27,10556,-20.066667,-49.9
 br,careiro,Careiro,04,6659,-3.2,-59.75
 br,careiro da varzea,Careiro da Varzea,04,1092,-3.2,-59.75
@@ -2743,7 +2743,7 @@ br,charqueada,Charqueada,27,12391,-22.5,-47.766667
 br,charqueadas,Charqueadas,23,32076,-29.966667,-51.633333
 br,chavantes,Chavantes,27,10306,-23.033333,-49.716667
 br,chopinzinho,Chopinzinho,18,14142,-25.85,-52.5
-br,chorozinho,Choròzinho,06,9755,-4.3,-38.483333
+br,chorozinho,Chorozinho,06,9755,-4.3,-38.483333
 br,cianorte,Cianorte,18,55995,-23.616667,-52.616667
 br,cicero dantas,Cicero Dantas,05,18317,-10.6,-38.383333
 br,cidreira,Cidreira,23,8965,-30.183333,-50.2
@@ -3233,9 +3233,9 @@ br,joinville,Joinville,26,461312,-26.3,-48.833333
 br,jose bonifacio,Jose Bonifacio,27,27828,-21.05,-49.683333
 br,jose de freitas,Jose de Freitas,20,21433,-4.75,-42.583333
 br,juatuba,Juatuba,15,24551,-19.95,-44.333333
-br,juazeirinho,Juàzeirinho,17,8846,-6.816667,-38.05
+br,juazeirinho,Juazeirinho,17,8846,-6.816667,-38.05
 br,juazeiro do norte,Juazeiro do Norte,06,225234,-7.2,-39.333333
-br,juazeiro,Juàzeiro,05,137807,-9.5,-40.5
+br,juazeiro,Juazeiro,05,137807,-9.5,-40.5
 br,jucas,Jucas,06,14822,-6.533333,-39.533333
 br,jucurutu,Jucurutu,22,11535,-6.033333,-37.016667
 br,juiz de fora,Juiz de Fora,15,470201,-21.751667,-43.352778
@@ -3679,7 +3679,7 @@ br,piranhas,Piranhas,29,9887,-16.516667,-51.85
 br,pirapemas,Pirapemas,13,6441,-3.716667,-44.233333
 br,pirapora do bom jesus,Pirapora do Bom Jesus,27,14690,-23.4,-47
 br,pirapora,Pirapora,15,51657,-17.35,-44.933333
-br,pirapozinho,Pirapòzinho,27,21711,-22.25,-51.5
+br,pirapozinho,Pirapozinho,27,21711,-22.25,-51.5
 br,piraquara,Piraquara,18,41162,-25.433333,-49.066667
 br,pirassununga,Pirassununga,27,60414,-21.983333,-47.416667
 br,pirenopolis,Pirenopolis,29,13615,-15.85,-48.95
@@ -12225,7 +12225,7 @@ fr,plougastel-daoulas,Plougastel-Daoulas,A2,13128,48.366667,-4.366667
 fr,plouzane,Plouzane,A2,12588,48.383333,-4.616667
 fr,poissy,Poissy,A8,35663,48.92902,2.049521
 fr,poitiers,Poitiers,B7,86639,46.583333,.333333
-fr,pont-a-mousson,Pont-à-Mousson,B2,14657,48.907861,6.058897
+fr,pont-a-mousson,Pont-a-Mousson,B2,14657,48.907861,6.058897
 fr,pontarlier,Pontarlier,A6,18665,46.908792,6.35917
 fr,pont-audemer,Pont-Audemer,A7,9125,49.35,.516667
 fr,pontivy,Pontivy,A2,13789,48.066539,-2.96442
@@ -20561,7 +20561,7 @@ it,busca,Busca,12,10168,44.516667,7.483333
 it,bussolengo,Bussolengo,20,18755,45.466667,10.85
 it,busto arsizio,Busto Arsizio,09,79229,45.616667,8.85
 it,busto garolfo,Busto Garolfo,09,13520,45.55,8.883333
-it,cabras,Càbras,14,9249,39.93,8.531389
+it,cabras,Cabras,14,9249,39.93,8.531389
 it,cadoneghe,Cadoneghe,20,15600,45.433333,11.916667
 it,cagliari,Cagliari,14,157343,39.216667,9.116667
 it,cagli,Cagli,10,9068,43.55,12.65
@@ -20708,11 +20708,11 @@ it,cingoli,Cingoli,10,10261,43.366667,13.216667
 it,cinisello balsamo,Cinisello Balsamo,09,74123,45.55,9.216667
 it,cinisi,Cinisi,15,11305,38.15,13.1
 it,cirie,Ciriè,12,18882,45.233333,7.6
-it,ciro marina,Cirò Marina,03,13929,39.366667,17.133333
+it,ciro marina,Ciro Marina,03,13929,39.366667,17.133333
 it,cisterna,Cisterna,07,35945,41.583333,12.816667
 it,cisternino,Cisternino,13,12265,40.733333,17.416667
 it,cittadella,Cittadella,20,19681,45.65,11.783333
-it,citta di castello,Città di Castello,18,39959,43.45,12.233333
+it,citta di castello,Citta di Castello,18,39959,43.45,12.233333
 it,cittanova,Cittanova,03,10282,38.35,16.083333
 it,cividale del friuli,Cividale del Friuli,06,11590,46.093056,13.4275
 it,civita castellana,Civita Castellana,07,16785,42.283333,12.416667
@@ -21059,12 +21059,12 @@ it,mortara,Mortara,09,14300,45.25,8.733333
 it,motta di livenza,Motta di Livenza,20,10501,45.778056,12.602778
 it,mottola,Mottola,13,16686,40.635278,17.035278
 it,muggia,Múggia,06,13470,45.603056,13.767222
-it,muggio,Muggiò,09,21561,45.583333,9.216667
+it,muggio,Muggio,09,21561,45.583333,9.216667
 it,mugnano di napoli,Mugnano di Napoli,04,32847,40.916667,14.2
 it,musile di piave,Musile di Piave,20,10779,45.616667,12.55
 it,mussomeli,Mussomeli,15,11846,37.583333,13.75
 it,naples,Naples,04,981284,40.833333,14.25
-it,nardo,Nardò,13,31294,40.183333,18.033333
+it,nardo,Nardo,13,31294,40.183333,18.033333
 it,narni,Narni,18,20567,42.516667,12.516667
 it,naro,Naro,15,8747,37.3,13.783333
 it,nave,Nave,09,11001,45.583333,10.283333
@@ -21182,7 +21182,7 @@ it,pontassieve,Pontassieve,16,21423,43.766667,11.433333
 it,pontecagnano,Pontecagnano,04,22997,40.633333,14.883333
 it,pontecorvo,Pontecorvo,07,14863,41.45,13.666667
 it,pontedera,Pontedera,16,26713,43.666667,10.633333
-it,ponte san nicolo,Ponte San Nicolò,20,13148,45.366667,11.616667
+it,ponte san nicolo,Ponte San Nicolo,20,13148,45.366667,11.616667
 it,ponte san pietro,Ponte San Pietro,09,9873,45.7,9.583333
 it,pontinia,Pontinia,07,14621,41.4,13.033333
 it,porcia,Porcia,06,13981,45.96,12.607222
@@ -21271,7 +21271,7 @@ it,sala consilina,Sala Consilina,04,12903,40.383333,15.6
 it,salemi,Salemi,15,11937,37.816667,12.8
 it,salerno,Salerno,04,144147,40.683333,14.783333
 it,salice salentino,Salice Salentino,13,8932,40.383333,17.966667
-it,salo,Salò,09,10525,45.6,10.516667
+it,salo,Salo,09,10525,45.6,10.516667
 it,salsomaggiore terme,Salsomaggiore Terme,05,18565,44.816667,9.983333
 it,saluzzo,Saluzzo,12,16080,44.65,7.483333
 it,salzano,Salzano,20,12306,45.521944,12.108333
@@ -21280,7 +21280,7 @@ it,san benedetto del tronto,San Benedetto del Tronto,10,43767,42.95,13.883333
 it,san bonifacio,San Bonifacio,20,18684,45.4,11.266667
 it,san cataldo,San Cataldo,15,24487,37.483333,13.983333
 it,san cesareo,San Cesareo,07,11312,41.816667,12.8
-it,san dona di piave,San Donà di Piave,20,37452,45.631667,12.569444
+it,san dona di piave,San Dona di Piave,20,37452,45.631667,12.569444
 it,san donato milanese,San Donato Milanese,09,33116,45.416667,9.266667
 it,san felice sul panaro,San Felice sul Panaro,05,10589,44.833333,11.133333
 it,san ferdinando di puglia,San Ferdinando di Puglia,13,14792,41.3,16.066667
@@ -21329,7 +21329,7 @@ it,santa maria capua vetere,Santa Maria Capua Vetere,04,29780,41.083333,14.25
 it,santa maria di sala,Santa Maria di Sala,20,15322,45.506944,12.029722
 it,santa marinella,Santa Marinella,07,17577,42.033333,11.85
 it,santeramo in colle,Santeramo in Colle,13,27024,40.8,16.75
-it,santhia,Santhià,12,9614,45.366667,8.166667
+it,santhia,Santhia,12,9614,45.366667,8.166667
 it,santo stino di livenza,Santo Stino di Livenza,20,12294,45.735,12.680833
 it,san vito al tagliamento,San Vito al Tagliamento,06,13834,45.914444,12.85
 it,san vito dei normanni,San Vito dei Normanni,13,20057,40.65,17.7
@@ -47445,9 +47445,9 @@ vn,bac giang,Bac Giang,71,53732,21.266667,106.2
 vn,bac lieu,Bac Lieu,73,107920,9.285,105.724444
 vn,bac ninh,Bac Ninh,74,43564,21.183333,106.05
 vn,ben tre,Ben Tre,03,59449,10.233333,106.383333
-vn,bien hoa,Biên Hòa,43,407224,10.95,106.816667
+vn,bien hoa,Biên Hoa,43,407224,10.95,106.816667
 vn,buon me thuot,Buon Me Thuot,07,146986,12.666667,108.05
-vn,ca mau,Cà Mau,77,111903,9.176944,105.15
+vn,ca mau,Ca Mau,77,111903,9.176944,105.15
 vn,cam pha,Cam Pha,30,135487,21.016667,107.316667
 vn,cam ranh,Cam Ranh,54,146771,11.9,109.15
 vn,can tho,Can Tho,48,259608,10.033333,105.783333
@@ -47459,13 +47459,13 @@ vn,dien bien,Dien Bien,22,40292,21.383333,103.016667
 vn,dong hoi,Dong Hoi,04,31044,17.5,106.633333
 vn,dong hoi,Dong Hoi,62,31044,17.483333,106.6
 vn,dong xoai,Dong Xoai,76,23978,11.533333,106.916667
-vn,ha giang,Hà Giang,50,32690,22.833333,104.983333
+vn,ha giang,Ha Giang,50,32690,22.833333,104.983333
 vn,hai duong,Hai Duong,79,58035,20.933333,106.316667
 vn,hai phong,Hai Phong,13,602718,20.856111,106.682222
 vn,hanoi,Hanoi,44,1431377,21.033333,105.85
 vn,ha noi,Ha Noi,44,1431377,21.033333,105.85
 vn,ha tinh,Ha Tinh,52,26547,18.333333,105.9
-vn,hoa binh,Hòa Bình,53,105268,20.813333,105.338333
+vn,hoa binh,Hoa Bình,53,105268,20.813333,105.338333
 vn,ho chi minh city,Ho Chi Minh City,20,3467426,10.75,106.666667
 vn,hoi an,Hoi An,84,32757,15.879444,108.335
 vn,hong gai,Hong Gai,30,148072,20.951111,107.08
@@ -47473,7 +47473,7 @@ vn,hue,Hue,66,287228,16.466667,107.6
 vn,kon tum,Kon Tum,10,47414,14.366667,107.95
 vn,kon tum,Kon Tum,55,47414,14.35,108
 vn,lang son,Lang Son,39,34964,21.833333,106.733333
-vn,lao cai,Lào Cai,56,36502,22.483333,103.95
+vn,lao cai,Lao Cai,56,36502,22.483333,103.95
 vn,long xuyen,Long Xuyên,01,158159,10.383333,105.416667
 vn,my tho,My Tho,37,122315,10.35,106.35
 vn,nam dinh,Nam Dinh,82,193507,20.416667,106.166667
@@ -47495,9 +47495,9 @@ vn,tay ninh,Tây Ninh,33,47971,11.3,106.1
 vn,thai binh,Thai Bình,35,53095,20.45,106.333333
 vn,thai nguyen,Thai Nguyên,85,133882,21.592778,105.844167
 vn,thanh hoa,Thanh Hoa,34,112482,19.8,105.766667
-vn,tra vinh,Trà Vinh,67,57413,9.934722,106.345278
+vn,tra vinh,Tra Vinh,67,57413,9.934722,106.345278
 vn,tuyen quang,Tuyên Quang,68,36435,21.823333,105.218056
-vn,tuy hoa,Tuy Hòa,61,69602,13.083333,109.3
+vn,tuy hoa,Tuy Hoa,61,69602,13.083333,109.3
 vn,uong bi,Uông Bi,30,63829,21.033333,106.783333
 vn,viet tri,Viet Tri,86,71462,21.306542,105.418847
 vn,vinh long,Vinh Long,69,103323,10.25,105.966667
