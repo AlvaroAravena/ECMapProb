@@ -20592,7 +20592,7 @@ it,canegrate,Canegrate,09,12649,45.566667,8.933333
 it,canelli,Canelli,12,10595,44.716667,8.283333
 it,canicatti,Canicatti,15,32514,37.35,13.85
 it,canosa di puglia,Canosa di Puglia,13,30426,41.216667,16.066667
-it,cantu,Cantù,09,36513,45.733333,9.133333
+it,cantu,Cantu,09,36513,45.733333,9.133333
 it,caorle,Caorle,20,11647,45.599722,12.883889
 it,capaccio,Capaccio,04,21122,40.416667,15.083333
 it,capaci,Capaci,15,10559,38.166667,13.233333
@@ -20675,7 +20675,7 @@ it,cave,Cave,07,11014,41.816667,12.933333
 it,cazzago san martino,Cazzago San Martino,09,10732,45.583333,10.016667
 it,ceccano,Ceccano,07,24918,41.566667,13.333333
 it,cecina,Cecina,16,27969,43.316667,10.516667
-it,cefalu,Cefalù,15,14334,38.033333,14.016667
+it,cefalu,Cefalu,15,14334,38.033333,14.016667
 it,ceglie messapica,Ceglie Messapica,13,20695,40.65,17.516667
 it,celano,Celano,01,11701,42.083333,13.55
 it,cento,Cento,05,30001,44.716667,11.283333
