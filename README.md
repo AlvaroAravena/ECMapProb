@@ -1,6 +1,9 @@
 # ECMapProb
 Probability maps of pyroclastic density currents (PDCs) by using a modified approach of the energy cone model and SRTM 30 m elevation data.
 
+Citation of the paper describing the branching strategy adopted here:
+Aravena, A., Cioni, R., Bevilacqua, A., de' Michieli Vitturi, M., Esposti Ongaro, T., and Neri, A. (2020). Tree‐branching based enhancement of kinetic energy models for reproducing channelization processes of pyroclastic density currents. Journal of Geophysical Research: Solid Earth, 125, e2019JB019271.
+
 Usage normal version:
  python3 ECMapProb.py
 
