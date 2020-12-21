@@ -4,7 +4,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from math import sin, cos, sqrt, atan2, radians, log, factorial, tan
 from scipy import interpolate
-from scipy.stats import norm, uniform, gamma
+from scipy.stats import norm, uniform, gamma, lognorm
 from scipy.ndimage import gaussian_filter
 import sys
 import os
@@ -189,7 +189,7 @@ def read_input():
 		if( not type_input in [ 1 , 2 , 3 ] ):
 			print( 'Problems with input parameters. Variable type_input must be defined properly.' )
 			sys.exit( 0 )
-		if( type_input == 1 and ( not dist_input_height in [ 1 , 2 , 3 ] or not dist_input_hl in [ 1 , 2 , 3 ] ) ):
+		if( type_input == 1 and ( not dist_input_height in [ 1 , 2 , 3 , 4 ] or not dist_input_hl in [ 1 , 2 , 3 , 4 ] ) ):
 			print( 'Problems with input parameters. Variables (dist_input_height, dist_input_hl) must be defined properly.' )
 			sys.exit( 0 )
 		if( type_input in [ 2 , 3 ] ):
@@ -201,20 +201,20 @@ def read_input():
 					print('Problems with input parameters. Variable calibration_type must be defined properly.')
 					sys.exit(0)
 				if( calibration_type in [ 5 , 6 ] ):
-					if( not dist_distance_calibration in [ 1 , 2 , 3 ] ):
+					if( not dist_distance_calibration in [ 1 , 2 , 3 , 4 ] ):
 						print('Problems with input parameters. Variable dist_distance_calibration must be defined properly.')
 						sys.exit(0)
-					if( dist_distance_calibration in [ 1 , 2 ] and ( np.isnan( distance_calibration ) or np.isnan( var_distance_calibration ) ) ):
+					if( dist_distance_calibration in [ 1 , 2 , 4 ] and ( np.isnan( distance_calibration ) or np.isnan( var_distance_calibration ) ) ):
 						print('Problems with input parameters. Variables (distance_calibration, var_distance_calibration) must be defined.')
 						sys.exit(0)
 					if( dist_distance_calibration == 3 and ( np.isnan( distance_calibration_k ) or np.isnan( distance_calibration_theta ) ) ):
 						print('Problems with input parameters. Variables (distance_calibration_k, distance_calibration_theta) must be defined.')
 						sys.exit(0)						
 				if( calibration_type == 7 ):
-					if( not dist_area_calibration in [ 1 , 2 , 3 ] ):
+					if( not dist_area_calibration in [ 1 , 2 , 3 , 4 ] ):
 						print('Problems with input parameters. Variable dist_area_calibration must be defined properly.')
 						sys.exit(0)
-					if( dist_area_calibration in [ 1 , 2 ] and ( np.isnan( area_calibration ) or np.isnan( var_area_calibration ) ) ):
+					if( dist_area_calibration in [ 1 , 2 , 4 ] and ( np.isnan( area_calibration ) or np.isnan( var_area_calibration ) ) ):
 						print('Problems with input parameters. Variables (area_calibration, var_area_calibration) must be defined.')
 						sys.exit(0)
 					if( dist_area_calibration == 3 and ( np.isnan( area_calibration_k ) or np.isnan( area_calibration_theta ) ) ):
@@ -242,7 +242,7 @@ def read_input():
 			print('Problems with input parameters. Collapse position (east_cen, north_cen) must be defined.')
 			sys.exit(0)
 	if( type_input == 1 ):
-		if( dist_input_height in [ 1 , 2 ] ):
+		if( dist_input_height in [ 1 , 2 , 4 ] ):
 			if( np.isnan( height ) or np.isnan( var_height ) ):
 				print('Problems with input parameters. Input parameters (height, var_height) must be defined.')
 				sys.exit(0)
@@ -250,7 +250,7 @@ def read_input():
 			if( np.isnan( height_k ) or np.isnan( height_theta ) ):
 				print('Problems with input parameters. Input parameters (height_k, height_theta) must be defined.')
 				sys.exit(0)
-		if( dist_input_hl in [ 1 , 2 ] ):
+		if( dist_input_hl in [ 1 , 2 , 4 ] ):
 			if( np.isnan( hl ) or np.isnan( var_hl ) ):
 				print('Problems with input parameters. Input parameters (hl, var_hl) must be defined.')
 				sys.exit(0)
@@ -482,11 +482,11 @@ def create_inputs( type_sim , type_input , dist_input_height , dist_input_hl , i
 		Yi_reshaped = np.reshape( Yi , ( number_steps_dense * number_steps_dense , 1 ) )
 		if( calibration_type in [ 1 , 2 , 3 , 4 ] ):
 			if( np.isnan( file_data[ : , 2 ] ).any()  ):
-                                print('Calibration data is only associated with distance- and area-based calibrations.')
-                                if( bol_friendly == 0 ):
-                                        sys.exit( 0 )
-                                else:
-                                        return [ np.zeros( ( 0 ) ) , np.zeros( ( 0 ) ) , N , variable_vector , limits_calib , Probability_Save ]
+				print('Calibration data is only associated with distance- and area-based calibrations.')
+				if( bol_friendly == 0 ):
+					sys.exit( 0 )
+				else:
+					return [ np.zeros( ( 0 ) ) , np.zeros( ( 0 ) ) , N , variable_vector , limits_calib , Probability_Save ]
 			if( calibration_type == 1 ):
 				z = np.reshape( file_data[ : , 2 ] , ( number_steps , number_steps ) )
 				interpolator = interpolate.interp2d( xi_sim , yi_sim , z , kind = 'cubic' )
@@ -494,23 +494,13 @@ def create_inputs( type_sim , type_input , dist_input_height , dist_input_hl , i
 			elif( calibration_type == 2 ):
 				z = np.reshape( file_data[ : , 3 ] , ( number_steps , number_steps ) )
 				interpolator = interpolate.interp2d( xi_sim , yi_sim , z , kind = 'cubic' )
-				zi = interpolator( xi , yi )
-				zi_reshaped = np.reshape( zi , ( number_steps_dense * number_steps_dense , 1 ) )
-				zi_gradientx = np.gradient( zi , axis = 0 )
-				zi_gradienty = np.gradient( zi , axis = 1 )
-				zi_gradient = np.sqrt( np.power( zi_gradientx , 2.0 ) + np.power( zi_gradienty , 2.0 ) )
-				zi_gradient_reshaped = np.reshape( zi_gradient , ( number_steps_dense * number_steps_dense , 1 ) )
-				zi_reshaped = 1.0 / ( zi_reshaped + resolution + 0.5 * zi_gradient_reshaped )
+				zi_reshaped = np.reshape( interpolator( xi , yi ) , ( number_steps_dense * number_steps_dense , 1 ) )
+				zi_reshaped = 1.0 / ( zi_reshaped + resolution )
 			elif( calibration_type == 3 ):
 				z = np.reshape( file_data[ : , 4 ] , ( number_steps , number_steps ) )
 				interpolator = interpolate.interp2d( xi_sim , yi_sim , z , kind = 'cubic' )
-				zi = interpolator( xi , yi )
-				zi_reshaped = np.reshape( zi , ( number_steps_dense * number_steps_dense , 1 ) )
-				zi_gradientx = np.gradient( zi , axis = 0 )
-				zi_gradienty = np.gradient( zi , axis = 1 )
-				zi_gradient = np.sqrt( np.power( zi_gradientx , 2.0 ) + np.power( zi_gradienty , 2.0 ) )
-				zi_gradient_reshaped = np.reshape( zi_gradient , ( number_steps_dense * number_steps_dense , 1 ) )
-				zi_reshaped = 1.0 / ( zi_reshaped + resolution + 0.5 * zi_gradient_reshaped )
+				zi_reshaped = np.reshape( interpolator( xi , yi ) , ( number_steps_dense * number_steps_dense , 1 ) )
+				zi_reshaped = 1.0 / ( zi_reshaped + resolution )
 			elif( calibration_type == 4 ):
 				z = np.reshape( file_data[ : , 6 ] , ( number_steps , number_steps ) )
 				interpolator = interpolate.interp2d( xi_sim , yi_sim , z , kind = 'cubic' )
@@ -527,8 +517,8 @@ def create_inputs( type_sim , type_input , dist_input_height , dist_input_hl , i
 				height_vector[ i ] = ( Xi_reshaped[ indexes , 0 ] ) + sampling_height[ i ] * stepx
 				hl_vector[ i ] = ( Yi_reshaped[ indexes , 0 ] ) + sampling_hl[ i ] * stepy
 		else:
-			number_steps_var = 500
-			number_steps_var_plot = 500
+			number_steps_var = 5000
+			number_steps_var_plot = 3000
 			variable_vector = np.zeros( ( number_steps_var_plot , 2 ) )
 			if( calibration_type in [ 5 , 6 ] ):
 				if( calibration_type == 5 ):
@@ -540,12 +530,7 @@ def create_inputs( type_sim , type_input , dist_input_height , dist_input_hl , i
 					min_val_cal = np.min( file_data[ : , 7 ] )
 					z = np.reshape( file_data[ : , 7 ] , ( number_steps , number_steps ) )
 				interpolator = interpolate.interp2d( xi_sim , yi_sim , z , kind = 'cubic' )
-				zi = interpolator( xi , yi )
-				zi_reshaped = np.reshape( zi , ( number_steps_dense * number_steps_dense , 1 ) )
-				zi_gradientx = np.gradient( zi , axis = 0 )
-				zi_gradienty = np.gradient( zi , axis = 1 )
-				zi_gradient = np.sqrt( np.power( zi_gradientx , 2.0 ) + np.power( zi_gradienty , 2.0 ) )
-				zi_gradient_reshaped = np.reshape( zi_gradient , ( number_steps_dense * number_steps_dense , 1 ) )
+				zi_reshaped = np.reshape( interpolator( xi , yi ) , ( number_steps_dense * number_steps_dense , 1 ) )
 				if( dist_distance_calibration == 1 ):
 					mincum = norm.cdf( min_val_cal , distance_calibration , var_distance_calibration )
 					maxcum = norm.cdf( max_val_cal , distance_calibration , var_distance_calibration )
@@ -560,25 +545,29 @@ def create_inputs( type_sim , type_input , dist_input_height , dist_input_hl , i
 					variable_vector_used = uniform.ppf( vector_p , distance_calibration - var_distance_calibration , 2 * var_distance_calibration )
 					variable_vector[ : , 0 ] = np.linspace( np.minimum( 0.0 , np.min( variable_vector_used ) ) , np.max( variable_vector_used ) , number_steps_var_plot )
 					variable_vector[ : , 1 ] = uniform.pdf( variable_vector[ : , 0 ] , distance_calibration - var_distance_calibration , 2 * var_distance_calibration )
-				else:
+				elif( dist_distance_calibration == 3 ):
 					mincum = gamma.cdf( min_val_cal , distance_calibration_k , 0 , distance_calibration_theta )
 					maxcum = gamma.cdf( np.max( file_data[ : , 5 ] ) , distance_calibration_k , 0 , distance_calibration_theta )
 					vector_p = np.arange( mincum + ( maxcum - mincum ) / ( 2 * number_steps_var ) , maxcum , ( maxcum - mincum ) / ( number_steps_var ) )
 					variable_vector_used = gamma.ppf( vector_p , distance_calibration_k , 0 , distance_calibration_theta )
 					variable_vector[ : , 0 ] = np.linspace( np.minimum( 0.0 , np.min( variable_vector_used ) ) , np.max( variable_vector_used ) , number_steps_var_plot )
 					variable_vector[ : , 1 ] = gamma.pdf( variable_vector[ : , 0 ] , distance_calibration_k , 0 , distance_calibration_theta )
+				else:
+					parameter_sigma = np.sqrt( np.log( var_distance_calibration * var_distance_calibration / distance_calibration / distance_calibration + 1.0 ) )
+					parameter_mu = np.log( distance_calibration * distance_calibration / np.sqrt( distance_calibration * distance_calibration + var_distance_calibration * var_distance_calibration ) )
+					mincum = lognorm.cdf( min_val_cal , parameter_sigma , 0 , np.exp( parameter_mu ) )
+					maxcum = lognorm.cdf( max_val_cal , parameter_sigma , 0 , np.exp( parameter_mu ) )
+					vector_p = np.arange( mincum + ( maxcum - mincum ) / ( 2 * number_steps_var ) , maxcum , ( maxcum - mincum ) / ( number_steps_var ) )
+					variable_vector_used = lognorm.ppf( vector_p , parameter_sigma , 0 , np.exp( parameter_mu ) )
+					variable_vector[ : , 0 ] = np.linspace( np.minimum( 0.0 , np.min( variable_vector_used ) ) , np.max( variable_vector_used ) , number_steps_var_plot )
+					variable_vector[ : , 1 ] = lognorm.pdf( variable_vector[ : , 0 ] , parameter_sigma , 0 , np.exp( parameter_mu ) )
 			else:
 				resolution = resolution * resolution / 1000000.00
 				max_val_cal = np.max( file_data[ : , 8 ] )
 				min_val_cal = np.min( file_data[ : , 8 ] )
 				z = np.reshape( file_data[ : , 8 ] , ( number_steps , number_steps ) )
 				interpolator = interpolate.interp2d( xi_sim , yi_sim , z , kind = 'cubic' )
-				zi = interpolator( xi , yi )
-				zi_reshaped = np.reshape( zi , ( number_steps_dense * number_steps_dense , 1 ) )
-				zi_gradientx = np.gradient( zi , axis = 0 )
-				zi_gradienty = np.gradient( zi , axis = 1 )
-				zi_gradient = np.sqrt( np.power( zi_gradientx , 2.0 ) + np.power( zi_gradienty , 2.0 ) )
-				zi_gradient_reshaped = np.reshape( zi_gradient , ( number_steps_dense * number_steps_dense , 1 ) )
+				zi_reshaped = np.reshape( interpolator( xi , yi ) , ( number_steps_dense * number_steps_dense , 1 ) )
 				if( dist_area_calibration == 1 ):
 					mincum = norm.cdf( min_val_cal , area_calibration , var_area_calibration )
 					maxcum = norm.cdf( max_val_cal , area_calibration , var_area_calibration )
@@ -593,20 +582,29 @@ def create_inputs( type_sim , type_input , dist_input_height , dist_input_hl , i
 					variable_vector_used = uniform.ppf( vector_p , area_calibration - var_area_calibration , 2 * var_area_calibration )
 					variable_vector[ : , 0 ] = np.linspace( np.minimum( 0.0 , np.min( variable_vector_used ) ) , np.max( variable_vector_used ) , number_steps_var_plot )
 					variable_vector[ : , 1 ] = uniform.pdf( variable_vector[ : , 0 ] , area_calibration - var_area_calibration , 2 * var_area_calibration )
-				else:
+				elif( dist_area_calibration == 3 ):
 					mincum = gamma.cdf( min_val_cal , area_calibration_k , 0 , area_calibration_theta )
 					maxcum = gamma.cdf( np.max( file_data[ : , 5 ] ) , area_calibration_k , 0 , area_calibration_theta )
 					vector_p = np.arange( mincum + ( maxcum - mincum ) / ( 2 * number_steps_var ) , maxcum , ( maxcum - mincum ) / ( number_steps_var ) )
 					variable_vector_used = gamma.ppf( vector_p , area_calibration_k , 0 , area_calibration_theta )
 					variable_vector[ : , 0 ] = np.linspace( np.minimum( 0.0 , np.min( variable_vector_used ) ) , np.max( variable_vector_used ) , number_steps_var_plot )
 					variable_vector[ : , 1 ]= gamma.pdf( variable_vector[ : , 0 ] , area_calibration_k , 0 , area_calibration_theta )
+				else:
+					parameter_sigma = np.sqrt( np.log( var_area_calibration * var_area_calibration / area_calibration / area_calibration + 1.0 ) )
+					parameter_mu = np.log( area_calibration * area_calibration / np.sqrt( area_calibration * area_calibration + var_area_calibration * var_area_calibration ) )
+					mincum = lognorm.cdf( min_val_cal , parameter_sigma , 0 , np.exp( parameter_mu ) )
+					maxcum = lognorm.cdf( max_val_cal , parameter_sigma , 0 , np.exp( parameter_mu ) )
+					vector_p = np.arange( mincum + ( maxcum - mincum ) / ( 2 * number_steps_var ) , maxcum , ( maxcum - mincum ) / ( number_steps_var ) )
+					variable_vector_used = lognorm.ppf( vector_p , parameter_sigma , 0 , np.exp( parameter_mu ) )
+					variable_vector[ : , 0 ] = np.linspace( np.minimum( 0.0 , np.min( variable_vector_used ) ) , np.max( variable_vector_used ) , number_steps_var_plot )
+					variable_vector[ : , 1 ] = lognorm.pdf( variable_vector[ : , 0 ] , parameter_sigma , 0 , np.exp( parameter_mu ) )
 			divisor_int = np.zeros( vector_p.shape )
 			for ind_int in range( len( divisor_int ) ):
-                                divisor_int[ ind_int ] = np.sum( np.power( resolution + 0.5 * zi_gradient_reshaped + np.abs( zi_reshaped - variable_vector_used[ ind_int ] ) , -1.0 ) )
+                                divisor_int[ ind_int ] = np.sum( np.power( resolution + np.abs( zi_reshaped - variable_vector_used[ ind_int ] ) , -1.0 ) )
 			Probability = np.zeros( zi_reshaped.shape )
 			for ind_prob in range( len( Probability ) ):
-                                Probability[ ind_prob ] = np.sum( np.power( resolution + 0.5 * zi_gradient_reshaped[ ind_prob ] + np.abs( zi_reshaped[ ind_prob ] - variable_vector_used ) , - 1.0 ) / divisor_int )
-			Probability_Save = gaussian_filter( np.reshape( Probability / np.sum( Probability ) , ( number_steps_dense , number_steps_dense ) ), 0 )
+                                Probability[ ind_prob ] = np.sum( np.power( resolution + np.abs( zi_reshaped[ ind_prob ] - variable_vector_used ) , - 1.0 ) / divisor_int )
+			Probability_Save = gaussian_filter( np.reshape( Probability / np.sum( Probability ) , ( number_steps_dense , number_steps_dense ) ), 10 )
 			Probability = np.cumsum( np.reshape( Probability_Save , ( number_steps_dense * number_steps_dense , 1 ) ) / np.sum( np.reshape( Probability_Save , ( number_steps_dense * number_steps_dense , 1 ) ) ) )
 			sampling = np.random.uniform( 0.0 , 1.0 , N )
 			sampling_height = np.random.uniform( - 0.5 , 0.5 , N )
@@ -624,20 +622,24 @@ def create_inputs( type_sim , type_input , dist_input_height , dist_input_hl , i
 					height_vector = np.random.normal( height , var_height , N )
 				elif( dist_input_height == 2 ):
 					height_vector = np.random.uniform( height - var_height , height + var_height , N )
-				else:
+				elif( dist_input_height == 3 ):
 					height_vector = np.random.gamma( height_k , height_theta , N )
+				else:
+					height_vector = np.random.lognormal( np.log( height * height / np.sqrt( height * height + var_height * var_height ) ), np.log( 1 + var_height * var_height / height / height ) , N )
 			else:
 				height_vector = np.linspace( height - var_height, height + var_height, num = N )
 		else:
 			height_vector = np.ones( N ) * height
-		if( var_hl > 0.0 or dist_input_height == 3 ):
+		if( var_hl > 0.0 or dist_input_hl == 3 ):
 			if( type_sim == 1 ):
 				if( dist_input_hl == 1 ):
 			 		hl_vector = np.random.normal( hl , var_hl , N )
 				elif( dist_input_hl == 2 ):
 					hl_vector = np.random.uniform( hl - var_hl , hl + var_hl , N )
-				else:
+				elif( dist_input_hl == 3 ):
 					hl_vector = np.random.gamma( hl_k , hl_theta , N )
+				else:
+					hl_vector = np.random.lognormal( np.log( hl * hl / np.sqrt( hl * hl + var_hl * var_hl ) ), np.log( 1 + var_hl * var_hl / hl / hl ) , N )
 			else:
 				hl_vector = np.linspace( hl - var_hl , hl + var_hl , num = N )
 		else:
@@ -661,22 +663,26 @@ def create_inputs( type_sim , type_input , dist_input_height , dist_input_hl , i
 								height_vector[ i ] = np.random.normal( height , var_height , 1 )
 							elif( dist_input_height == 2 ):
 								height_vector[ i ] = np.random.uniform( height - var_height , height + var_height , 1 )
+							elif( dist_input_height == 3 ):
+								height_vector[ i ] = np.random.gamma( height_k , height_theta , 1 )
 							else:
-                                                                height_vector[ i ] = np.random.gamma( height_k , height_theta , 1 )
+								height_vector[ i ] = np.random.lognormal( np.log( height * height / np.sqrt( height * height + var_height * var_height ) ), np.log( 1 + var_height * var_height / height / height ) , 1 )
 							aux_boolean = 1
 					if(aux_boolean == 0):
 						break
-			if( var_hl > 0.0 or dist_input_height == 3 ):
+			if( var_hl > 0.0 or dist_input_hl == 3 ):
 				while True:
 					aux_boolean = 0
 					for i in range( 0 , N ):
-						if( hl_vector[ i ] < 0.05 ):
+						if( hl_vector[ i ] < 0.01 ):
 							if( dist_input_hl == 1 ):
 								hl_vector[ i ] = np.random.normal( hl , var_hl , 1 )
 							elif( dist_input_hl == 2 ):
 								hl_vector[ i ] = np.random.uniform( hl - var_hl , hl + var_hl , 1 )
+							elif( dist_input_hl == 3 ):
+								hl_vector[ i ] = np.random.gamma( hl_k , hl_theta , 1 )
 							else:
-                                                                hl_vector[ i ] = np.random.gamma( hl_k , hl_theta , 1 )
+								hl_vector[ i ] = np.random.lognormal( np.log( hl * hl / np.sqrt( hl * hl + var_hl * var_hl ) ), np.log( 1 + var_hl * var_hl / hl / hl ) , 1 )
 							aux_boolean = 1
 					if( aux_boolean == 0 ):
 						break
@@ -2344,7 +2350,7 @@ def plot_only_vent_utm( east_cen_vector , north_cen_vector , N ):
 		plt.plot( east_cen_vector[ i ] , north_cen_vector[ i ] , 'r.' , markersize = 2 )
 
 def plot_only_height( height_vector , hl_vector , variable_vector , type_input , calibration_type , limits_calib , probability_save ):
-        
+
 	plt.figure( 1 , figsize = ( 14.0 , 5.0 ) )
 	plt.subplot( 121 )
 	plt.hist( height_vector )
@@ -2407,7 +2413,7 @@ def plot_only_map_deg( Cities , lon1 , lon2 , lat1 , lat2 , step_lat_m , step_lo
 	cmapr = plt.cm.get_cmap( 'Reds' )
 	cmaps = plt.cm.get_cmap( 'Blues' ) 
 	if( N > 1 ):
-		CS_Topo = plt.contourf( matrix_lon , matrix_lat , Topography , 100 , alpha = 1.0 , cmap = cmapg , antialiased = True )
+		CS_Topo = plt.contourf( matrix_lon , matrix_lat , Topography , 1000 , alpha = 1.0 , cmap = cmapg , antialiased = True )
 		CS_Sea = plt.contourf( matrix_lon , matrix_lat , Topography_Sea , 100 , alpha = 0.5 , cmap = cmaps , antialiased = True )
 		CS = plt.contourf( matrix_lon , matrix_lat , data_cones , 100 , vmin = 0.0 , vmax = 1.0 , alpha = 0.3 , interpolation = 'linear' , cmap = cmapr , antialiased = True )	
 		fmt = '%.2f'
@@ -2415,7 +2421,7 @@ def plot_only_map_deg( Cities , lon1 , lon2 , lat1 , lat2 , step_lat_m , step_lo
 		CS_lines = plt.contour( matrix_lon , matrix_lat , data_cones, np.array( [ val_down , val_up ] ) , colors = 'r' , interpolation = 'linear' , linewidths = 1 )
 		plt.clabel( CS_lines , inline = 0.1 , fontsize = 10 , colors = 'k' , fmt = fmt )
 	else:
-		CS_Topo = plt.contourf( matrix_lon , matrix_lat , Topography , 100 , alpha = 1.0 , cmap = cmapg , antialiased = True )
+		CS_Topo = plt.contourf( matrix_lon , matrix_lat , Topography , 1000 , alpha = 1.0 , cmap = cmapg , antialiased = True )
 		CS_Sea = plt.contourf( matrix_lon , matrix_lat , Topography_Sea , 100 , alpha = 0.5 , cmap = cmaps , antialiased = True )
 		CS = plt.contourf( matrix_lon , matrix_lat , data_cones , 100 , alpha = 0.3 , cmap = cmapr , antialiased = True )
 	plt.axes().set_aspect( step_lat_m / step_lon_m )

@@ -1,5 +1,5 @@
 # Name of the run (used to save the parameters and the output).
-run_name = Example
+run_name = Chaiten_B
 
 # Type of simulation (1: Default mode: Construction of probability map. 2: Calibration mode).
 type_sim = 1
@@ -44,7 +44,7 @@ vent_type = 1
 lon_cen = -72.650
 lat_cen = -42.835
 var_cen = 500.0
-dist_input_cen = 1
+dist_input_cen = 2
 
 # Other parameters of energy cones
 # type_input = type of distribution for height and H/L (1: Prescribed distribution. 2: Input file with values of height and hl. 3: Calibration-based sampling. Only considered if type_sim = 1, otherwise type_input = 1).
@@ -71,10 +71,10 @@ dist_input_cen = 1
 # area_calibration_k = k in gamma area distribution used for area-based calibration (only considered if type_sim = 1, type_input = 3, calibration_type = 7, and dist_area_calibration = 3).
 # area_calibration_theta = theta in gamma area distribution used for area-based calibration (only considered if type_sim = 1, type_input = 3, calibration_type = 7, and dist_area_calibration = 3).
 type_input = 1
-dist_input_height = 1
+dist_input_height = 2
 height = 600.0
 var_height = 400.0
-dist_input_hl = 1
+dist_input_hl = 4
 hl = 0.40
 var_hl = 0.05
 

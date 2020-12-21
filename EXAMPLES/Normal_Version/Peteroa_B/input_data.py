@@ -1,5 +1,5 @@
 # Name of the run (used to save the parameters and the output).
-run_name = Example
+run_name = Peteroa_B
 
 # Type of simulation (1: Default mode: Construction of probability map. 2: Calibration mode).
 type_sim = 1
@@ -21,10 +21,10 @@ source_dem = 1
 # lon2 = longitude of the second limit of the map.
 # lat1 = latitude of the first limit of the map.
 # lat2 = latitude of the second limit of the map.
-lon1 = -72.8
-lon2 = -72.5
-lat1 = -42.95
-lat2 = -42.75
+lon1 = -70.9
+lon2 = -70.4
+lat1 = -35.5
+lat2 = -35.1
 
 # Parameters of the collapse position.
 # vent_type = type of distribution of collapse position (1: Pointwise. 2: Linear. 3: Circumference arch. 4: Input file. Only considered if type_sim = 1, otherwise vent_type = 1).
@@ -40,10 +40,12 @@ lat2 = -42.75
 # var_cen = uncertainty of collapse position (in meters. Only considered if type_sim = 1 and vent_type = 1, 2 or 3).
 # dist_input_cen = type of distribution for collapse position variability (1: Gaussian. 2: Uniform. Only considered if type_sim = 1 and vent_type = 1, 2 or 3).
 # input_file_vent = name of the file with the set of values for vent positions (only considered if vent_type = 4).
-vent_type = 1
-lon_cen = -72.650
-lat_cen = -42.835
-var_cen = 500.0
+vent_type = 2
+lon_cen = -70.5785
+lat_cen = -35.288
+var_cen = 300.0
+azimuth_lin =  -5.0
+length_lin = 3000.0
 dist_input_cen = 1
 
 # Other parameters of energy cones
@@ -71,11 +73,11 @@ dist_input_cen = 1
 # area_calibration_k = k in gamma area distribution used for area-based calibration (only considered if type_sim = 1, type_input = 3, calibration_type = 7, and dist_area_calibration = 3).
 # area_calibration_theta = theta in gamma area distribution used for area-based calibration (only considered if type_sim = 1, type_input = 3, calibration_type = 7, and dist_area_calibration = 3).
 type_input = 1
-dist_input_height = 1
-height = 600.0
-var_height = 400.0
-dist_input_hl = 1
-hl = 0.40
+dist_input_height = 2
+height = 300.0
+var_height = 300.0
+dist_input_hl = 2
+hl = 0.50
 var_hl = 0.05
 
 # Maximum order of energy cones.

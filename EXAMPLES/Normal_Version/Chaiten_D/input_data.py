@@ -1,8 +1,8 @@
 # Name of the run (used to save the parameters and the output).
-run_name = Example
+run_name = Chaiten_D
 
 # Type of simulation (1: Default mode: Construction of probability map. 2: Calibration mode).
-type_sim = 1
+type_sim = 2
 
 # Source of DEM.
 # source_dem = type of input data (1: SRTM 30 m. 2: Uploaded DEM (UTM). 3: Uploaded Data (lat, lon)).
@@ -15,6 +15,7 @@ source_dem = 1
 # comparison_polygon = name of file of bound points of comparison polygon (See an example in EXAMPLES/Normal_Version/Chaiten_D. If absent, only runout distance or inundation area-based calibrations can be performed).
 # ang_cal = angle from vent to circumference arch center that defines the PDC dispersion direction used to calibrate. If absent, all the transport directions are considered.
 # ang_cal_range = extent of the circumference arch that defines the PDC dispersion direction used to calibrate. If absent, all the transport directions are considered.
+comparison_polygon = ./EXAMPLES/Normal_Version/Chaiten_D/Chaiten_20082009.txt
 
 # Map limits (only considered if source_dem = 1).
 # lon1 = longitude of the first limit of the map.
@@ -40,11 +41,8 @@ lat2 = -42.75
 # var_cen = uncertainty of collapse position (in meters. Only considered if type_sim = 1 and vent_type = 1, 2 or 3).
 # dist_input_cen = type of distribution for collapse position variability (1: Gaussian. 2: Uniform. Only considered if type_sim = 1 and vent_type = 1, 2 or 3).
 # input_file_vent = name of the file with the set of values for vent positions (only considered if vent_type = 4).
-vent_type = 1
 lon_cen = -72.650
 lat_cen = -42.835
-var_cen = 500.0
-dist_input_cen = 1
 
 # Other parameters of energy cones
 # type_input = type of distribution for height and H/L (1: Prescribed distribution. 2: Input file with values of height and hl. 3: Calibration-based sampling. Only considered if type_sim = 1, otherwise type_input = 1).
@@ -70,19 +68,16 @@ dist_input_cen = 1
 # var_area_calibration = variability of area used for area-based calibration (In km2. Only considered if type_sim = 1, type_input = 3, calibration_type = 7, and dist_area_calibration = 1, 2 or 4).
 # area_calibration_k = k in gamma area distribution used for area-based calibration (only considered if type_sim = 1, type_input = 3, calibration_type = 7, and dist_area_calibration = 3).
 # area_calibration_theta = theta in gamma area distribution used for area-based calibration (only considered if type_sim = 1, type_input = 3, calibration_type = 7, and dist_area_calibration = 3).
-type_input = 1
-dist_input_height = 1
-height = 600.0
-var_height = 400.0
-dist_input_hl = 1
-hl = 0.40
-var_hl = 0.05
+height = 500.0
+var_height = 500.0
+hl = 0.50
+var_hl = 0.30
 
 # Maximum order of energy cones.
 cone_levels = 100
 
 # Number of simulations (Only considered if type_input = 1 or 3 and vent_type = 1, 2 or 3).
-N = 100
+N = 400
 
 # Save results in files txt (1: Yes. 0: No).
 save_data = 1

@@ -5,6 +5,10 @@ Citation of the paper describing the branching strategy adopted here:
 
 Aravena, A., Cioni, R., Bevilacqua, A., de' Michieli Vitturi, M., Esposti Ongaro, T., and Neri, A. (2020). Tree‐branching based enhancement of kinetic energy models for reproducing channelization processes of pyroclastic density currents. Journal of Geophysical Research: Solid Earth, 125, e2019JB019271.
 
+Application to San Salvador and Nejapa-Chiltepe Volcanic Fields:
+
+Bevilacqua, A., Aravena, A., Neri, A., Gutierrez, E., Escobar, D., Schliz, M., Aiuppa, A., and Cioni, R. (2020). Thematic vent opening probability maps and hazard assessment of small-scale pyroclastic density currents in the San Salvador Volcanic Complex (El Salvador) and Nejapa-Chiltepe Volcanic Complex (Nicaragua). Natural Hazards and Earth System Sciences Discussions.
+
 Usage normal version:
  python3 ECMapProb.py
 

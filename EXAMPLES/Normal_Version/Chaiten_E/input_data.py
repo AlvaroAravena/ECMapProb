@@ -1,5 +1,5 @@
 # Name of the run (used to save the parameters and the output).
-run_name = Example
+run_name = Chaiten_E
 
 # Type of simulation (1: Default mode: Construction of probability map. 2: Calibration mode).
 type_sim = 1
@@ -43,7 +43,7 @@ lat2 = -42.75
 vent_type = 1
 lon_cen = -72.650
 lat_cen = -42.835
-var_cen = 500.0
+var_cen = 100.00
 dist_input_cen = 1
 
 # Other parameters of energy cones
@@ -70,13 +70,9 @@ dist_input_cen = 1
 # var_area_calibration = variability of area used for area-based calibration (In km2. Only considered if type_sim = 1, type_input = 3, calibration_type = 7, and dist_area_calibration = 1, 2 or 4).
 # area_calibration_k = k in gamma area distribution used for area-based calibration (only considered if type_sim = 1, type_input = 3, calibration_type = 7, and dist_area_calibration = 3).
 # area_calibration_theta = theta in gamma area distribution used for area-based calibration (only considered if type_sim = 1, type_input = 3, calibration_type = 7, and dist_area_calibration = 3).
-type_input = 1
-dist_input_height = 1
-height = 600.0
-var_height = 400.0
-dist_input_hl = 1
-hl = 0.40
-var_hl = 0.05
+type_input = 3
+input_file_cal = ./EXAMPLES/Normal_Version/Chaiten_D/Calibration_Data.txt
+calibration_type = 3
 
 # Maximum order of energy cones.
 cone_levels = 100

@@ -1,0 +1,20 @@
+Simulation type: Default mode
+Cone generations: 100
+Number of Simulations: 100
+
+Source DEM: SRTM 30 m
+Longitude 1: -71.6
+Longitude 2: -71.2
+Latitude 1: -16.5
+Latitude 2: -16.1
+
+Vent type: Pointwise
+Longitude collapse [deg]: -71.4054
+Latitude collapse [deg]: -16.2994
+Uncertainty of vent position [m]: 100.0
+Probability distribution of uncertainty of vent position: Gaussian
+
+Distribution type for height and H/L: Calibration-based sampling
+Calibration type: Jaccard
+File name: ./EXAMPLES/User-Friendly_Version/ElMisti_A/Calibration_Data.txt
+

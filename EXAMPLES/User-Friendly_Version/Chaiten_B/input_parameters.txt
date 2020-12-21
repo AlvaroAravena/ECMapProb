@@ -1,0 +1,27 @@
+Simulation type: Default mode
+Cone generations: 100
+Number of Simulations: 100
+
+Source DEM: SRTM 30 m
+Longitude 1: -72.8
+Longitude 2: -72.5
+Latitude 1: -42.95
+Latitude 2: -42.75
+
+Vent type: Circumference arch
+Longitude collapse [deg]: -72.65
+Latitude collapse [deg]: -42.835
+Radius (circumference arch) [m]: 1000.0
+Initial angle (circumference arch) [m]: 0.0
+Final angle (circumference arch) [m]:  360.0
+Uncertainty of vent position [m]: 200.0
+Probability distribution of uncertainty of vent position: Gaussian
+
+Distribution type for height and H/L: Predefined distributions
+Distribution type for height: Gaussian
+Expected collapse height [m]: 500.0
+Uncertainty of collapse height [m]: 200.0
+Distribution type for H/L: Gaussian
+Expected H/L: 0.45
+Uncertainty of H/L: 0.05
+

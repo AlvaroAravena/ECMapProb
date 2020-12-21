@@ -1,0 +1,23 @@
+Simulation type: Default mode
+Cone generations: 100
+Number of Simulations: 100
+
+Source DEM: SRTM 30 m
+Longitude 1: 110.2
+Longitude 2: 110.6
+Latitude 1: -7.75
+Latitude 2: -7.4
+
+Vent type: Pointwise
+Longitude collapse [deg]: 110.4465
+Latitude collapse [deg]: -7.5405
+Uncertainty of vent position [m]: 100.0
+Probability distribution of uncertainty of vent position: Gaussian
+
+Distribution type for height and H/L: Calibration-based sampling
+Calibration type: Runout distance-based
+File name: ./EXAMPLES/User-Friendly_Version/Merapi_A/Calibration_Data.txt
+Distribution type for runout distance: Gamma
+Parameter k in gamma distribution (runout distance [m]): 3.47087
+Parameter theta in gamma distribution (runout distance [m]): 1678.81
+

@@ -1,0 +1,26 @@
+Simulation type: Calibration mode (Including reference PDC deposit polygon)
+Cone generations: 100
+Number of Simulations: 100
+
+Source DEM: SRTM 30 m
+Longitude 1: -71.7
+Longitude 2: -71.2
+Latitude 1: -16.6
+Latitude 2: -16.1
+
+Vent type: Pointwise
+Longitude collapse [deg]: -71.4054
+Latitude collapse [deg]: -16.2994
+Uncertainty of vent position [m]: 0.0
+Probability distribution of uncertainty of vent position: Gaussian
+
+Distribution type for height and H/L: Predefined distributions
+Distribution type for height: Uniform
+Expected collapse height [m]: 800.0
+Uncertainty of collapse height [m]: 700.0
+Distribution type for H/L: Uniform
+Expected H/L: 0.5
+Uncertainty of H/L: 0.3
+
+Polygon file name: ./EXAMPLES/User-Friendly_Version/ElMisti_A/ElMisti_2030.txt
+

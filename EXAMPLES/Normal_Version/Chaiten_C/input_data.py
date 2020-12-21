@@ -1,5 +1,5 @@
 # Name of the run (used to save the parameters and the output).
-run_name = Example
+run_name = Chaiten_C
 
 # Type of simulation (1: Default mode: Construction of probability map. 2: Calibration mode).
 type_sim = 1
@@ -79,7 +79,7 @@ hl = 0.40
 var_hl = 0.05
 
 # Maximum order of energy cones.
-cone_levels = 100
+cone_levels = 1
 
 # Number of simulations (Only considered if type_input = 1 or 3 and vent_type = 1, 2 or 3).
 N = 100
