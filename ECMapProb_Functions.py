@@ -795,7 +795,7 @@ def read_comparison_polygon_deg( comparison_polygon , ang_cal , ang_cal_range , 
 		vertices_compare = np.zeros( ( len( dist_step ) , 2 ) )
 		for i in range( len( dist_step ) ):
 			for j in range( len( cum_compare ) ):
-				if( dist_step[ i ] < cum_compare[ j ] ):
+				if( dist_step[ i ] <= cum_compare[ j ] ):
 					if( j == 0 ):
 						factor = (cum_compare[ j ] - dist_step[ i ] ) / cum_compare[ j ]
 					else:
@@ -863,7 +863,7 @@ def read_comparison_polygon_utm( comparison_polygon , ang_cal , ang_cal_range , 
 		vertices_compare = np.zeros( ( len( dist_step ) , 2 ) )
 		for i in range( len( dist_step ) ):
 			for j in range( len( cum_compare ) ):
-				if( dist_step[ i ] < cum_compare[ j ] ):
+				if( dist_step[ i ] <= cum_compare[ j ] ):
 					if( j == 0 ):
 						factor = (cum_compare[ j ] - dist_step[ i ] ) / cum_compare[ j ]
 					else:
