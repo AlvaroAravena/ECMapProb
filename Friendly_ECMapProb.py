@@ -1,20 +1,20 @@
-from tkinter import Tk, ttk, Label, Button, W, E, Entry, OptionMenu, StringVar, DoubleVar, IntVar, Canvas, Scrollbar, VERTICAL, Frame, messagebox, filedialog
+from tkinter import Tk , ttk , Label , Button , W , E , Entry , OptionMenu , StringVar , DoubleVar , IntVar , Canvas , Scrollbar , VERTICAL , Frame , messagebox , filedialog
 import os
 import sys
 import numpy as np
 import matplotlib.pyplot as plt
 import utm
 import warnings
-warnings.filterwarnings("ignore")
+warnings.filterwarnings( "ignore" )
 import matplotlib
-matplotlib.use("TkAgg")
-from matplotlib.backends.backend_tkagg import ( FigureCanvasTkAgg, NavigationToolbar2Tk)
+matplotlib.use( "TkAgg" )
+from matplotlib.backends.backend_tkagg import ( FigureCanvasTkAgg , NavigationToolbar2Tk )
 from matplotlib.figure import Figure
-from ECMapProb_Functions import import_map, read_map_utm, read_map_deg, matrix_deg, matrix_utm, create_inputs, create_vent_deg, create_vent_utm, read_comparison_polygon_deg, read_comparison_polygon_utm, initial_definitions, definitions_save_data_deg, definitions_save_data_utm, compute_energy_cones_deg, compute_energy_cones_utm, save_data_deg, save_data_utm, plot_deg, plot_only_topography_deg , plot_only_topography_utm , plot_utm, calibration, plot_only_vent_deg, plot_only_vent_utm, plot_only_height, plot_only_comparison_polygon_deg, plot_only_comparison_polygon_utm, plot_only_map_deg, plot_only_map_utm, plot_only_calibration, plot_input_output
+from ECMapProb_Functions import import_map , read_map_utm , read_map_deg , matrix_deg , matrix_utm , create_inputs , create_vent_deg , create_vent_utm , read_comparison_polygon_deg , read_comparison_polygon_utm , initial_definitions , definitions_save_data_deg , definitions_save_data_utm , compute_energy_cones_deg , compute_energy_cones_utm , save_data_deg , save_data_utm , plot_deg , plot_only_topography_deg , plot_only_topography_utm , plot_utm , calibration , plot_only_vent_deg , plot_only_vent_utm , plot_only_height , plot_only_comparison_polygon_deg , plot_only_comparison_polygon_utm , plot_only_map_deg , plot_only_map_utm , plot_only_calibration , plot_input_output
 
 class MainFrame:
 
-	def __init__(self, master):
+	def __init__( self , master ):
 
 		self.master = master
 		master.title( "ECMapProb" )
@@ -82,41 +82,41 @@ class MainFrame:
 		typesim = StringVar( master )
 		typesim.set( "Default mode: Construction of PDC inundation probability map" )
 		cone_levels = IntVar( master )
-		cone_levels.set(1)
+		cone_levels.set( 1 )
 		Nsim = IntVar( master )
-		Nsim.set(10)
+		Nsim.set( 10 )
 		var_dem = StringVar( master )
 		var_dem.set( "STRM 30 m" )
 		lon1 = DoubleVar( master )
-		lon1.set(-72.8)
+		lon1.set( -72.8 )
 		lon2 = DoubleVar( master )
-		lon2.set(-72.5)
+		lon2.set( -72.5 )
 		lat1 = DoubleVar( master )
-		lat1.set(-42.95)
+		lat1.set( -42.95 )
 		lat2 = DoubleVar( master )
-		lat2.set(-42.75)
+		lat2.set( -42.75 )
 		self.venttype = StringVar( master )
 		self.venttype.set( "Pointwise" )
 		loncen = DoubleVar( master )
-		loncen.set(-72.650)
+		loncen.set( -72.650 )
 		latcen = DoubleVar( master )
-		latcen.set(-42.835)
+		latcen.set( -42.835 )
 		eastcen = DoubleVar( master )
-		eastcen.set(501000.0)
+		eastcen.set( 501000.0 )
 		northcen = DoubleVar( master )
-		northcen.set(4178000.0)
+		northcen.set( 4178000.0 )
 		azimuthline = DoubleVar( master )
-		azimuthline.set(0.0)
+		azimuthline.set( 0.0 )
 		lengthline = DoubleVar( master )
-		lengthline.set(1000.0)
+		lengthline.set( 1000.0 )
 		radcir = DoubleVar( master )
-		radcir.set(1000.0)
+		radcir.set( 1000.0 )
 		ang1cir = DoubleVar( master )
-		ang1cir.set(0.0)
+		ang1cir.set( 0.0 )
 		ang2cir = DoubleVar( master )
-		ang2cir.set(90.0)
+		ang2cir.set( 90.0 )
 		self.varcen = DoubleVar( master )
-		self.varcen.set(300.0)
+		self.varcen.set( 300.0 )
 		ventdist = StringVar( master )
 		ventdist.set( "Gaussian" )
 		self.typeinput = StringVar( master )
@@ -124,45 +124,45 @@ class MainFrame:
 		self.distheight = StringVar( master )
 		self.distheight.set( "Gaussian" )
 		height = DoubleVar( master )
-		height.set(500.0)
+		height.set( 500.0 )
 		var_height = DoubleVar( master )
-		var_height.set(200.0)
+		var_height.set( 200.0 )
 		height_k = DoubleVar( master )
-		height_k.set(1.0)
+		height_k.set( 1.0 )
 		height_theta = DoubleVar( master )
-		height_theta.set(100.0)
+		height_theta.set( 100.0 )
 		self.disthl = StringVar( master )
 		self.disthl.set( "Gaussian" )
 		hl = DoubleVar( master )
-		hl.set(0.45)
+		hl.set( 0.45 )
 		var_hl = DoubleVar( master )
-		var_hl.set(0.05)
+		var_hl.set( 0.05 )
 		hl_k = DoubleVar( master )
-		hl_k.set(1.0)
+		hl_k.set( 1.0 )
 		hl_theta = DoubleVar( master )
-		hl_theta.set(0.2)
+		hl_theta.set( 0.2 )
 		calibrationtype = StringVar( master )
 		calibrationtype.set( "Jaccard index" )		
 		distdistance = StringVar( master )
 		distdistance.set( "Gaussian" )
 		distance = DoubleVar( master )
-		distance.set(3000.0)
+		distance.set( 3000.0 )
 		var_distance = DoubleVar( master )
-		var_distance.set(500.0)
+		var_distance.set( 500.0 )
 		distance_k = DoubleVar( master )
-		distance_k.set(1.0)
+		distance_k.set( 1.0 )
 		distance_theta = DoubleVar( master )
-		distance_theta.set(2000.0)
+		distance_theta.set( 2000.0 )
 		distarea = StringVar( master )
 		distarea.set( "Gaussian" )
 		area = DoubleVar( master )
-		area.set(5.0)
+		area.set( 5.0 )
 		var_area = DoubleVar( master )
-		var_area.set(1.0)
+		var_area.set( 1.0 )
 		area_k = DoubleVar( master )
-		area_k.set(1.0)
+		area_k.set( 1.0 )
 		area_theta = DoubleVar( master )
-		area_theta.set(3.0)
+		area_theta.set( 3.0 )
 		runname = StringVar( master )
 		runname.set( "Default_Name" )
 		
@@ -180,7 +180,7 @@ class MainFrame:
 		self.Nsim_entry.grid( row = 2 , column = 3 , columnspan = 3 , sticky = W + E )
 		self.label_sourcedem = Label( tab1 , text = "Source DEM" )
 		self.label_sourcedem.grid( row = 3 , column = 0 , columnspan = 3 , sticky = W )
-		self.sourcedem_entry = OptionMenu( tab1 , var_dem , "STRM 30 m" , "Input DEM (utm)" , "Input DEM (lat,lon)" , command = self.opt_dem )
+		self.sourcedem_entry = OptionMenu( tab1 , var_dem , "STRM 30 m" , "Input DEM (utm)" , "Input DEM (lat, lon)" , command = self.opt_dem )
 		self.sourcedem_entry.grid( row = 3 , column = 3 , columnspan = 3 , sticky = W + E )
 		self.label_lon1 = Label( tab1 , text = "Longitude 1 [deg]" )
 		self.label_lon1.grid( row = 4 , column = 0 , columnspan = 3 , sticky = W )
@@ -189,7 +189,7 @@ class MainFrame:
 		self.label_lon2 = Label( tab1 , text = "Longitude 2 [deg]" )
 		self.label_lon2.grid( row = 5 , column = 0 , columnspan = 3 , sticky = W )
 		self.lon2_entry = Entry( tab1 , textvariable = lon2 )
-		self.lon2_entry.grid( row = 5 , column = 3 , columnspan = 3 ,  sticky = W + E )
+		self.lon2_entry.grid( row = 5 , column = 3 , columnspan = 3 , sticky = W + E )
 		self.label_lat1 = Label( tab1 , text = "Latitude 1 [deg]" )
 		self.label_lat1.grid( row = 6 , column = 0 , columnspan = 3 , sticky = W )
 		self.lat1_entry = Entry( tab1 , textvariable = lat1 )
@@ -286,7 +286,7 @@ class MainFrame:
 		self.label_height_theta.grid( row = 6 , column = 0 , columnspan = 2 , sticky = W )
 		self.height_theta_entry = Entry( tab3 , textvariable = height_theta , state = 'disabled' )
 		self.height_theta_entry.grid( row = 6 , column = 2 , columnspan = 1 , sticky = W + E )
-		self.label_dist_hl = Label( tab3 , text = "Predefined distribution for H/L")
+		self.label_dist_hl = Label( tab3 , text = "Predefined distribution for H/L" )
 		self.label_dist_hl.grid( row = 2 , column = 3 , columnspan = 2 , sticky = W )
 		self.dist_hl_entry = OptionMenu( tab3 , self.disthl , "Gaussian" , "Uniform" , "Gamma" , "Lognormal" , command = self.opt_disthl )
 		self.dist_hl_entry.grid( row = 2 , column = 5 , columnspan = 1 , sticky = W + E )
@@ -454,7 +454,7 @@ class MainFrame:
 		elif( opt == "Gamma" ):
 			self.dist_height_choice = 3
 		elif( opt == "Lognormal" ):
-                        self.dist_height_choice = 4
+			self.dist_height_choice = 4
 		self.enabled_disabled()
 
 	def opt_disthl( self , opt ):
@@ -465,7 +465,7 @@ class MainFrame:
 		elif( opt == "Gamma" ):
 			self.dist_hl_choice = 3
 		elif( opt == "Lognormal" ):
-                        self.dist_hl_choice = 4
+			self.dist_hl_choice = 4
 		self.enabled_disabled()
 
 	def opt_calibrationtype( self , opt ):
@@ -539,12 +539,12 @@ class MainFrame:
 			else:
 				file_path = filedialog.askopenfilename()
 				if( len( file_path ) == 0 ):
-                                        self.topography_availability == 0
-                                        self.source_dem = np.nan
-                                        self.topography_inputs = ""
-                                        self.enabled_disabled()
-                                        messagebox.showerror( title = None, message = "Topography was not loaded")
-                                        return
+					self.topography_availability == 0
+					self.source_dem = np.nan
+					self.topography_inputs = ""
+					self.enabled_disabled()
+					messagebox.showerror( title = None , message = "Topography was not loaded" )
+					return
 				if( self.source_dem_choice == 2 ):
 					[ self.Topography , self.Topography_Sea , self.n_north , self.n_east , self.cellsize , self.east_cor , self.north_cor ] = read_map_utm( file_path , file_path )
 					[ self.matrix_north , self.matrix_east , self.utm_save ] = matrix_utm( self.n_north , self.n_east , self.cellsize , self.east_cor , self.north_cor )
@@ -560,13 +560,13 @@ class MainFrame:
 				self.topography_inputs = self.topography_inputs + "Topography File: " + file_path + "\n"
 			self.topography_availability = 1
 			self.enabled_disabled()
-			messagebox.showinfo( title = None, message = "Topography loaded successfully")
+			messagebox.showinfo( title = None , message = "Topography loaded successfully" )
 		except:
 			self.topography_availability == 0
 			self.source_dem = np.nan
 			self.topography_inputs = ""
 			self.enabled_disabled()
-			messagebox.showerror( title = None, message = "Topography was not loaded")
+			messagebox.showerror( title = None , message = "Topography was not loaded" )
 
 	def plot_topography( self ):
 		if( self.source_dem == 1 or self.source_dem == 3 ):
@@ -649,29 +649,29 @@ class MainFrame:
 					self.radius_rad = float( self.radcir_entry.get() )
 					self.ang1_rad = float( self.ang1cir_entry.get() )
 					self.ang2_rad = float( self.ang2cir_entry.get() )
-					rad_collapse = "Radius (circumference arch) [m]: " + str( self.radius_rad ) + "\n" + "Initial angle (circumference arch) [m]: " + str( self.ang1_rad ) + "\n" + "Final angle (circumference arch) [m]:  " + str( self.ang2_rad ) + "\n" 
+					rad_collapse = "Radius (circumference arch) [m]: " + str( self.radius_rad ) + "\n" + "Initial angle (circumference arch) [m]: " + str( self.ang1_rad ) + "\n" + "Final angle (circumference arch) [m]: " + str( self.ang2_rad ) + "\n" 
 			if( self.source_dem == 1 or self.source_dem == 3 ):
 				if( not self.vent_type == 4 ):
 					self.lon_cen = float( self.loncen_entry.get() )
 					self.lat_cen = float( self.latcen_entry.get() )
-					inputs_collapse = "Longitude collapse [deg]: " + str(self.lon_cen) + "\n" + "Latitude collapse [deg]: " + str(self.lat_cen) + "\n"
+					inputs_collapse = "Longitude collapse [deg]: " + str( self.lon_cen ) + "\n" + "Latitude collapse [deg]: " + str( self.lat_cen ) + "\n"
 					var_collapse = "Uncertainty of vent position [m]: " + str( self.var_cen ) + "\n" + "Probability distribution of uncertainty of vent position: "
 					if( self.vent_dist == 1 ):
 						var_collapse = var_collapse + "Gaussian" + "\n"
 					else:
 						var_collapse = var_collapse + "Uniform" + "\n"
-				[ self.lon_cen_vector , self.lat_cen_vector , self.N ] = create_vent_deg( self.vent_type , file_path , self.lon_cen , self.lat_cen , self.var_cen , self.azimuth_lin, self.length_lin , self.radius_rad , self.ang1_rad , self.ang2_rad , self.step_lon_deg , self.step_lat_deg , self.step_lon_m , self.step_lat_m , self.vent_dist , self.N )
+				[ self.lon_cen_vector , self.lat_cen_vector , self.N ] = create_vent_deg( self.vent_type , file_path , self.lon_cen , self.lat_cen , self.var_cen , self.azimuth_lin , self.length_lin , self.radius_rad , self.ang1_rad , self.ang2_rad , self.step_lon_deg , self.step_lat_deg , self.step_lon_m , self.step_lat_m , self.vent_dist , self.N )
 			else:
 				if( not self.vent_type == 4 ):
 					self.east_cen = float( self.eastcen_entry.get() )
 					self.north_cen = float( self.northcen_entry.get() )
-					inputs_collapse = "East collapse [m]: " + str(self.east_cen) + "\n" + "North collapse [m]: " + str(self.north_cen)  + "\n"
+					inputs_collapse = "East collapse [m]: " + str( self.east_cen ) + "\n" + "North collapse [m]: " + str( self.north_cen ) + "\n"
 					var_collapse = "Uncertainty of vent position [m]: " + str( self.var_cen ) + "\n" + "Probability distribution of uncertainty of vent position: "
 					if( self.vent_dist == 1 ):
 						var_collapse = var_collapse + "Gaussian" + "\n"
 					else:
 						var_collapse = var_collapse + "Uniform" + "\n"					
-				[ self.east_cen_vector , self.north_cen_vector , self.N ] = create_vent_utm( self.vent_type , file_path , self.east_cen , self.north_cen , self.var_cen , self.azimuth_lin, self.length_lin , self.radius_rad , self.ang1_rad , self.ang2_rad , self.vent_dist , self.N )
+				[ self.east_cen_vector , self.north_cen_vector , self.N ] = create_vent_utm( self.vent_type , file_path , self.east_cen , self.north_cen , self.var_cen , self.azimuth_lin , self.length_lin , self.radius_rad , self.ang1_rad , self.ang2_rad , self.vent_dist , self.N )
 			self.sample_vent_availability = 1
 			if( self.vent_type == 1 ):
 				self.vent_inputs = "Vent type: Pointwise" + "\n" + inputs_collapse + var_collapse
@@ -697,12 +697,12 @@ class MainFrame:
 				self.calib_inputs = ""
 				self.run_inputs = ""
 				self.enabled_disabled()
-				messagebox.showerror( title = None, message = "The previous loaded information was associated with other number of simulations. Sampling of height and H/L was discarded." )
+				messagebox.showerror( title = None , message = "The previous loaded information was associated with other number of simulations. Sampling of height and H/L was discarded." )
 		except:
 			self.sample_vent_availability = 0		
 			self.vent_inputs = ""
 			self.enabled_disabled()
-			messagebox.showerror( title = None, message = "Vent position was not sampled" )
+			messagebox.showerror( title = None , message = "Vent position was not sampled" )
 
 	def plot_vent( self ):
 		if( self.source_dem == 1 or self.source_dem == 3 ):
@@ -715,7 +715,7 @@ class MainFrame:
 
 	def sample_calib( self ):
 		if( not np.isnan( self.type_sim ) and not self.type_sim == self.type_sim_choice ):
-			messagebox.showerror( title = None, message = "The current loaded information is associated with other type of simulation (default). If you want to develop calibration simulations, please sample vent position again.")
+			messagebox.showerror( title = None , message = "The current loaded information is associated with other type of simulation (default). If you want to develop calibration simulations, please sample vent position again." )
 			return
 		try:
 			self.boolean_polygon = self.boolean_polygon_choice
@@ -818,39 +818,39 @@ class MainFrame:
 			if( self.type_input == 2 or self.type_input == 3 ):
 				file_path = filedialog.askopenfilename()
 				if( self.type_input == 3 and self.calibration_type == 5 ):
-					if( self.dist_distance in [ 1 , 2 , 4 ]):
+					if( self.dist_distance in [ 1 , 2 , 4 ] ):
 						self.distance = float( self.distance_entry.get() )
 						self.var_distance = float( self.var_distance_entry.get() )
 					else:
 						self.distance_k = float( self.distance_k_entry.get() )
 						self.distance_theta = float( self.distance_theta_entry.get() )
 				elif( self.type_input == 3 and self.calibration_type == 7 ):
-					if( self.dist_area in [ 1 , 2 , 4 ]):
+					if( self.dist_area in [ 1 , 2 , 4 ] ):
 						self.area = float( self.area_entry.get() )
 						self.var_area = float( self.var_area_entry.get() )
 					else:
 						self.area_k = float( self.area_k_entry.get() )
 						self.area_theta = float( self.area_theta_entry.get() )
 			else:
-				if( self.dist_height in [ 1 , 2 , 4 ]):
+				if( self.dist_height in [ 1 , 2 , 4 ] ):
 					self.height = float( self.height_entry.get() )
 					self.var_height = float( self.var_height_entry.get() )
 				else:
 					self.height_k = float( self.height_k_entry.get() )
 					self.height_theta = float( self.height_theta_entry.get() )
-				if( self.dist_hl in [ 1 , 2 , 4 ]):
+				if( self.dist_hl in [ 1 , 2 , 4 ] ):
 					self.hl = float( self.hl_entry.get() )
 					self.var_hl = float( self.var_hl_entry.get() )
 				else:
 					self.hl_k = float( self.hl_k_entry.get() )
 					self.hl_theta = float( self.hl_theta_entry.get() )
-			[ self.height_vector , self.hl_vector , self.N , self.variable_vector , self.limits_calib , self.probability_save ] = create_inputs( self.type_sim , self.type_input , self.dist_height , self.dist_hl , file_path , self.height , self.var_height , self.height_k , self.height_theta, self.hl , self.var_hl , self.hl_k , self.hl_theta , self.calibration_type , self.dist_distance , self.distance , self.var_distance , self.distance_k , self.distance_theta , self.dist_area , self.area , self.var_area , self.area_k , self.area_theta , self.N , 1 )
+			[ self.height_vector , self.hl_vector , self.N , self.variable_vector , self.limits_calib , self.probability_save ] = create_inputs( self.type_sim , self.type_input , self.dist_height , self.dist_hl , file_path , self.height , self.var_height , self.height_k , self.height_theta , self.hl , self.var_hl , self.hl_k , self.hl_theta , self.calibration_type , self.dist_distance , self.distance , self.var_distance , self.distance_k , self.distance_theta , self.dist_area , self.area , self.var_area , self.area_k , self.area_theta , self.N , 1 )
 			if( len( self.height_vector ) == 0 ):
-                                self.sample_height_availability = 0
-                                self.height_inputs = ""
-                                self.enabled_disabled()
-                                messagebox.showerror( title = None , message = "Height and H/L were not sampled" )
-                                return
+				self.sample_height_availability = 0
+				self.height_inputs = ""
+				self.enabled_disabled()
+				messagebox.showerror( title = None , message = "Height and H/L were not sampled" )
+				return
 			self.sample_height_availability = 1				
 			if( self.type_input == 1 ):
 				self.height_inputs = "Distribution type for height and H/L: Predefined distributions" + "\n"
@@ -861,11 +861,11 @@ class MainFrame:
 				elif( self.dist_height == 3 ):
 					self.height_inputs = self.height_inputs + "Distribution type for height: Gamma" + "\n"
 				else:
-					self.height_inputs = self.height_inputs + "Distribution type for height: Lognormal" + "\n"                                        
+					self.height_inputs = self.height_inputs + "Distribution type for height: Lognormal" + "\n"
 				if( self.dist_height in [ 1 , 2 , 4 ] ):
 					self.height_inputs = self.height_inputs + "Expected collapse height [m]: " + str( self.height ) + "\n" + "Uncertainty of collapse height [m]: " + str( self.var_height ) + "\n"
 				else:
-                                        self.height_inputs = self.height_inputs + "Parameter k in gamma distribution (collapse height [m]): " + str( self.height_k ) + "\n" + "Parameter theta in gamma distribution (collapse height [m]): " + str( self.height_theta ) + "\n"
+					self.height_inputs = self.height_inputs + "Parameter k in gamma distribution (collapse height [m]): " + str( self.height_k ) + "\n" + "Parameter theta in gamma distribution (collapse height [m]): " + str( self.height_theta ) + "\n"
 				if( self.dist_hl == 1 ):
 					self.height_inputs = self.height_inputs + "Distribution type for H/L: Gaussian" + "\n"
 				elif( self.dist_hl == 2 ):
@@ -873,7 +873,7 @@ class MainFrame:
 				elif( self.dist_hl == 3 ):
 					self.height_inputs = self.height_inputs + "Distribution type for H/L: Gamma" + "\n"
 				else:
-					self.height_inputs = self.height_inputs + "Distribution type for H/L: Lognormal" + "\n"                                        
+					self.height_inputs = self.height_inputs + "Distribution type for H/L: Lognormal" + "\n"
 				if( self.dist_hl in [ 1 , 2 , 4 ] ):
 					self.height_inputs = self.height_inputs + "Expected H/L: " + str( self.hl ) + "\n" + "Uncertainty of H/L: " + str( self.var_hl ) + "\n"
 				else:
@@ -902,7 +902,7 @@ class MainFrame:
 					if( self.dist_distance in [ 1 , 2 , 4 ] ):
 						self.height_inputs = self.height_inputs + "Expected runout distance [m]: " + str( self.distance ) + "\n" + "Uncertainty of runout distance [m]: " + str( self.var_distance ) + "\n"
 					else:
-                        	                self.height_inputs = self.height_inputs + "Parameter k in gamma distribution (runout distance [m]): " + str( self.distance_k ) + "\n" + "Parameter theta in gamma distribution (runout distance [m]): " + str( self.distance_theta ) + "\n"
+						self.height_inputs = self.height_inputs + "Parameter k in gamma distribution (runout distance [m]): " + str( self.distance_k ) + "\n" + "Parameter theta in gamma distribution (runout distance [m]): " + str( self.distance_theta ) + "\n"
 				elif( self.calibration_type == 7 ):
 					self.height_inputs = self.height_inputs + "Calibration type: Inundation area-based" + "\n" + "File name: " + file_path + "\n"
 					if( self.dist_area == 1 ):
@@ -916,7 +916,7 @@ class MainFrame:
 					if( self.dist_area in [ 1 , 2 , 4 ] ):
 						self.height_inputs = self.height_inputs + "Expected inundation area [km2]: " + str( self.area ) + "\n" + "Uncertainty of inundation area [km2]: " + str( self.var_area ) + "\n"
 					else:
-                        	                self.height_inputs = self.height_inputs + "Parameter k in gamma distribution (inundation area [km2]): " + str( self.area_k ) + "\n" + "Parameter theta in gamma distribution (inundation area [km2]): " + str( self.area_theta ) + "\n"
+						self.height_inputs = self.height_inputs + "Parameter k in gamma distribution (inundation area [km2]): " + str( self.area_k ) + "\n" + "Parameter theta in gamma distribution (inundation area [km2]): " + str( self.area_theta ) + "\n"
 			self.enabled_disabled()
 			messagebox.showinfo( title = None , message = "Height and H/L sampled successfully" )
 			if( not self.N == self.N_choice ):
@@ -954,11 +954,11 @@ class MainFrame:
 			if( self.source_dem == 1 or self.source_dem == 3 ):
 				[ self.summary_data , self.area_pixel , self.sim_data , self.string_data , self.string_cones ] = definitions_save_data_deg( self.source_dem , self.height_vector , self.hl_vector , self.lon_cen_vector , self.lat_cen_vector , self.step_lon_m , self.step_lat_m , self.N , self.cone_levels )
 				[ self.data_cones , self.polygon ] = [ np.nan , np.nan ]
-				[ self.summary_data , self.string_data , self.string_cones , self.string_compare , self.sim_data , self.data_cones , self.polygon ] = compute_energy_cones_deg( self.type_sim , self.lon1 , self.lon2 , self.lat1 , self.lat2 , self.step_lon_deg , self.step_lat_deg , self.step_lon_m , self.step_lat_m , self.lon_cen_vector , self.lat_cen_vector , self.matrix_lon , self.matrix_lat , self.height_vector , self.hl_vector , self.cells_lon , self.cells_lat , self.Topography , self.angstep , self.angstep_res2 , self.angstep_res3 , self.distep , self.area_pixel , self.cone_levels , self.N , self.redist_energy , self.save_data ,  self.summary_data , self.string_data , self.string_cones , self.sim_data , self.anglen , self.pix_min ,  self.vector_backward_1 , self.vector_backward_2 , self.index_max , self.vector_correc , self.matrix_compare , self.vertices_compare , self.string_compare , self.data_direction , comp_polygon )
+				[ self.summary_data , self.string_data , self.string_cones , self.string_compare , self.sim_data , self.data_cones , self.polygon ] = compute_energy_cones_deg( self.type_sim , self.lon1 , self.lon2 , self.lat1 , self.lat2 , self.step_lon_deg , self.step_lat_deg , self.step_lon_m , self.step_lat_m , self.lon_cen_vector , self.lat_cen_vector , self.matrix_lon , self.matrix_lat , self.height_vector , self.hl_vector , self.cells_lon , self.cells_lat , self.Topography , self.angstep , self.angstep_res2 , self.angstep_res3 , self.distep , self.area_pixel , self.cone_levels , self.N , self.redist_energy , self.save_data , self.summary_data , self.string_data , self.string_cones , self.sim_data , self.anglen , self.pix_min , self.vector_backward_1 , self.vector_backward_2 , self.index_max , self.vector_correc , self.matrix_compare , self.vertices_compare , self.string_compare , self.data_direction , comp_polygon )
 			else:
 				[ self.summary_data , self.area_pixel , self.sim_data , self.string_data , self.string_cones ] = definitions_save_data_utm( self.source_dem , self.height_vector , self.hl_vector , self.east_cen_vector , self.north_cen_vector , self.cellsize , self.N , self.cone_levels )
 				[ self.data_cones , self.polygon ] = [ np.nan , np.nan ]
-				[ self.summary_data , self.string_data , self.string_cones , self.string_compare , self.sim_data , self.data_cones , self.polygon ] = compute_energy_cones_utm( self.type_sim , self.n_north , self.n_east , self.east_cor , self.north_cor , self.east_cen_vector , self.north_cen_vector ,  self.matrix_north , self.matrix_east , self.height_vector , self.hl_vector , self.cellsize , self.Topography , self.angstep , self.angstep_res2 , self.angstep_res3 , self.distep , self.area_pixel , self.cone_levels , self.N , self.redist_energy , self.save_data , self.summary_data , self.string_data , self.string_cones , self.sim_data , self.anglen , self.pix_min , self.vector_backward_1 , self.vector_backward_2 , self.index_max , self.vector_correc , self.matrix_compare , self.vertices_compare , self.string_compare , self.data_direction , comp_polygon )
+				[ self.summary_data , self.string_data , self.string_cones , self.string_compare , self.sim_data , self.data_cones , self.polygon ] = compute_energy_cones_utm( self.type_sim , self.n_north , self.n_east , self.east_cor , self.north_cor , self.east_cen_vector , self.north_cen_vector , self.matrix_north , self.matrix_east , self.height_vector , self.hl_vector , self.cellsize , self.Topography , self.angstep , self.angstep_res2 , self.angstep_res3 , self.distep , self.area_pixel , self.cone_levels , self.N , self.redist_energy , self.save_data , self.summary_data , self.string_data , self.string_cones , self.sim_data , self.anglen , self.pix_min , self.vector_backward_1 , self.vector_backward_2 , self.index_max , self.vector_correc , self.matrix_compare , self.vertices_compare , self.string_compare , self.data_direction , comp_polygon )
 			self.results_availability = 1
 			self.enabled_disabled()
 			if( self.type_sim == 1 ):
@@ -969,12 +969,12 @@ class MainFrame:
 				else:
 					self.run_inputs = "Simulation type: Calibration mode (Based on the distribution of PDC runout distance or inundation area)" + "\n"
 			self.run_inputs = self.run_inputs + "Cone generations: " + str( self.cone_levels ) + "\n" + "Number of Simulations: " + str( self.N ) + "\n"
-			messagebox.showinfo( title = None, message = "Simulations finished")
+			messagebox.showinfo( title = None , message = "Simulations finished" )
 		except:
 			self.results_availability = 0
 			self.run_inputs = ""
 			self.enabled_disabled()
-			messagebox.showerror( title = None, message = "Simulations were not finished")
+			messagebox.showerror( title = None , message = "Simulations were not finished" )
 
 	def plotres( self ):
 		if( self.source_dem == 1 or self.source_dem == 3 ):
@@ -984,8 +984,8 @@ class MainFrame:
 		if( self.type_sim == 2 ):
 			comp_polygon = ""
 			if( self.boolean_polygon ):
-                                comp_polygon = "Yes"
-			plot_only_calibration( self.string_compare , self.vertices_compare , self.N ,  comp_polygon )
+				comp_polygon = "Yes"
+			plot_only_calibration( self.string_compare , self.vertices_compare , self.N , comp_polygon )
 		else:
 			plot_input_output( self.summary_data )
 		plt.show()
@@ -993,15 +993,15 @@ class MainFrame:
 	def saveres( self ):
 		run_name = str( self.runname_entry.get() )
 		try:
-			os.mkdir('Results')
+			os.mkdir( 'Results' )
 		except:
 			pass
 		try:
-			os.mkdir('Results/' + run_name)
+			os.mkdir( 'Results/' + run_name )
 		except:
 			pass
 		if( self.source_dem == 1 or self.source_dem == 3 ):
-			save_data_deg( run_name , self.source_dem , 0 , self.lon1 , self.lon2 , self.lat1 , self.lat2 , self.step_lon_m , self.step_lat_m , self.cells_lon , self.cells_lat , self.matrix_lon , self.matrix_lat , self.Topography , self.Topography_Sea , self.N , self.summary_data , self.string_data , self.string_cones , self.sim_data , self.data_cones, self.utm_save , 0 )
+			save_data_deg( run_name , self.source_dem , 0 , self.lon1 , self.lon2 , self.lat1 , self.lat2 , self.step_lon_m , self.step_lat_m , self.cells_lon , self.cells_lat , self.matrix_lon , self.matrix_lat , self.Topography , self.Topography_Sea , self.N , self.summary_data , self.string_data , self.string_cones , self.sim_data , self.data_cones , self.utm_save , 0 )
 		else:
 			save_data_utm( run_name , 0 , self.n_north , self.n_east , self.cellsize , self.matrix_east , self.matrix_north , self.Topography , self.Topography_Sea , self.N , self.summary_data , self.string_data , self.string_cones , self.string_compare , self.sim_data , self.data_cones , self.utm_save , 0 )
 		if( self.type_sim == 2 ):
@@ -1014,7 +1014,7 @@ class MainFrame:
 		if( self.type_sim == 2 ):
 			text_file.write( self.calib_inputs + "\n" )
 		text_file.close()		
-		messagebox.showinfo( title = None, message = "Results saved")
+		messagebox.showinfo( title = None , message = "Results saved" )
 
 	def enabled_disabled( self ):
 		if( self.source_dem_choice == 1 ):
@@ -1055,9 +1055,9 @@ class MainFrame:
 					bol_line = 0
 					bol_circ = 1
 				if( self.type_sim_choice == 1 ):
-                                        bol_varcen = 1
+					bol_varcen = 1
 				else:
-                                        bol_varcen = -1
+					bol_varcen = -1
 			else:
 				bol_lonlatcol = 0
 				bol_eastnorthcol = 0
@@ -1074,9 +1074,9 @@ class MainFrame:
 			if( self.sample_cal_availability == 1 ):
 				self.loaded_calib.config( text = "Defined" )
 				if( self.boolean_polygon == 1 ):
-        				bol_plot_calib = 1
+					bol_plot_calib = 1
 				else:
-                                        bol_plot_calib = 0
+					bol_plot_calib = 0
 			else:
 				if( np.isnan( self.type_sim ) ):
 					self.loaded_calib.config( text = "Not defined / Not needed" )
@@ -1112,17 +1112,17 @@ class MainFrame:
 				bol_labelpres = 1
 				bol_distheighthl = 1
 				if( self.dist_height_choice in [ 1 , 2 , 4 ] ):
-                                	bol_height_gaus = 1
-                                	bol_height_gam = 0
+					bol_height_gaus = 1
+					bol_height_gam = 0
 				else:
-                                	bol_height_gaus = 0
-                                	bol_height_gam = 1
+					bol_height_gaus = 0
+					bol_height_gam = 1
 				if( self.dist_hl_choice in [ 1 , 2 , 4 ] ):
-                                	bol_hl_gaus = 1
-                                	bol_hl_gam = 0
+					bol_hl_gaus = 1
+					bol_hl_gam = 0
 				else:
-                                	bol_hl_gaus = 0
-                                	bol_hl_gam = 1  
+					bol_hl_gaus = 0
+					bol_hl_gam = 1
 				bol_label_calib = 0
 				bol_dist_distance = 0
 				bol_distance_gaus = 0
@@ -1131,19 +1131,19 @@ class MainFrame:
 				bol_area_gaus = 0
 				bol_area_gam = 0				
 			elif( self.type_input_choice == 2 ):
-                                bol_labelpres = 0
-                                bol_distheighthl = 0
-                                bol_height_gaus = 0
-                                bol_height_gam = 0
-                                bol_hl_gaus = 0
-                                bol_hl_gam = 0
-                                bol_label_calib = 0
-                                bol_dist_distance = 0
-                                bol_distance_gaus = 0
-                                bol_distance_gam = 0
-                                bol_dist_area = 0
-                                bol_area_gaus = 0
-                                bol_area_gam = 0
+				bol_labelpres = 0
+				bol_distheighthl = 0
+				bol_height_gaus = 0
+				bol_height_gam = 0
+				bol_hl_gaus = 0
+				bol_hl_gam = 0
+				bol_label_calib = 0
+				bol_dist_distance = 0
+				bol_distance_gaus = 0
+				bol_distance_gam = 0
+				bol_dist_area = 0
+				bol_area_gaus = 0
+				bol_area_gam = 0
 			else:
 				bol_labelpres = 0
 				bol_distheighthl = 0
@@ -1222,9 +1222,9 @@ class MainFrame:
 		else:
 			self.loaded_numbersim.config( text = "Not defined" )
 
-		self.set_fields( bol_lonlat , bol_plot_top , bol_vent_type , bol_lonlatcol , bol_eastnorthcol , bol_line , bol_circ , bol_varcen , bol_sam_vent , bol_plot_vent , bol_sam_calib , bol_plot_calib , bol_typeinput , bol_labelpres , bol_distheighthl , bol_height_gaus, bol_height_gam , bol_hl_gaus , bol_hl_gam , bol_label_calib , bol_dist_distance , bol_distance_gaus , bol_distance_gam , bol_dist_area , bol_area_gaus , bol_area_gam , bol_sam_height , bol_plot_height , bol_runsim , bol_plotres )
+		self.set_fields( bol_lonlat , bol_plot_top , bol_vent_type , bol_lonlatcol , bol_eastnorthcol , bol_line , bol_circ , bol_varcen , bol_sam_vent , bol_plot_vent , bol_sam_calib , bol_plot_calib , bol_typeinput , bol_labelpres , bol_distheighthl , bol_height_gaus , bol_height_gam , bol_hl_gaus , bol_hl_gam , bol_label_calib , bol_dist_distance , bol_distance_gaus , bol_distance_gam , bol_dist_area , bol_area_gaus , bol_area_gam , bol_sam_height , bol_plot_height , bol_runsim , bol_plotres )
 
-	def set_fields( self , bol_lonlat , bol_plot_top , bol_vent_type , bol_lonlatcol , bol_eastnorthcol , bol_line , bol_circ , bol_varcen , bol_sam_vent , bol_plot_vent , bol_sam_calib , bol_plot_calib , bol_typeinput , bol_labelpres , bol_distheighthl , bol_height_gaus, bol_height_gam , bol_hl_gaus , bol_hl_gam , bol_label_calib , bol_dist_distance , bol_distance_gaus , bol_distance_gam , bol_dist_area , bol_area_gaus , bol_area_gam , bol_sam_height , bol_plot_height , bol_runsim , bol_plotres ):
+	def set_fields( self , bol_lonlat , bol_plot_top , bol_vent_type , bol_lonlatcol , bol_eastnorthcol , bol_line , bol_circ , bol_varcen , bol_sam_vent , bol_plot_vent , bol_sam_calib , bol_plot_calib , bol_typeinput , bol_labelpres , bol_distheighthl , bol_height_gaus , bol_height_gam , bol_hl_gaus , bol_hl_gam , bol_label_calib , bol_dist_distance , bol_distance_gaus , bol_distance_gam , bol_dist_area , bol_area_gaus , bol_area_gam , bol_sam_height , bol_plot_height , bol_runsim , bol_plotres ):
 
 		if( bol_lonlat == 1 ):
 			self.lon1_entry.configure( state = 'normal' )
@@ -1346,9 +1346,9 @@ class MainFrame:
 			self.type_input_entry.configure( state = 'disabled' )
 			self.type_input_choice = 1
 		if( bol_labelpres == 1 ):
-                        self.label_prescribed.configure( state = 'normal' )
+			self.label_prescribed.configure( state = 'normal' )
 		else:
-                        self.label_prescribed.configure( state = 'disabled' )
+			self.label_prescribed.configure( state = 'disabled' )
 		if( bol_distheighthl == 1 ):
 			self.label_dist_height.configure( state = 'normal' )
 			self.dist_height_entry.configure( state = 'normal' )
@@ -1490,7 +1490,7 @@ class MainFrame:
 			self.but_saveres.configure( state = 'disabled' )
 
 if __name__ == '__main__':
-        root = Tk()
-        my_gui = MainFrame(root)
-        root.after( 100 )
-        root.mainloop()
+	root = Tk()
+	my_gui = MainFrame( root )
+	root.after( 100 )
+	root.mainloop()
