@@ -505,7 +505,7 @@ class MainFrame:
 
 	def load_topography( self ):
 		if( self.topography_availability == 1 ):
-			result = messagebox.askquestion( "Continue?" , "Topography information was loaded previously. If you continue, the code will discard all the information loaded previously, expect height and H/L data. Do you want to continue?" , icon = 'warning' )
+			result = messagebox.askquestion( "Continue?" , "Topography information was loaded previously. If you continue, the code will discard all the information loaded previously, except height and H/L data. Do you want to continue?" , icon = 'warning' )
 			if( result == 'no' ):
 				return
 			else:
