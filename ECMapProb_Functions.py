@@ -296,7 +296,7 @@ def import_map( current_path , run_name , lon1 , lon2 , lat1 , lat2 ):
 				Cities.append( [ lon_dat , lat_dat , aux[ 2 ] ] )
 		if( len( Cities ) <= 5 ):
 			break
-	elevation.clip( bounds = ( lon1 , lat1 , lon2 , lat2 ), output = current_path + '/' + run_name + '.tif' )
+	elevation.clip( bounds = ( lon1 , lat1 , lon2 , lat2 ) , output = current_path + '/' + run_name + '.tif' )
 	fp = run_name + '.tif'
 	image = tifffile.imread( fp )
 	elevation.clean()
@@ -423,7 +423,7 @@ def matrix_deg( lon1 , lon2 , lat1 , lat2 , cells_lon , cells_lat ):
 	else:
 		distance_lon = distance_two_points( lat1 , lat1 , lon1 , lon2 )
 		distance_lat = distance_two_points( lat1 , lat2 , lon1 , lon1 )
-	utm_save = utm.from_latlon( min( lat1 , lat2 ), min( lon1 , lon2 ) )
+	utm_save = utm.from_latlon( min( lat1 , lat2 ) , min( lon1 , lon2 ) )
 	step_lon_m = distance_lon / ( cells_lon - 1 )
 	step_lat_m = distance_lat / ( cells_lat - 1 )
 	matrix_lon = np.zeros( ( cells_lat , cells_lon ) )
@@ -604,7 +604,7 @@ def create_inputs( type_sim , type_input , dist_input_height , dist_input_hl , i
 			Probability = np.zeros( zi_reshaped.shape )
 			for ind_prob in range( len( Probability ) ):
 				Probability[ ind_prob ] = np.sum( np.power( resolution + np.abs( zi_reshaped[ ind_prob ] - variable_vector_used ) , - 1.0 ) / divisor_int )
-			Probability_Save = gaussian_filter( np.reshape( Probability / np.sum( Probability ) , ( number_steps_dense , number_steps_dense ) ), 10 )
+			Probability_Save = gaussian_filter( np.reshape( Probability / np.sum( Probability ) , ( number_steps_dense , number_steps_dense ) ) , 10 )
 			Probability = np.cumsum( np.reshape( Probability_Save , ( number_steps_dense * number_steps_dense , 1 ) ) / np.sum( np.reshape( Probability_Save , ( number_steps_dense * number_steps_dense , 1 ) ) ) )
 			sampling = np.random.uniform( 0.0 , 1.0 , N )
 			sampling_height = np.random.uniform( - 0.5 , 0.5 , N )
@@ -625,7 +625,7 @@ def create_inputs( type_sim , type_input , dist_input_height , dist_input_hl , i
 				elif( dist_input_height == 3 ):
 					height_vector = np.random.gamma( height_k , height_theta , N )
 				else:
-					height_vector = np.random.lognormal( np.log( height * height / np.sqrt( height * height + var_height * var_height ) ), np.log( 1 + var_height * var_height / height / height ) , N )
+					height_vector = np.random.lognormal( np.log( height * height / np.sqrt( height * height + var_height * var_height ) ) , np.log( 1 + var_height * var_height / height / height ) , N )
 			else:
 				height_vector = np.linspace( height - var_height , height + var_height , num = N )
 		else:
@@ -639,7 +639,7 @@ def create_inputs( type_sim , type_input , dist_input_height , dist_input_hl , i
 				elif( dist_input_hl == 3 ):
 					hl_vector = np.random.gamma( hl_k , hl_theta , N )
 				else:
-					hl_vector = np.random.lognormal( np.log( hl * hl / np.sqrt( hl * hl + var_hl * var_hl ) ), np.log( 1 + var_hl * var_hl / hl / hl ) , N )
+					hl_vector = np.random.lognormal( np.log( hl * hl / np.sqrt( hl * hl + var_hl * var_hl ) ) , np.log( 1 + var_hl * var_hl / hl / hl ) , N )
 			else:
 				hl_vector = np.linspace( hl - var_hl , hl + var_hl , num = N )
 		else:
@@ -666,7 +666,7 @@ def create_inputs( type_sim , type_input , dist_input_height , dist_input_hl , i
 							elif( dist_input_height == 3 ):
 								height_vector[ i ] = np.random.gamma( height_k , height_theta , 1 )
 							else:
-								height_vector[ i ] = np.random.lognormal( np.log( height * height / np.sqrt( height * height + var_height * var_height ) ), np.log( 1 + var_height * var_height / height / height ) , 1 )
+								height_vector[ i ] = np.random.lognormal( np.log( height * height / np.sqrt( height * height + var_height * var_height ) ) , np.log( 1 + var_height * var_height / height / height ) , 1 )
 							aux_boolean = 1
 					if( aux_boolean == 0 ):
 						break
@@ -682,7 +682,7 @@ def create_inputs( type_sim , type_input , dist_input_height , dist_input_hl , i
 							elif( dist_input_hl == 3 ):
 								hl_vector[ i ] = np.random.gamma( hl_k , hl_theta , 1 )
 							else:
-								hl_vector[ i ] = np.random.lognormal( np.log( hl * hl / np.sqrt( hl * hl + var_hl * var_hl ) ), np.log( 1 + var_hl * var_hl / hl / hl ) , 1 )
+								hl_vector[ i ] = np.random.lognormal( np.log( hl * hl / np.sqrt( hl * hl + var_hl * var_hl ) ) , np.log( 1 + var_hl * var_hl / hl / hl ) , 1 )
 							aux_boolean = 1
 					if( aux_boolean == 0 ):
 						break
@@ -776,7 +776,7 @@ def read_comparison_polygon_deg( comparison_polygon , ang_cal , ang_cal_range , 
 		draw = ImageDraw.Draw( img_compare ).polygon( polygon_compare , outline = 1 , fill = 1 )
 		matrix_compare = np.array( img_compare )
 		string_compare = np.zeros( ( N , 9 ) ) * np.nan
-		line_compare = plt.contour( matrix_lon , matrix_lat , matrix_compare[ range( len( matrix_compare[ : , 0 ] ) -1 , -1 , -1 ) , : ], np.array( [ 0 ] ), colors = 'r' , interpolation = 'linear' )
+		line_compare = plt.contour( matrix_lon , matrix_lat , matrix_compare[ range( len( matrix_compare[ : , 0 ] ) -1 , -1 , -1 ) , : ], np.array( [ 0 ] ) , colors = 'r' , interpolation = 'linear' )
 		plt.close()
 		path_compare = line_compare.collections[ 0 ].get_paths()[ 0 ]
 		ver_compare = path_compare.vertices
@@ -848,7 +848,7 @@ def read_comparison_polygon_utm( comparison_polygon , ang_cal , ang_cal_range , 
 		draw = ImageDraw.Draw( img_compare ).polygon( polygon_compare , outline = 1 , fill = 1 )
 		matrix_compare = np.array( img_compare )
 		string_compare = np.zeros( ( N , 9 ) ) * np.nan
-		line_compare = plt.contour( matrix_east , matrix_north , matrix_compare[ range( len( matrix_compare[ : , 0 ] ) -1 , -1 , -1 ) , : ], np.array( [ 0 ] ), colors = 'r' , interpolation = 'linear' )
+		line_compare = plt.contour( matrix_east , matrix_north , matrix_compare[ range( len( matrix_compare[ : , 0 ] ) -1 , -1 , -1 ) , : ], np.array( [ 0 ] ) , colors = 'r' , interpolation = 'linear' )
 		plt.close()
 		path_compare = line_compare.collections[ 0 ].get_paths()[ 0 ]
 		ver_compare = path_compare.vertices
@@ -924,7 +924,7 @@ def initial_definitions( redist_energy ):
 		vector_backward_1[ int( anglen / 2 - 1 ) : ] = aux_backward[ : ]
 		vector_backward_1[ vector_backward_1 < 1e-3 ] = 0
 		vector_backward_1[ vector_backward_1 > 1.0 - 1e-3 ] = 1.0
-		aux_backward = 1 / ( 1 + np.exp( factor_mult * ( np.linspace( 1.0 / ( anglen / 2 ) , 1.0 - 1.0 / ( anglen / 2 ), int( anglen / 2 ) ) - center_elim ) ) )
+		aux_backward = 1 / ( 1 + np.exp( factor_mult * ( np.linspace( 1.0 / ( anglen / 2 ) , 1.0 - 1.0 / ( anglen / 2 ) , int( anglen / 2 ) ) - center_elim ) ) )
 		vector_backward_2 = np.zeros( int( anglen ) )
 		vector_backward_2[ 0 : int( anglen / 2 ) ] = aux_backward[::-1]
 		vector_backward_2[ int( anglen / 2 ) : ] = aux_backward[ : ]
@@ -1007,7 +1007,7 @@ def compute_energy_cones_deg( type_sim , lon1 , lon2 , lat1 , lat2 , step_lon_de
 				for distance in range( 0 , 100000 , distep ):
 					h = interpol_pos( lon1 , lat1 , step_lon_deg , step_lat_deg , polygon[ j ][ 0 ] + distance * cos( angle_rad ) * step_lon_deg / step_lon_m , polygon[ j ][ 1 ] + distance * sin( angle_rad ) * step_lat_deg / step_lat_m , cells_lon , cells_lat , Topography )
 					if( h >= polygon[ j ][ 2 ] - hl_current * distance or np.isnan( h ) ):
-						polygon_xy.append( ( int( ( polygon[ j ][ 0 ] + ( distance - distep ) * cos( angle_rad ) * step_lon_deg / step_lon_m - lon1 ) * cells_lon / ( lon2 - lon1 ) ), int( ( polygon[ j ][ 1 ] + ( distance - distep ) * sin( angle_rad ) * step_lat_deg / step_lat_m - lat1 ) * cells_lat / ( lat2 - lat1 ) ) ) )
+						polygon_xy.append( ( int( ( polygon[ j ][ 0 ] + ( distance - distep ) * cos( angle_rad ) * step_lon_deg / step_lon_m - lon1 ) * cells_lon / ( lon2 - lon1 ) ) , int( ( polygon[ j ][ 1 ] + ( distance - distep ) * sin( angle_rad ) * step_lat_deg / step_lat_m - lat1 ) * cells_lat / ( lat2 - lat1 ) ) ) )
 						polygons_new.append( distance - distep )
 						break
 			if( ( redist_energy == 3 or redist_energy == 4 ) and polygon[ j ][ 4 ] > -1 ):
@@ -1209,8 +1209,8 @@ def compute_energy_cones_deg( type_sim , lon1 , lon2 , lat1 , lat2 , step_lon_de
 					for l in wh_max:
 						lint = np.int( l )
 						if( wh_sum[ lint ] > 0 ):
-							new_x = polygon[ j ][ 0 ] + polygons_new[ lint ] * cos( ( vec_ang[ lint ] + angstep * ( l - lint ) ) * np.pi / 180 ) * step_lon_deg / step_lon_m ; 
-							new_y = polygon[ j ][ 1 ] + polygons_new[ lint ] * sin( ( vec_ang[ lint ] + angstep * ( l - lint ) ) * np.pi / 180 ) * step_lat_deg / step_lat_m ;
+							new_x = polygon[ j ][ 0 ] + polygons_new[ lint ] * cos( ( vec_ang[ lint ] + angstep * ( l - lint ) ) * np.pi / 180 ) * step_lon_deg / step_lon_m
+							new_y = polygon[ j ][ 1 ] + polygons_new[ lint ] * sin( ( vec_ang[ lint ] + angstep * ( l - lint ) ) * np.pi / 180 ) * step_lat_deg / step_lat_m
 							height_eff = wh_sum[ lint ] + interpol_pos( lon1 , lat1 , step_lon_deg , step_lat_deg , new_x , new_y , cells_lon , cells_lat , Topography )
 							if( not np.isnan( interpol_pos( lon1 , lat1 , step_lon_deg , step_lat_deg , new_x , new_y , cells_lon , cells_lat , Topography ) ) ):
 								polygon.append( ( new_x , new_y , height_eff , polygon[ j ][ 3 ] + 1 , l , wh_sum[ lint ] ) )
@@ -1336,7 +1336,7 @@ def compute_energy_cones_utm( type_sim , n_north , n_east , east_cor , north_cor
 				for distance in range( 0 , 100000 , distep ):
 					h = interpol_pos( east_cor , north_cor , cellsize , cellsize , polygon[ j ][ 0 ] + distance * cos( angle_rad ) , polygon[ j ][ 1 ] + distance * sin( angle_rad ) , n_east , n_north , Topography )
 					if( h >= polygon[ j ][ 2 ] - hl_current * distance or np.isnan( h ) ):
-						polygon_xy.append( ( int( ( polygon[ j ][ 0 ] + ( distance - distep ) * cos( angle_rad ) - east_cor ) * n_east / ( cellsize * ( n_east - 1 ) ) ), int( ( polygon[ j ][ 1 ] + ( distance - distep ) * sin( angle_rad ) - north_cor ) * n_north / ( cellsize * ( n_north - 1 ) ) ) ) )
+						polygon_xy.append( ( int( ( polygon[ j ][ 0 ] + ( distance - distep ) * cos( angle_rad ) - east_cor ) * n_east / ( cellsize * ( n_east - 1 ) ) ) , int( ( polygon[ j ][ 1 ] + ( distance - distep ) * sin( angle_rad ) - north_cor ) * n_north / ( cellsize * ( n_north - 1 ) ) ) ) )
 						polygons_new.append( distance - distep )
 						break		
 			if( ( redist_energy == 3 or redist_energy == 4 ) and polygon[ j ][ 4 ] > -1 ):
@@ -1364,7 +1364,7 @@ def compute_energy_cones_utm( type_sim , n_north , n_east , east_cor , north_cor
 					for distance in range( 0 , 100000 , distep ):
 						h = interpol_pos( east_cor , north_cor , cellsize , cellsize , polygon[ j ][ 0 ] + distance * cos( angle_rad ) , polygon[ j ][ 1 ] + distance * sin( angle_rad ) , n_east , n_north , Topography )
 						if( h >= polygon[ j ][ 2 ] - hl_current * distance or np.isnan( h ) ):
-							polygon_xy_res3.append( ( int( ( polygon[ j ][ 0 ] + ( distance - distep ) * cos( angle_rad ) - east_cor ) * n_east / ( cellsize * ( n_east - 1 ) ) ), int( ( polygon[ j ][ 1 ] + ( distance - distep ) * sin( angle_rad ) - north_cor ) * n_north / ( cellsize * ( n_north - 1 ) ) ) ) )
+							polygon_xy_res3.append( ( int( ( polygon[ j ][ 0 ] + ( distance - distep ) * cos( angle_rad ) - east_cor ) * n_east / ( cellsize * ( n_east - 1 ) ) ) , int( ( polygon[ j ][ 1 ] + ( distance - distep ) * sin( angle_rad ) - north_cor ) * n_north / ( cellsize * ( n_north - 1 ) ) ) ) )
 							break
 			img = Image.new( 'L' , ( n_east , n_north ) , 0 )
 			if( len( polygon_xy ) > 0 ):
@@ -1537,8 +1537,8 @@ def compute_energy_cones_utm( type_sim , n_north , n_east , east_cor , north_cor
 					for l in wh_max:
 						lint = np.int( l )
 						if( wh_sum[ lint ] > 0 ):
-							new_x = polygon[ j ][ 0 ] + polygons_new[ lint ] * cos( ( vec_ang[ lint ] + angstep * ( l - lint ) ) * np.pi / 180 ) ; 
-							new_y = polygon[ j ][ 1 ] + polygons_new[ lint ] * sin( ( vec_ang[ lint ] + angstep * ( l - lint ) ) * np.pi / 180 ) ;
+							new_x = polygon[ j ][ 0 ] + polygons_new[ lint ] * cos( ( vec_ang[ lint ] + angstep * ( l - lint ) ) * np.pi / 180 )
+							new_y = polygon[ j ][ 1 ] + polygons_new[ lint ] * sin( ( vec_ang[ lint ] + angstep * ( l - lint ) ) * np.pi / 180 )
 							height_eff = wh_sum[ lint ] + interpol_pos( east_cor , north_cor , cellsize , cellsize , new_x , new_y , n_east , n_north , Topography )
 							if( not np.isnan( interpol_pos( east_cor , north_cor , cellsize , cellsize , new_x , new_y , n_east , n_north , Topography ) ) ):
 								polygon.append( ( new_x , new_y , height_eff , polygon[ j ][ 3 ] + 1 , l , wh_sum[ lint ] ) )
@@ -1546,7 +1546,7 @@ def compute_energy_cones_utm( type_sim , n_north , n_east , east_cor , north_cor
 			print( ( j , len( polygon ) , polygon[ j ][ 3 ] , polygon[ j ][ 2 ] , sum( sum( data_step ) ) , polygon[ j ][ 4 ] ) )
 			if( save_data == 1 or type_sim == 2 ):
 				if( j == 0 or ( j + 1 == len( polygon ) ) ):
-					distances = np.power( np.power( ( matrix_east - east_cen_vector[ i ] ) , 2 ) + np.power( ( matrix_north - north_cen_vector[ i ] ) , 2 ) ,0.5 ) 
+					distances = np.power( np.power( ( matrix_east - east_cen_vector[ i ] ) , 2 ) + np.power( ( matrix_north - north_cen_vector[ i ] ) , 2 ) , 0.5 ) 
 					distances = distances * data_step[ range( len( data_cones[ : , 0 ] ) -1 , -1 , -1 ) , : ]
 					string_data = string_data + "\n" + str( polygon[ j ][ 3 ] ) + " " + str( sum( sum( data_step ) ) * area_pixel ) + " " + str( distances.max() / 1000.0 ) + " " + str( distances.min() / 1000.0 )
 				elif( polygon[ j ][ 3 ] < polygon[ j + 1 ][ 3 ] ):
@@ -1612,7 +1612,7 @@ def compute_energy_cones_utm( type_sim , n_north , n_east , east_cor , north_cor
 					string_compare[ i , : ] = [ height_vector[ i ] , hl_vector[ i ] , np.nan , np.nan , np.nan , distances.max() , np.nan , ( distances * data_direction ).max() , sum( sum( data_step ) ) * area_pixel ]
 			data_cones = data_cones + data_step
 		if( save_data == 1 or type_sim == 2 ):
-			distances = np.power( np.power( ( matrix_east - east_cen_vector[ i ] ) , 2 ) + np.power( ( matrix_north - north_cen_vector[ i ] ) , 2 ), 0.5 ) 
+			distances = np.power( np.power( ( matrix_east - east_cen_vector[ i ] ) , 2 ) + np.power( ( matrix_north - north_cen_vector[ i ] ) , 2 ) , 0.5 ) 
 			distances = distances * data_step[ range( len( data_cones[ : , 0 ] ) -1 , -1 , -1 ) , : ]
 			summary_data[ i , 4 ] = sum( sum( data_step ) ) * area_pixel
 			summary_data[ i , 5 ] = distances.max() / 1000.0
@@ -1636,7 +1636,7 @@ def save_data_deg( run_name , source_dem , sea_flag , lon1 , lon2 , lat1 , lat2 
 	text_file.write( 'xllcorner' + ' ' + str( utm_save[ 0 ] ) + '\n' )
 	text_file.write( 'yllcorner' + ' ' + str( utm_save[ 1 ] ) + '\n' )
 	text_file.write( 'cellsize' + ' ' + str( cellsize ) + '\n' )
-	text_file.write( 'NODATA_value' + ' ' + '-9999' );
+	text_file.write( 'NODATA_value' + ' ' + '-9999' )
 	data_cones_save = data_cones / N
 	for j in range( 0 , output_cells_lat ):
 		text_file.write( '\n' )
@@ -1684,7 +1684,7 @@ def save_data_utm( run_name , sea_flag , n_north , n_east , cellsize , matrix_ea
 	text_file.write( 'xllcorner' + ' ' + str( utm_save[ 0 ] ) + '\n' )
 	text_file.write( 'yllcorner' + ' ' + str( utm_save[ 1 ] ) + '\n' )
 	text_file.write( 'cellsize' + ' ' + str( cellsize ) + '\n' )
-	text_file.write( 'NODATA_value' + ' ' + '-9999' );
+	text_file.write( 'NODATA_value' + ' ' + '-9999' )
 	data_cones_save = data_cones / N
 	for i in range( n_north - 1 , -1 , -1 ):
 		text_file.write( '\n' )
@@ -1739,7 +1739,7 @@ def plot_deg( run_name , type_sim , Cities , polygon , lon1 , lon2 , lat1 , lat2
 	plt.xlim( lon1 , lon2 )
 	plt.ylim( lat1 , lat2 )
 	for i in range( len( Cities ) ):
-		plt.text( float( Cities[ i ][ 0 ] ), float( Cities[ i ][ 1 ] ), str( Cities[ i ][ 2 ] ), horizontalalignment = 'center' , verticalalignment ='center' , fontsize = 6 )
+		plt.text( float( Cities[ i ][ 0 ] ) , float( Cities[ i ][ 1 ] ) , str( Cities[ i ][ 2 ] ) , horizontalalignment = 'center' , verticalalignment ='center' , fontsize = 6 )
 	for i in range( 0 , N ):
 		plt.plot( lon_cen_vector[ i ] , lat_cen_vector[ i ] , 'r.' , markersize = 2 )
 	if( N == 1 ):
@@ -1747,7 +1747,7 @@ def plot_deg( run_name , type_sim , Cities , polygon , lon1 , lon2 , lat1 , lat2
 			plt.plot( polygon[ i ][ 0 ] , polygon[ i ][ 1 ] , 'b.' , markersize = 2 )
 	if( type_sim == 2 ):
 		if( not comparison_polygon == '' ):
-			line_compare = plt.contour( matrix_lon , matrix_lat , matrix_compare[ range( len( matrix_compare[ : , 0 ] ) -1 , -1 , -1 ) , : ], np.array( [ 0 ] ), colors = 'b' , interpolation = 'linear' )
+			line_compare = plt.contour( matrix_lon , matrix_lat , matrix_compare[ range( len( matrix_compare[ : , 0 ] ) -1 , -1 , -1 ) , : ], np.array( [ 0 ] ) , colors = 'b' , interpolation = 'linear' )
 		if( ang_cal_range < 360 ):
 			line_direction = plt.contour( matrix_lon , matrix_lat , data_direction , np.array( [ 0 ] ) , colors = 'g' , interpolation = 'linear' )
 	plt.savefig( 'Results/' + run_name + '/Map.png' )
@@ -1893,7 +1893,7 @@ def plot_deg( run_name , type_sim , Cities , polygon , lon1 , lon2 , lat1 , lat2
 			plt.colorbar( c5 )
 			plt.xlabel( 'Collapse height [m]' )
 			plt.ylabel( 'H/L' )
-			plt.title( 'Jaccard Index (direction)' )
+			plt.title( 'Jaccard Index (directional)' )
 			plt.xlim( np.min( calibration_data[ : , 0 ] ) , np.max( calibration_data[ : , 0 ] ) )
 			plt.ylim( np.min( calibration_data[ : , 1 ] ) , np.max( calibration_data[ : , 1 ] ) )
 			plt.savefig( 'Results/' + run_name + '/Calibration_Jaccard_Directional.png' )
@@ -1916,7 +1916,7 @@ def plot_utm( run_name , type_sim , polygon , matrix_east , matrix_north , east_
 		CS = plt.contourf( matrix_east , matrix_north , data_cones , 100, vmin = 0.0 , vmax = 1.0 , alpha = 0.3 , interpolation = 'linear' , cmap = cmapr , antialiased = True )	
 		fmt = '%.2f'
 		plt.colorbar()
-		CS_lines = plt.contour( matrix_east , matrix_north , data_cones , np.array( [ val_down , val_up ] ), colors = 'r' , interpolation = 'linear' , linewidths = 0.1 )
+		CS_lines = plt.contour( matrix_east , matrix_north , data_cones , np.array( [ val_down , val_up ] ) , colors = 'r' , interpolation = 'linear' , linewidths = 0.1 )
 		plt.clabel( CS_lines , inline = 0.1 , fontsize = 7 , colors = 'k' , fmt = fmt )
 	else:
 		CS_Topo = plt.contourf( matrix_east , matrix_north , Topography , 100 , alpha = 1.0 , cmap = cmapg , antialiased = True )
@@ -1934,7 +1934,7 @@ def plot_utm( run_name , type_sim , polygon , matrix_east , matrix_north , east_
 			plt.plot( polygon[ i ][ 0 ] , polygon[ i ][ 1 ] , 'b.' , markersize = 2 )
 	if( type_sim == 2 ):
 		if( not comparison_polygon == '' ):
-			line_compare = plt.contour( matrix_east , matrix_north , matrix_compare[ range( len( matrix_compare[ : , 0 ] ) -1 , -1 , -1 ) , : ], np.array( [ 0 ] ), colors = 'b' , interpolation = 'linear' )
+			line_compare = plt.contour( matrix_east , matrix_north , matrix_compare[ range( len( matrix_compare[ : , 0 ] ) -1 , -1 , -1 ) , : ] , np.array( [ 0 ] ) , colors = 'b' , interpolation = 'linear' )
 		if( ang_cal_range < 360 ):
 			line_direction = plt.contour( matrix_east , matrix_north , data_direction , np.array( [ 0 ] ) , colors = 'g' , interpolation = 'linear' )
 	plt.savefig( 'Results/' + run_name + '/Map.png' )
@@ -2080,7 +2080,7 @@ def plot_utm( run_name , type_sim , polygon , matrix_east , matrix_north , east_
 			plt.colorbar( c5 )
 			plt.xlabel( 'Collapse height [m]' )
 			plt.ylabel( 'H/L' )
-			plt.title( 'Jaccard Index (direction)' )
+			plt.title( 'Jaccard Index (directional)' )
 			plt.xlim( np.min( calibration_data[ : , 0 ] ) , np.max( calibration_data[ : , 0 ] ) )
 			plt.ylim( np.min( calibration_data[ : , 1 ] ) , np.max( calibration_data[ : , 1 ] ) )
 			plt.savefig( 'Results/' + run_name + '/Calibration_Jaccard_Directional.png' )
@@ -2161,7 +2161,7 @@ def plot_only_topography_deg( Cities , lon1 , lon2 , lat1 , lat2 , step_lat_m , 
 	plt.xlim( lon1, lon2 )
 	plt.ylim( lat1, lat2 )
 	for i in range( len( Cities ) ):
-		plt.text( float( Cities[ i ][ 0 ] ), float( Cities[ i ][ 1 ] ), str( Cities[ i ][ 2 ] ), horizontalalignment = 'center' , verticalalignment ='center' , fontsize = 6 )
+		plt.text( float( Cities[ i ][ 0 ] ) , float( Cities[ i ][ 1 ] ) , str( Cities[ i ][ 2 ] ) , horizontalalignment = 'center' , verticalalignment ='center' , fontsize = 6 )
 
 def plot_only_topography_utm( matrix_east , matrix_north , east_cor , north_cor , n_east , n_north , cellsize , Topography , Topography_Sea ):
 
@@ -2233,11 +2233,11 @@ def plot_only_height( height_vector , hl_vector , variable_vector , type_input ,
 
 def plot_only_comparison_polygon_deg( matrix_lon , matrix_lat , matrix_compare ):
 
-	line_compare = plt.contour( matrix_lon , matrix_lat , matrix_compare[ range( len( matrix_compare[ : , 0 ] ) -1 , -1 , -1 ) , : ], np.array( [ 0 ] ), colors = 'b' , interpolation = 'linear' )
+	line_compare = plt.contour( matrix_lon , matrix_lat , matrix_compare[ range( len( matrix_compare[ : , 0 ] ) -1 , -1 , -1 ) , : ], np.array( [ 0 ] ) , colors = 'b' , interpolation = 'linear' )
 
 def plot_only_comparison_polygon_utm( matrix_east , matrix_north , matrix_compare ):
 
-	line_compare = plt.contour( matrix_east , matrix_north , matrix_compare[ range( len( matrix_compare[ : , 0 ] ) -1 , -1 , -1 ) , : ], np.array( [ 0 ] ), colors = 'b' , interpolation = 'linear' )
+	line_compare = plt.contour( matrix_east , matrix_north , matrix_compare[ range( len( matrix_compare[ : , 0 ] ) -1 , -1 , -1 ) , : ], np.array( [ 0 ] ) , colors = 'b' , interpolation = 'linear' )
 
 def plot_only_map_deg( Cities , lon1 , lon2 , lat1 , lat2 , step_lat_m , step_lon_m , matrix_lon , matrix_lat , lon_cen_vector , lat_cen_vector , Topography , Topography_Sea , N , data_cones ):
 
@@ -2268,7 +2268,7 @@ def plot_only_map_deg( Cities , lon1 , lon2 , lat1 , lat2 , step_lat_m , step_lo
 	plt.xlim( lon1, lon2 )
 	plt.ylim( lat1, lat2 )
 	for i in range( len( Cities ) ):
-		plt.text( float( Cities[ i ][ 0 ] ), float( Cities[ i ][ 1 ] ), str( Cities[ i ][ 2 ] ), horizontalalignment = 'center' , verticalalignment ='center' , fontsize = 6 )
+		plt.text( float( Cities[ i ][ 0 ] ) , float( Cities[ i ][ 1 ] ) , str( Cities[ i ][ 2 ] ) , horizontalalignment = 'center' , verticalalignment ='center' , fontsize = 6 )
 	for i in range( 0 , N ):
 		plt.plot( lon_cen_vector[ i ] , lat_cen_vector[ i ] , 'r.' , markersize = 2 )
 
@@ -2289,7 +2289,7 @@ def plot_only_map_utm( matrix_east , matrix_north , east_cor , north_cor , n_eas
 		CS = plt.contourf( matrix_east , matrix_north , data_cones , 100, vmin = 0.0 , vmax = 1.0 , alpha = 0.3 , interpolation = 'linear' , cmap = cmapr , antialiased = True )	
 		fmt = '%.2f'
 		plt.colorbar()
-		CS_lines = plt.contour( matrix_east , matrix_north , data_cones , np.array( [ val_down , val_up ] ), colors = 'r' , interpolation = 'linear' , linewidths = 1 )
+		CS_lines = plt.contour( matrix_east , matrix_north , data_cones , np.array( [ val_down , val_up ] ) , colors = 'r' , interpolation = 'linear' , linewidths = 1 )
 		plt.clabel( CS_lines , inline = 0.1 , fontsize = 10 , colors = 'k' , fmt = fmt )
 	else:
 		CS_Topo = plt.contourf( matrix_east , matrix_north , Topography , 100 , alpha = 1.0 , cmap = cmapg , antialiased = True )
