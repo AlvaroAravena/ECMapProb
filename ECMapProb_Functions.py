@@ -2272,7 +2272,7 @@ def plot_only_map_deg( Cities , lon1 , lon2 , lat1 , lat2 , step_lat_m , step_lo
 	for i in range( 0 , N ):
 		plt.plot( lon_cen_vector[ i ] , lat_cen_vector[ i ] , 'r.' , markersize = 2 )
 
-def plot_only_map_utm( matrix_east , matrix_north , east_cor , north_cor , n_east , n_north , cellsize , east_cen_vector , north_cen_vector , height_vector , hl_vector , Topography , Topography_Sea , N , data_cones ):
+def plot_only_map_utm( matrix_east , matrix_north , east_cor , north_cor , n_east , n_north , cellsize , east_cen_vector , north_cen_vector , Topography , Topography_Sea , N , data_cones ):
 
 	data_cones = data_cones[ range( len( data_cones[ : , 0 ] ) -1 , -1 , -1 ) , : ] / N
 	line_val = data_cones.max()

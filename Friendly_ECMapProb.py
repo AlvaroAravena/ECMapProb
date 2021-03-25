@@ -980,7 +980,7 @@ class MainFrame:
 		if( self.source_dem == 1 or self.source_dem == 3 ):
 			plot_only_map_deg( self.Cities , self.lon1 , self.lon2 , self.lat1 , self.lat2 , self.step_lat_m , self.step_lon_m , self.matrix_lon , self.matrix_lat , self.lon_cen_vector , self.lat_cen_vector , self.Topography , self.Topography_Sea , self.N , self.data_cones )
 		else:		
-			plot_only_map_utm( self.matrix_east , self.matrix_north , self.east_cor , self.north_cor , self.n_east , self.n_north , self.cellsize , self.east_cen_vector , self.north_cen_vector , self.height_vector , self.hl_vector , self.Topography , self.Topography_Sea , self.N , self.data_cones )
+			plot_only_map_utm( self.matrix_east , self.matrix_north , self.east_cor , self.north_cor , self.n_east , self.n_north , self.cellsize , self.east_cen_vector , self.north_cen_vector , self.Topography , self.Topography_Sea , self.N , self.data_cones )
 		if( self.type_sim == 2 ):
 			comp_polygon = ""
 			if( self.boolean_polygon ):
