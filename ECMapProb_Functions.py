@@ -1718,6 +1718,7 @@ def plot_deg( run_name , type_sim , Cities , polygon , lon1 , lon2 , lat1 , lat2
 	val_up = np.floor( ( line_val + 0.1 - 1.0 / N ) * 10.0 ) / 20.0
 	val_down = np.maximum( val_up / 10.0 , 0.05 )
 	plt.figure( 1 , figsize = ( 8.0 , 5.0 ) )
+	plt.axes().set_aspect( step_lat_m / step_lon_m )
 	cmapg = plt.cm.get_cmap( 'Greys' )
 	cmapr = plt.cm.get_cmap( 'Reds' )
 	cmaps = plt.cm.get_cmap( 'Blues' ) 
@@ -1733,7 +1734,6 @@ def plot_deg( run_name , type_sim , Cities , polygon , lon1 , lon2 , lat1 , lat2
 		CS_Topo = plt.contourf( matrix_lon , matrix_lat , Topography , 100 , alpha = 1.0 , cmap = cmapg , antialiased = True )
 		CS_Sea = plt.contourf( matrix_lon , matrix_lat , Topography_Sea , 100 , alpha = 0.5 , cmap = cmaps , antialiased = True )
 		CS = plt.contourf( matrix_lon , matrix_lat , data_cones , 100 , alpha = 0.3 , cmap = cmapr , antialiased = True )
-	plt.axes().set_aspect( step_lat_m / step_lon_m )
 	plt.xlabel( 'Longitude $[^\circ]$' )
 	plt.ylabel( 'Latitude $[^\circ]$' )
 	plt.xlim( lon1 , lon2 )
@@ -1907,6 +1907,7 @@ def plot_utm( run_name , type_sim , polygon , matrix_east , matrix_north , east_
 	val_up = np.floor( ( line_val + 0.1 - 1.0 / N ) * 10.0 ) / 20.0
 	val_down = np.maximum( val_up / 10.0 , 0.05 )
 	plt.figure( 1 , figsize = ( 8.0 , 5.0 ) )
+	plt.axes().set_aspect( 1.0 )
 	cmapg = plt.cm.get_cmap( 'Greys' )
 	cmapr = plt.cm.get_cmap( 'Reds' )
 	cmaps = plt.cm.get_cmap( 'Blues' ) 
@@ -1922,7 +1923,6 @@ def plot_utm( run_name , type_sim , polygon , matrix_east , matrix_north , east_
 		CS_Topo = plt.contourf( matrix_east , matrix_north , Topography , 100 , alpha = 1.0 , cmap = cmapg , antialiased = True )
 		CS_Sea = plt.contourf( matrix_east , matrix_north , Topography_Sea , 100 , alpha = 0.5 , cmap = cmaps , antialiased = True )
 		CS = plt.contourf( matrix_east , matrix_north , data_cones , 100 , alpha = 0.3 , cmap = cmapr , antialiased = True )
-	plt.axes().set_aspect( 1.0 )
 	plt.xlabel( 'East [m]' )
 	plt.ylabel( 'North [m]' )
 	plt.xlim( east_cor , east_cor + cellsize * ( n_east - 1 ) )
@@ -2150,12 +2150,12 @@ def interpol_pos( lon1 , lat1 , step_lon_deg , step_lat_deg , lon_cen , lat_cen 
 def plot_only_topography_deg( Cities , lon1 , lon2 , lat1 , lat2 , step_lat_m , step_lon_m , matrix_lon , matrix_lat , Topography , Topography_Sea ):
 
 	plt.figure( 1 , figsize = ( 8.0 , 5.0 ) )
+	plt.axes().set_aspect( step_lat_m / step_lon_m )
 	cmapg = plt.cm.get_cmap( 'Greys' )
 	cmapr = plt.cm.get_cmap( 'Reds' )
 	cmaps = plt.cm.get_cmap( 'Blues' ) 
 	CS_Topo = plt.contourf( matrix_lon , matrix_lat , Topography , 100 , alpha = 1.0 , cmap = cmapg , antialiased = True )
 	CS_Sea = plt.contourf( matrix_lon , matrix_lat , Topography_Sea , 100 , alpha = 0.5 , cmap = cmaps , antialiased = True )
-	plt.axes().set_aspect( step_lat_m / step_lon_m )
 	plt.xlabel( 'Longitude $[^\circ]$' )
 	plt.ylabel( 'Latitude $[^\circ]$' )
 	plt.xlim( lon1, lon2 )
@@ -2166,6 +2166,7 @@ def plot_only_topography_deg( Cities , lon1 , lon2 , lat1 , lat2 , step_lat_m , 
 def plot_only_topography_utm( matrix_east , matrix_north , east_cor , north_cor , n_east , n_north , cellsize , Topography , Topography_Sea ):
 
 	plt.figure( 1 , figsize = ( 8.0 , 5.0 ) )
+	plt.axes().set_aspect( 1.0 )
 	cmapg = plt.cm.get_cmap( 'Greys' )
 	cmapr = plt.cm.get_cmap( 'Reds' )
 	cmaps = plt.cm.get_cmap( 'Blues' ) 
@@ -2175,7 +2176,6 @@ def plot_only_topography_utm( matrix_east , matrix_north , east_cor , north_cor 
 	plt.ylabel( 'North [m]' )
 	plt.xlim( east_cor , east_cor + cellsize * ( n_east - 1 ) )
 	plt.ylim( north_cor , north_cor + cellsize * ( n_north - 1 ) )
-	plt.axes().set_aspect( 1.0 )
 
 def plot_only_vent_deg( lon_cen_vector , lat_cen_vector , N ):
 
@@ -2247,6 +2247,7 @@ def plot_only_map_deg( Cities , lon1 , lon2 , lat1 , lat2 , step_lat_m , step_lo
 	val_up = np.floor( ( line_val + 0.1 - 1.0 / N ) * 10.0 ) / 20.0
 	val_down = np.maximum( val_up / 10.0 , 0.05 )
 	plt.figure( 1 , figsize = ( 8.0 , 5.0 ) )
+	plt.axes().set_aspect( step_lat_m / step_lon_m )
 	cmapg = plt.cm.get_cmap( 'Greys' )
 	cmapr = plt.cm.get_cmap( 'Reds' )
 	cmaps = plt.cm.get_cmap( 'Blues' ) 
@@ -2262,7 +2263,6 @@ def plot_only_map_deg( Cities , lon1 , lon2 , lat1 , lat2 , step_lat_m , step_lo
 		CS_Topo = plt.contourf( matrix_lon , matrix_lat , Topography , 1000 , alpha = 1.0 , cmap = cmapg , antialiased = True )
 		CS_Sea = plt.contourf( matrix_lon , matrix_lat , Topography_Sea , 100 , alpha = 0.5 , cmap = cmaps , antialiased = True )
 		CS = plt.contourf( matrix_lon , matrix_lat , data_cones , 100 , alpha = 0.3 , cmap = cmapr , antialiased = True )
-	plt.axes().set_aspect( step_lat_m / step_lon_m )
 	plt.xlabel( 'Longitude $[^\circ]$' )
 	plt.ylabel( 'Latitude $[^\circ]$' )
 	plt.xlim( lon1, lon2 )
@@ -2280,6 +2280,7 @@ def plot_only_map_utm( matrix_east , matrix_north , east_cor , north_cor , n_eas
 	val_up = np.floor( ( line_val + 0.1 - 1.0 / N ) * 10.0 ) / 20.0
 	val_down = np.maximum( val_up / 10.0 , 0.05 )
 	plt.figure( 1 , figsize = ( 8.0 , 5.0 ) )
+	plt.axes().set_aspect( 1.0 )
 	cmapg = plt.cm.get_cmap( 'Greys' )
 	cmapr = plt.cm.get_cmap( 'Reds' )
 	cmaps = plt.cm.get_cmap( 'Blues' ) 
@@ -2295,7 +2296,6 @@ def plot_only_map_utm( matrix_east , matrix_north , east_cor , north_cor , n_eas
 		CS_Topo = plt.contourf( matrix_east , matrix_north , Topography , 100 , alpha = 1.0 , cmap = cmapg , antialiased = True )
 		CS_Sea = plt.contourf( matrix_east , matrix_north , Topography_Sea , 100 , alpha = 0.5 , cmap = cmaps , antialiased = True )
 		CS = plt.contourf( matrix_east , matrix_north , data_cones , 100 , alpha = 0.3 , cmap = cmapr , antialiased = True )
-	plt.axes().set_aspect( 1.0 )
 	plt.xlabel( 'East [m]' )
 	plt.ylabel( 'North [m]' )
 	plt.xlim( east_cor , east_cor + cellsize * ( n_east - 1 ) )
