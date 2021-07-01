@@ -547,9 +547,7 @@ def create_inputs( type_sim , type_input , dist_input_height , dist_input_hl , i
 					mincum = norm.cdf( min_val_cal , distance_calibration , var_distance_calibration )
 					maxcum = norm.cdf( max_val_cal , distance_calibration , var_distance_calibration )
 					vector_p = np.arange( mincum + ( maxcum - mincum ) / ( 2 * number_steps_var ) , maxcum , ( maxcum - mincum ) / ( number_steps_var ) )
-					print( vector_p )
 					variable_vector_used = norm.ppf( vector_p , distance_calibration , var_distance_calibration )
-					print( variable_vector_used )
 					variable_vector[ : , 0 ] = np.linspace( np.minimum( 0.0 , np.min( variable_vector_used ) ) , np.max( variable_vector_used ) , number_steps_var_plot )
 					variable_vector[ : , 1 ] = norm.pdf( variable_vector[ : , 0 ] , distance_calibration , var_distance_calibration )
 				elif( dist_distance_calibration == 2 ):

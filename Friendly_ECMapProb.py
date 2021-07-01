@@ -932,7 +932,7 @@ class MainFrame:
 					elif( self.dist_area == 3 ):
 						self.height_inputs = self.height_inputs + "Parameter k in gamma distribution (inundation area [km2]): " + str( self.area_k ) + "\n" + "Parameter theta in gamma distribution (inundation area [km2]): " + str( self.area_theta ) + "\n"
 					else:
-						self.height_inputs = self.height_inputs + "File name: " + file_cumulative_distance + "\n"
+						self.height_inputs = self.height_inputs + "File name: " + file_cumulative_area + "\n"
 			self.enabled_disabled()
 			messagebox.showinfo( title = None , message = "Height and H/L sampled successfully" )
 			if( not self.N == self.N_choice ):
