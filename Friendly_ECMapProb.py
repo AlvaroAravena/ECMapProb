@@ -315,7 +315,7 @@ class MainFrame:
 		self.calibration_type_entry.configure( state = 'disabled' )
 		self.label_dist_distance = Label( tab3 , text = "Distribution for runout distance" , state = 'disabled' )
 		self.label_dist_distance.grid( row = 9 , column = 0 , columnspan = 2 , sticky = W )
-		self.dist_distance_entry = OptionMenu( tab3 , distdistance , "Gaussian" , "Uniform" , "Gamma" , "Lognormal" , command = self.opt_distdistance )
+		self.dist_distance_entry = OptionMenu( tab3 , distdistance , "Gaussian" , "Uniform" , "Gamma" , "Lognormal" , "Input cumulative distribution" , command = self.opt_distdistance )
 		self.dist_distance_entry.grid( row = 9 , column = 2 , columnspan = 1 , sticky = W + E )
 		self.dist_distance_entry.configure( state = 'disabled' )
 		self.label_distance = Label( tab3 , text = "Expected runout distance [m]" , state = 'disabled' )
@@ -336,7 +336,7 @@ class MainFrame:
 		self.distance_theta_entry.grid( row = 13 , column = 2 , columnspan = 1 , sticky = W + E )
 		self.label_dist_area = Label( tab3 , text = "Distribution for inundation area" , state = 'disabled' )
 		self.label_dist_area.grid( row = 9 , column = 3 , columnspan = 2 , sticky = W )
-		self.dist_area_entry = OptionMenu( tab3 , distarea , "Gaussian" , "Uniform" , "Gamma" , "Lognormal" , command = self.opt_distarea )
+		self.dist_area_entry = OptionMenu( tab3 , distarea , "Gaussian" , "Uniform" , "Gamma" , "Lognormal" , "Input cumulative distribution" , command = self.opt_distarea )
 		self.dist_area_entry.grid( row = 9 , column = 5 , columnspan = 1 , sticky = W + E )
 		self.dist_area_entry.configure( state = 'disabled' )
 		self.label_area = Label( tab3 , text = "Expected inundation area [km2]" , state = 'disabled' )
@@ -490,6 +490,8 @@ class MainFrame:
 			self.dist_distance_choice = 3
 		elif( opt == "Lognormal" ):
 			self.dist_distance_choice = 4
+		elif( opt == "Input cumulative distribution" ):
+			self.dist_distance_choice = 5
 		self.enabled_disabled()
 
 	def opt_distarea( self , opt ):
@@ -501,6 +503,8 @@ class MainFrame:
 			self.dist_area_choice = 3
 		elif( opt == "Lognormal" ):
 			self.dist_area_choice = 4
+		elif( opt == "Input cumulative distribution" ):
+			self.dist_area_choice = 5
 		self.enabled_disabled()
 
 	def load_topography( self ):
@@ -814,23 +818,27 @@ class MainFrame:
 			self.calibration_type = self.calibration_type_choice
 			self.dist_distance = self.dist_distance_choice
 			self.dist_area = self.dist_area_choice
-			[ file_path , self.height , self.var_height , self.height_k , self.height_theta , self.hl , self.var_hl , self.hl_k , self.hl_theta , self.distance , self.var_distance , self.distance_k , self.distance_theta , self.area , self.var_area , self.area_k , self.area_theta ] = [ "" , np.nan , np.nan , np.nan , np.nan , np.nan , np.nan , np.nan , np.nan , np.nan , np.nan , np.nan , np.nan , np.nan , np.nan , np.nan , np.nan ]
+			[ file_path , self.height , self.var_height , self.height_k , self.height_theta , self.hl , self.var_hl , self.hl_k , self.hl_theta , self.distance , self.var_distance , self.distance_k , self.distance_theta , file_cumulative_distance , self.area , self.var_area , self.area_k , self.area_theta , file_cumulative_area ] = [ '' , np.nan , np.nan , np.nan , np.nan , np.nan , np.nan , np.nan , np.nan , np.nan , np.nan , np.nan , np.nan , '' , np.nan , np.nan , np.nan , np.nan , '' ]
 			if( self.type_input == 2 or self.type_input == 3 ):
-				file_path = filedialog.askopenfilename()
+				file_path = filedialog.askopenfilename( title = "Calibration File" )
 				if( self.type_input == 3 and self.calibration_type == 5 ):
 					if( self.dist_distance in [ 1 , 2 , 4 ] ):
 						self.distance = float( self.distance_entry.get() )
 						self.var_distance = float( self.var_distance_entry.get() )
-					else:
+					elif( self.dist_distance == 3 ):
 						self.distance_k = float( self.distance_k_entry.get() )
 						self.distance_theta = float( self.distance_theta_entry.get() )
+					else:
+						file_cumulative_distance = filedialog.askopenfilename( title = "Cumulative distribution of runout distance" )
 				elif( self.type_input == 3 and self.calibration_type == 7 ):
 					if( self.dist_area in [ 1 , 2 , 4 ] ):
 						self.area = float( self.area_entry.get() )
 						self.var_area = float( self.var_area_entry.get() )
-					else:
+					elif( self.dist_area == 3 ):
 						self.area_k = float( self.area_k_entry.get() )
 						self.area_theta = float( self.area_theta_entry.get() )
+					else:
+						file_cumulative_area = filedialog.askopenfilename( title = "Cumulative distribution of inundation area" )
 			else:
 				if( self.dist_height in [ 1 , 2 , 4 ] ):
 					self.height = float( self.height_entry.get() )
@@ -844,7 +852,7 @@ class MainFrame:
 				else:
 					self.hl_k = float( self.hl_k_entry.get() )
 					self.hl_theta = float( self.hl_theta_entry.get() )
-			[ self.height_vector , self.hl_vector , self.N , self.variable_vector , self.limits_calib , self.probability_save ] = create_inputs( self.type_sim , self.type_input , self.dist_height , self.dist_hl , file_path , self.height , self.var_height , self.height_k , self.height_theta , self.hl , self.var_hl , self.hl_k , self.hl_theta , self.calibration_type , self.dist_distance , self.distance , self.var_distance , self.distance_k , self.distance_theta , self.dist_area , self.area , self.var_area , self.area_k , self.area_theta , self.N , 1 )
+			[ self.height_vector , self.hl_vector , self.N , self.variable_vector , self.limits_calib , self.probability_save ] = create_inputs( self.type_sim , self.type_input , self.dist_height , self.dist_hl , file_path , self.height , self.var_height , self.height_k , self.height_theta , self.hl , self.var_hl , self.hl_k , self.hl_theta , self.calibration_type , self.dist_distance , self.distance , self.var_distance , self.distance_k , self.distance_theta , file_cumulative_distance , self.dist_area , self.area , self.var_area , self.area_k , self.area_theta , file_cumulative_area , self.N , 1 )
 			if( len( self.height_vector ) == 0 ):
 				self.sample_height_availability = 0
 				self.height_inputs = ""
@@ -897,12 +905,16 @@ class MainFrame:
 						self.height_inputs = self.height_inputs + "Distribution type for runout distance: Uniform" + "\n"
 					elif( self.dist_distance == 3 ):
 						self.height_inputs = self.height_inputs + "Distribution type for runout distance: Gamma" + "\n"
-					else:
+					elif( self.dist_distance == 4 ):
 						self.height_inputs = self.height_inputs + "Distribution type for runout distance: Lognormal" + "\n"
+					else:
+						self.height_inputs = self.height_inputs + "Distribution type for runout distance: Input file (CDF)" + "\n"
 					if( self.dist_distance in [ 1 , 2 , 4 ] ):
 						self.height_inputs = self.height_inputs + "Expected runout distance [m]: " + str( self.distance ) + "\n" + "Uncertainty of runout distance [m]: " + str( self.var_distance ) + "\n"
-					else:
+					elif( self.dist_distance == 3 ):
 						self.height_inputs = self.height_inputs + "Parameter k in gamma distribution (runout distance [m]): " + str( self.distance_k ) + "\n" + "Parameter theta in gamma distribution (runout distance [m]): " + str( self.distance_theta ) + "\n"
+					else:
+						self.height_inputs = self.height_inputs + "File name: " + file_cumulative_distance + "\n"
 				elif( self.calibration_type == 7 ):
 					self.height_inputs = self.height_inputs + "Calibration type: Inundation area-based" + "\n" + "File name: " + file_path + "\n"
 					if( self.dist_area == 1 ):
@@ -911,12 +923,16 @@ class MainFrame:
 						self.height_inputs = self.height_inputs + "Distribution type for inundation area: Uniform" + "\n"
 					elif( self.dist_area == 3 ):
 						self.height_inputs = self.height_inputs + "Distribution type for inundation area: Gamma" + "\n"
-					else:
+					elif( self.dist_area == 4 ):
 						self.height_inputs = self.height_inputs + "Distribution type for inundation area: Lognormal" + "\n"
+					else:
+						self.height_inputs = self.height_inputs + "Distribution type for inundation area: Input file (CDF)" + "\n"
 					if( self.dist_area in [ 1 , 2 , 4 ] ):
 						self.height_inputs = self.height_inputs + "Expected inundation area [km2]: " + str( self.area ) + "\n" + "Uncertainty of inundation area [km2]: " + str( self.var_area ) + "\n"
-					else:
+					elif( self.dist_area == 3 ):
 						self.height_inputs = self.height_inputs + "Parameter k in gamma distribution (inundation area [km2]): " + str( self.area_k ) + "\n" + "Parameter theta in gamma distribution (inundation area [km2]): " + str( self.area_theta ) + "\n"
+					else:
+						self.height_inputs = self.height_inputs + "File name: " + file_cumulative_distance + "\n"
 			self.enabled_disabled()
 			messagebox.showinfo( title = None , message = "Height and H/L sampled successfully" )
 			if( not self.N == self.N_choice ):
@@ -1164,9 +1180,12 @@ class MainFrame:
 					if( self.dist_distance_choice in [ 1 , 2 , 4 ] ):
 						bol_distance_gaus = 1
 						bol_distance_gam = 0
-					else:
+					elif( self.dist_distance_choice == 3 ):
 						bol_distance_gaus = 0
 						bol_distance_gam = 1
+					else:
+						bol_distance_gaus = 0
+						bol_distance_gam = 0					
 					bol_dist_area = 0
 					bol_area_gaus = 0
 					bol_area_gam = 0
@@ -1178,9 +1197,12 @@ class MainFrame:
 					if( self.dist_area_choice in [ 1 , 2 , 4 ] ):
 						bol_area_gaus = 1
 						bol_area_gam = 0
-					else:
+					elif( self.dist_area_choice == 3 ):
 						bol_area_gaus = 0
 						bol_area_gam = 1
+					else:
+						bol_area_gaus = 0
+						bol_area_gam = 0					
 		else:
 			bol_typeinput = -1
 			bol_labelpres = 1

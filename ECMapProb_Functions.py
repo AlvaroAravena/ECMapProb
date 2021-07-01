@@ -34,8 +34,8 @@ def read_input():
 	[ type_input , dist_input_height , height , var_height , height_k , height_theta ] = [ np.nan , np.nan , np.nan , np.nan , np.nan , np.nan ]
 	[ dist_input_hl , hl , var_hl , hl_k , hl_theta , input_file_cal , calibration_type ] = [ np.nan , np.nan , np.nan , np.nan , np.nan , '' , np.nan ]
 	[ dist_distance_calibration , distance_calibration , var_distance_calibration , distance_calibration_k ] = [ np.nan , np.nan , np.nan , np.nan ]
-	[ distance_calibration_theta , dist_area_calibration , area_calibration , var_area_calibration ] = [ np.nan , np.nan , np.nan , np.nan ]
-	[ area_calibration_k , area_calibration_theta , cone_levels , N , save_data ] = [ np.nan , np.nan , np.nan , np.nan , np.nan ]
+	[ distance_calibration_theta , file_cumulative_distance , dist_area_calibration , area_calibration , var_area_calibration ] = [ np.nan , '' , np.nan , np.nan , np.nan ]
+	[ area_calibration_k , area_calibration_theta , file_cumulative_area , cone_levels , N , save_data ] = [ np.nan , np.nan , '' , np.nan , np.nan , np.nan ]
 	[ redist_energy , plot_flag , sea_flag ] = [ 4 , 1 , 0 ]
 	for i in range( 0 , len( line ) ):
 		line[ i ] = line[ i ].replace( '=' , ' ' )
@@ -131,6 +131,9 @@ def read_input():
 					distance_calibration_k = float( aux[ 1 ] )
 				if( aux[ 0 ] == 'distance_calibration_theta' ):
 					distance_calibration_theta = float( aux[ 1 ] )
+				if( aux[ 0 ] == 'file_cumulative_distance' ):
+					file_cumulative_distance = aux[ 1 ]
+					file_cumulative_distance = file_cumulative_distance.replace( "'" , "" )
 				if( aux[ 0 ] == 'dist_area_calibration' ):
 					dist_area_calibration = int( aux[ 1 ] )					
 				if( aux[ 0 ] == 'area_calibration' ):
@@ -141,6 +144,9 @@ def read_input():
 					area_calibration_k = float( aux[ 1 ] )
 				if( aux[ 0 ] == 'area_calibration_theta' ):
 					area_calibration_theta = float( aux[ 1 ] )
+				if( aux[ 0 ] == 'file_cumulative_area' ):
+					file_cumulative_area = aux[ 1 ]
+					file_cumulative_area = file_cumulative_area.replace( "'" , "" )
 				if( aux[ 0 ] == 'cone_levels' ):
 					cone_levels = int( aux[ 1 ] )
 				if( aux[ 0 ] == 'N' ):
@@ -201,7 +207,7 @@ def read_input():
 					print( 'Problems with input parameters. Variable calibration_type must be defined properly.' )
 					sys.exit( 0 )
 				if( calibration_type in [ 5 , 6 ] ):
-					if( not dist_distance_calibration in [ 1 , 2 , 3 , 4 ] ):
+					if( not dist_distance_calibration in [ 1 , 2 , 3 , 4 , 5 ] ):
 						print( 'Problems with input parameters. Variable dist_distance_calibration must be defined properly.' )
 						sys.exit( 0 )
 					if( dist_distance_calibration in [ 1 , 2 , 4 ] and ( np.isnan( distance_calibration ) or np.isnan( var_distance_calibration ) ) ):
@@ -209,9 +215,12 @@ def read_input():
 						sys.exit( 0 )
 					if( dist_distance_calibration == 3 and ( np.isnan( distance_calibration_k ) or np.isnan( distance_calibration_theta ) ) ):
 						print( 'Problems with input parameters. Variables (distance_calibration_k, distance_calibration_theta) must be defined.' )
-						sys.exit( 0 )						
+						sys.exit( 0 )	
+					if( dist_distance_calibration == 5 and file_cumulative_distance == '' ):
+						print( 'Problems with input parameters. Variable file_cumulative_distance must be defined.' )
+						sys.exit( 0 )				
 				if( calibration_type == 7 ):
-					if( not dist_area_calibration in [ 1 , 2 , 3 , 4 ] ):
+					if( not dist_area_calibration in [ 1 , 2 , 3 , 4 , 5 ] ):
 						print( 'Problems with input parameters. Variable dist_area_calibration must be defined properly.' )
 						sys.exit( 0 )
 					if( dist_area_calibration in [ 1 , 2 , 4 ] and ( np.isnan( area_calibration ) or np.isnan( var_area_calibration ) ) ):
@@ -219,6 +228,9 @@ def read_input():
 						sys.exit( 0 )
 					if( dist_area_calibration == 3 and ( np.isnan( area_calibration_k ) or np.isnan( area_calibration_theta ) ) ):
 						print( 'Problems with input parameters. Variables (area_calibration_k, area_calibration_theta) must be defined.' )
+						sys.exit( 0 )
+					if( dist_area_calibration == 5 and file_cumulative_area == '' ):
+						print( 'Problems with input parameters. Variable file_cumulative_area must be defined.' )
 						sys.exit( 0 )
 	else:
 		vent_type = 1
@@ -272,7 +284,7 @@ def read_input():
 		pass
 	shutil.copyfile( 'input_data.py' , 'Results/' + run_name + '/input_data.py' )
 
-	return [ current_path , run_name , type_sim , source_dem , topography_file , comparison_polygon , ang_cal , ang_cal_range , lon1 , lon2 , lat1 , lat2 , vent_type , lon_cen , lat_cen , east_cen , north_cen , azimuth_lin , length_lin , radius_rad , ang1_rad , ang2_rad , var_cen , dist_input_cen , input_file_vent , type_input , dist_input_height , height , var_height , height_k , height_theta , dist_input_hl , hl , var_hl , hl_k , hl_theta , input_file_cal , calibration_type , dist_distance_calibration , distance_calibration , var_distance_calibration , distance_calibration_k , distance_calibration_theta , dist_area_calibration , area_calibration , var_area_calibration , area_calibration_k , area_calibration_theta , cone_levels , N , save_data , redist_energy , plot_flag , sea_flag ]
+	return [ current_path , run_name , type_sim , source_dem , topography_file , comparison_polygon , ang_cal , ang_cal_range , lon1 , lon2 , lat1 , lat2 , vent_type , lon_cen , lat_cen , east_cen , north_cen , azimuth_lin , length_lin , radius_rad , ang1_rad , ang2_rad , var_cen , dist_input_cen , input_file_vent , type_input , dist_input_height , height , var_height , height_k , height_theta , dist_input_hl , hl , var_hl , hl_k , hl_theta , input_file_cal , calibration_type , dist_distance_calibration , distance_calibration , var_distance_calibration , distance_calibration_k , distance_calibration_theta , file_cumulative_distance , dist_area_calibration , area_calibration , var_area_calibration , area_calibration_k , area_calibration_theta , file_cumulative_area , cone_levels , N , save_data , redist_energy , plot_flag , sea_flag ]
 
 def import_map( current_path , run_name , lon1 , lon2 , lat1 , lat2 ):
 
@@ -450,7 +462,7 @@ def matrix_utm( n_north , n_east , cellsize , east_cor , north_cor ):
 
 	return [ matrix_north , matrix_east , utm_save ]
 
-def create_inputs( type_sim , type_input , dist_input_height , dist_input_hl , input_file_cal , height , var_height , height_k , height_theta , hl , var_hl , hl_k , hl_theta , calibration_type , dist_distance_calibration , distance_calibration , var_distance_calibration , distance_calibration_k , distance_calibration_theta , dist_area_calibration , area_calibration , var_area_calibration , area_calibration_k , area_calibration_theta , N , bol_friendly ):
+def create_inputs( type_sim , type_input , dist_input_height , dist_input_hl , input_file_cal , height , var_height , height_k , height_theta , hl , var_hl , hl_k , hl_theta , calibration_type , dist_distance_calibration , distance_calibration , var_distance_calibration , distance_calibration_k , distance_calibration_theta , file_cumulative_distance , dist_area_calibration , area_calibration , var_area_calibration , area_calibration_k , area_calibration_theta , file_cumulative_area , N , bol_friendly ):
 
 	variable_vector = np.nan
 	limits_calib = np.nan
@@ -535,7 +547,9 @@ def create_inputs( type_sim , type_input , dist_input_height , dist_input_hl , i
 					mincum = norm.cdf( min_val_cal , distance_calibration , var_distance_calibration )
 					maxcum = norm.cdf( max_val_cal , distance_calibration , var_distance_calibration )
 					vector_p = np.arange( mincum + ( maxcum - mincum ) / ( 2 * number_steps_var ) , maxcum , ( maxcum - mincum ) / ( number_steps_var ) )
+					print( vector_p )
 					variable_vector_used = norm.ppf( vector_p , distance_calibration , var_distance_calibration )
+					print( variable_vector_used )
 					variable_vector[ : , 0 ] = np.linspace( np.minimum( 0.0 , np.min( variable_vector_used ) ) , np.max( variable_vector_used ) , number_steps_var_plot )
 					variable_vector[ : , 1 ] = norm.pdf( variable_vector[ : , 0 ] , distance_calibration , var_distance_calibration )
 				elif( dist_distance_calibration == 2 ):
@@ -552,7 +566,7 @@ def create_inputs( type_sim , type_input , dist_input_height , dist_input_hl , i
 					variable_vector_used = gamma.ppf( vector_p , distance_calibration_k , 0 , distance_calibration_theta )
 					variable_vector[ : , 0 ] = np.linspace( np.minimum( 0.0 , np.min( variable_vector_used ) ) , np.max( variable_vector_used ) , number_steps_var_plot )
 					variable_vector[ : , 1 ] = gamma.pdf( variable_vector[ : , 0 ] , distance_calibration_k , 0 , distance_calibration_theta )
-				else:
+				elif( dist_distance_calibration == 4 ):
 					parameter_sigma = np.sqrt( np.log( var_distance_calibration * var_distance_calibration / distance_calibration / distance_calibration + 1.0 ) )
 					parameter_mu = np.log( distance_calibration * distance_calibration / np.sqrt( distance_calibration * distance_calibration + var_distance_calibration * var_distance_calibration ) )
 					mincum = lognorm.cdf( min_val_cal , parameter_sigma , 0 , np.exp( parameter_mu ) )
@@ -561,6 +575,16 @@ def create_inputs( type_sim , type_input , dist_input_height , dist_input_hl , i
 					variable_vector_used = lognorm.ppf( vector_p , parameter_sigma , 0 , np.exp( parameter_mu ) )
 					variable_vector[ : , 0 ] = np.linspace( np.minimum( 0.0 , np.min( variable_vector_used ) ) , np.max( variable_vector_used ) , number_steps_var_plot )
 					variable_vector[ : , 1 ] = lognorm.pdf( variable_vector[ : , 0 ] , parameter_sigma , 0 , np.exp( parameter_mu ) )
+				else:
+					file_cumulative = np.loadtxt( file_cumulative_distance )
+					mincum = file_cumulative[ 0 ][ 1 ]
+					maxcum = file_cumulative[ len( file_cumulative ) - 1 ][ 1 ]
+					vector_p = np.arange( mincum + ( maxcum - mincum ) / ( 2 * number_steps_var ) , maxcum , ( maxcum - mincum ) / ( number_steps_var ) )
+					interpolator = interpolate.interp1d( file_cumulative[ : , 1 ] , file_cumulative[ : , 0 ] )
+					interpolator_inverse = interpolate.interp1d( file_cumulative[ 1 : len( file_cumulative ) - 2 , 0 ] , file_cumulative[ 2 : len( file_cumulative ) - 1 , 1 ] - file_cumulative[ 0 : len( file_cumulative ) - 3 , 1 ] , fill_value = "extrapolate" )
+					variable_vector_used = interpolator( vector_p )
+					variable_vector[ : , 0 ] = np.linspace( np.minimum( 0.0 , np.min( variable_vector_used ) ) , np.max( variable_vector_used ) , number_steps_var_plot )
+					variable_vector[ : , 1 ] = interpolator_inverse( variable_vector[ : , 0 ] )
 			else:
 				resolution = resolution * resolution / 1000000.00
 				max_val_cal = np.max( file_data[ : , 8 ] )
@@ -589,7 +613,7 @@ def create_inputs( type_sim , type_input , dist_input_height , dist_input_hl , i
 					variable_vector_used = gamma.ppf( vector_p , area_calibration_k , 0 , area_calibration_theta )
 					variable_vector[ : , 0 ] = np.linspace( np.minimum( 0.0 , np.min( variable_vector_used ) ) , np.max( variable_vector_used ) , number_steps_var_plot )
 					variable_vector[ : , 1 ]= gamma.pdf( variable_vector[ : , 0 ] , area_calibration_k , 0 , area_calibration_theta )
-				else:
+				elif( dist_area_calibration == 4 ):
 					parameter_sigma = np.sqrt( np.log( var_area_calibration * var_area_calibration / area_calibration / area_calibration + 1.0 ) )
 					parameter_mu = np.log( area_calibration * area_calibration / np.sqrt( area_calibration * area_calibration + var_area_calibration * var_area_calibration ) )
 					mincum = lognorm.cdf( min_val_cal , parameter_sigma , 0 , np.exp( parameter_mu ) )
@@ -598,13 +622,23 @@ def create_inputs( type_sim , type_input , dist_input_height , dist_input_hl , i
 					variable_vector_used = lognorm.ppf( vector_p , parameter_sigma , 0 , np.exp( parameter_mu ) )
 					variable_vector[ : , 0 ] = np.linspace( np.minimum( 0.0 , np.min( variable_vector_used ) ) , np.max( variable_vector_used ) , number_steps_var_plot )
 					variable_vector[ : , 1 ] = lognorm.pdf( variable_vector[ : , 0 ] , parameter_sigma , 0 , np.exp( parameter_mu ) )
+				else:
+					file_cumulative = np.loadtxt( file_cumulative_area )
+					mincum = file_cumulative[ 0 ][ 1 ]
+					maxcum = file_cumulative[ len( file_cumulative ) - 1 ][ 1 ]
+					vector_p = np.arange( mincum + ( maxcum - mincum ) / ( 2 * number_steps_var ) , maxcum , ( maxcum - mincum ) / ( number_steps_var ) )
+					interpolator = interpolate.interp1d( file_cumulative[ : , 1 ] , file_cumulative[ : , 0 ] )
+					interpolator_inverse = interpolate.interp1d( file_cumulative[ 1 : len( file_cumulative ) - 2 , 0 ] , file_cumulative[ 2 : len( file_cumulative ) - 1 , 1 ] - file_cumulative[ 0 : len( file_cumulative ) - 3 , 1 ] , fill_value = "extrapolate" )
+					variable_vector_used = interpolator( vector_p )
+					variable_vector[ : , 0 ] = np.linspace( np.minimum( 0.0 , np.min( variable_vector_used ) ) , np.max( variable_vector_used ) , number_steps_var_plot )
+					variable_vector[ : , 1 ] = interpolator_inverse( variable_vector[ : , 0 ] )
 			divisor_int = np.zeros( vector_p.shape )
 			for ind_int in range( len( divisor_int ) ):
 				divisor_int[ ind_int ] = np.sum( np.power( resolution + np.abs( zi_reshaped - variable_vector_used[ ind_int ] ) , -1.0 ) )
 			Probability = np.zeros( zi_reshaped.shape )
 			for ind_prob in range( len( Probability ) ):
 				Probability[ ind_prob ] = np.sum( np.power( resolution + np.abs( zi_reshaped[ ind_prob ] - variable_vector_used ) , - 1.0 ) / divisor_int )
-			Probability_Save = gaussian_filter( np.reshape( Probability / np.sum( Probability ) , ( number_steps_dense , number_steps_dense ) ) , 10 )
+			Probability_Save = gaussian_filter( np.reshape( Probability / np.sum( Probability ) , ( number_steps_dense , number_steps_dense ) ) , 1 )
 			Probability = np.cumsum( np.reshape( Probability_Save , ( number_steps_dense * number_steps_dense , 1 ) ) / np.sum( np.reshape( Probability_Save , ( number_steps_dense * number_steps_dense , 1 ) ) ) )
 			sampling = np.random.uniform( 0.0 , 1.0 , N )
 			sampling_height = np.random.uniform( - 0.5 , 0.5 , N )

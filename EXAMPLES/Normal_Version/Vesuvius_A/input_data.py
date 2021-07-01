@@ -59,16 +59,18 @@ dist_input_cen = 2
 # hl_theta = theta in gamma distribution of H/L (only considered if type_input = 1 and dist_input_hl = 3).
 # input_file_cal = name of the file with the set of values of height and H/L (when type_input = 2) or name of the calibration file (when type_input = 3). Only considered if type_input = 2 or 3.
 # calibration_type = type of calibration (1: Jaccard. 2: HD. 3: RMSD. 4: Directional Jaccard. 5: Distance. 6: Directional distance. 7: Area). Only considered if type_sim = 1 and type_input = 3.
-# dist_distance_calibration = type of distance distribution used for distance-based calibration (1: Gaussian. 2: Uniform. 3: Gamma. 4: Lognormal. Only considered if type_sim = 1, type_input = 3, and calibration_type = 5 or 6).
+# dist_distance_calibration = type of distance distribution used for distance-based calibration (1: Gaussian. 2: Uniform. 3: Gamma. 4: Lognormal. 5: Input cumulative distribution. Only considered if type_sim = 1, type_input = 3, and calibration_type = 5 or 6).
 # distance_calibration = expected distance used for distance-based calibration (In meters. Only considered if type_sim = 1, type_input = 3, calibration_type = 5 or 6, and dist_distance_calibration = 1, 2 or 4).
 # var_distance_calibration = variability of distance used for distance-based calibration (In meters. Only considered if type_sim = 1, type_input = 3, calibration_type = 5 or 6, and dist_distance_calibration = 1, 2 or 4).
 # distance_calibration_k = k in gamma distance distribution used for distance-based calibration (only considered if type_sim = 1, type_input = 3, calibration_type = 5 or 6, and dist_distance_calibration = 3).
 # distance_calibration_theta = theta in gamma distance distribution used for distance-based calibration (only considered if type_sim = 1, type_input = 3, calibration_type = 5 or 6, and dist_distance_calibration = 3).
-# dist_area_calibration = type of area distribution used for area-based calibration (1: Gaussian. 2: Uniform. 3: Gamma. 4: Lognormal. Only considered if type_sim = 1, type_input = 3, and calibration_type = 7).
+# file_cumulative_distance = name of the file with the cumulative distribution of runout distance used in the calibration procedure (only considered if type_sim = 1, type_input = 3, calibration_type = 5 or 6, and dist_distance_calibration = 5).
+# dist_area_calibration = type of area distribution used for area-based calibration (1: Gaussian. 2: Uniform. 3: Gamma. 4: Lognormal. 5: Input cumulative distribution. Only considered if type_sim = 1, type_input = 3, and calibration_type = 7).
 # area_calibration = expected area used for area-based calibration (In km2. Only considered if type_sim = 1, type_input = 3, calibration_type = 7, and dist_area_calibration = 1, 2 or 4).
 # var_area_calibration = variability of area used for area-based calibration (In km2. Only considered if type_sim = 1, type_input = 3, calibration_type = 7, and dist_area_calibration = 1, 2 or 4).
 # area_calibration_k = k in gamma area distribution used for area-based calibration (only considered if type_sim = 1, type_input = 3, calibration_type = 7, and dist_area_calibration = 3).
 # area_calibration_theta = theta in gamma area distribution used for area-based calibration (only considered if type_sim = 1, type_input = 3, calibration_type = 7, and dist_area_calibration = 3).
+# file_cumulative_area = name of the file with the cumulative distribution of runout distance or inundation area used in the calibration (only considered if type_sim = 1, type_input = 3, calibration_type = 7, and dist_area_calibration = 5).
 type_input = 1
 dist_input_height = 1
 height = 300.0

@@ -1,5 +1,5 @@
 # Name of the run (used to save the parameters and the output).
-run_name = Citlaltepetl_B
+run_name = Chaiten_F
 
 # Type of simulation (1: Default mode: Construction of probability map. 2: Calibration mode).
 type_sim = 1
@@ -21,10 +21,10 @@ source_dem = 1
 # lon2 = longitude of the second limit of the map.
 # lat1 = latitude of the first limit of the map.
 # lat2 = latitude of the second limit of the map.
-lon1 = -97.5
-lon2 = -97.0
-lat1 = 18.9
-lat2 = 19.2
+lon1 = -72.8
+lon2 = -72.5
+lat1 = -42.95
+lat2 = -42.75
 
 # Parameters of the collapse position.
 # vent_type = type of distribution of collapse position (1: Pointwise. 2: Linear. 3: Circumference arch. 4: Input file. Only considered if type_sim = 1, otherwise vent_type = 1).
@@ -41,9 +41,9 @@ lat2 = 19.2
 # dist_input_cen = type of distribution for collapse position variability (1: Gaussian. 2: Uniform. Only considered if type_sim = 1 and vent_type = 1, 2 or 3).
 # input_file_vent = name of the file with the set of values for vent positions (only considered if vent_type = 4).
 vent_type = 1
-lon_cen = -97.268
-lat_cen = 19.030
-var_cen = 300.0
+lon_cen = -72.650
+lat_cen = -42.835
+var_cen = 0.00
 dist_input_cen = 1
 
 # Other parameters of energy cones
@@ -72,16 +72,14 @@ dist_input_cen = 1
 # area_calibration_k = k in gamma area distribution used for area-based calibration (only considered if type_sim = 1, type_input = 3, calibration_type = 7, and dist_area_calibration = 3).
 # area_calibration_theta = theta in gamma area distribution used for area-based calibration (only considered if type_sim = 1, type_input = 3, calibration_type = 7, and dist_area_calibration = 3).
 # file_cumulative_area = name of the file with the cumulative distribution of runout distance or inundation area used in the calibration (only considered if type_sim = 1, type_input = 3, calibration_type = 7, and dist_area_calibration = 5).
-type_input = 1
-dist_input_height = 1
-height = 100.0
-var_height = 100.0
-dist_input_hl = 1
-hl = 0.40
-var_hl = 0.05
+type_input = 3
+input_file_cal = ./EXAMPLES/Normal_Version/Chaiten_D/Calibration_Data.txt
+calibration_type = 7
+dist_area_calibration = 5
+file_cumulative_area = ./EXAMPLES/Normal_Version/Chaiten_F/Cumulative_Data.txt
 
 # Maximum order of energy cones.
-cone_levels = 1
+cone_levels = 100
 
 # Number of simulations (Only considered if type_input = 1 or 3 and vent_type = 1, 2 or 3).
 N = 100
