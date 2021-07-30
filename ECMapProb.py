@@ -65,6 +65,8 @@ def main_program():
 			[ summary_data , area_pixel , sim_data , string_data , string_cones ] = definitions_save_data_deg( source_dem , height_vector , hl_vector , lon_cen_vector , lat_cen_vector , step_lon_m , step_lat_m , N , cone_levels )
 		else:
 			[ summary_data , area_pixel , sim_data , string_data , string_cones ] = definitions_save_data_utm( source_dem , height_vector , hl_vector , east_cen_vector , north_cen_vector , cellsize , N , cone_levels )
+	else:
+		[ summary_data , area_pixel , sim_data , string_data , string_cones ] = [ np.nan , np.nan , np.nan , np.nan , np.nan ]
 
 	if( source_dem == 1 or source_dem == 3 ):
 		[ summary_data , string_data , string_cones , string_compare , sim_data , data_cones , polygon ] = compute_energy_cones_deg( type_sim , lon1 , lon2 , lat1 , lat2 , step_lon_deg , step_lat_deg , step_lon_m , step_lat_m , lon_cen_vector , lat_cen_vector , matrix_lon , matrix_lat , height_vector , hl_vector , cells_lon , cells_lat , Topography , angstep , angstep_res2 , angstep_res3 , distep , area_pixel , cone_levels , N , redist_energy , save_data , summary_data , string_data , string_cones , sim_data , anglen , pix_min , vector_backward_1 , vector_backward_2 , index_max , vector_correc , matrix_compare , vertices_compare , string_compare , data_direction , comparison_polygon )
