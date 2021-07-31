@@ -1882,7 +1882,7 @@ def plot_deg( run_name , type_sim , Cities , polygon , lon1 , lon2 , lat1 , lat2
 				for j in range( leny ):
 					Jaccard_mat[ i , j ] = Jaccard_vals_reshaped[ i , j ]
 			plt.figure( 5 , figsize = ( 8.0 , 5.0 ) )
-			c1 = plt.pcolormesh( height_mat , hl_mat , Jaccard_mat )
+			c1 = plt.pcolormesh( height_mat , hl_mat , Jaccard_mat , cmap = 'viridis' )
 			plt.colorbar( c1 )
 			plt.xlabel( 'Collapse height [m]' )
 			plt.ylabel( 'H/L' )
@@ -1895,7 +1895,7 @@ def plot_deg( run_name , type_sim , Cities , polygon , lon1 , lon2 , lat1 , lat2
 				for j in range( leny ):
 					MSD_mat[ i , j ] = MSD_vals_reshaped[ i , j ]
 			plt.figure( 6 , figsize = ( 8.0 , 5.0 ) )
-			c2 = plt.pcolormesh( height_mat , hl_mat , MSD_mat )
+			c2 = plt.pcolormesh( height_mat , hl_mat , MSD_mat , cmap = 'viridis_r' )
 			plt.colorbar( c2 )
 			plt.xlabel( 'Collapse height [m]' )
 			plt.ylabel( 'H/L' )
@@ -1908,7 +1908,7 @@ def plot_deg( run_name , type_sim , Cities , polygon , lon1 , lon2 , lat1 , lat2
 				for j in range( leny ):
 					HD_mat[ i , j ] = HD_vals_reshaped[ i , j ]
 			plt.figure( 7 , figsize = ( 8.0 , 5.0 ) )
-			c3 = plt.pcolormesh( height_mat , hl_mat , HD_mat )
+			c3 = plt.pcolormesh( height_mat , hl_mat , HD_mat , cmap = 'viridis_r' )
 			plt.colorbar( c3 )
 			plt.xlabel( 'Collapse height [m]' )
 			plt.ylabel( 'H/L' )
@@ -1921,7 +1921,7 @@ def plot_deg( run_name , type_sim , Cities , polygon , lon1 , lon2 , lat1 , lat2
 				for j in range( leny ):
 					Jaccard_dir_mat[ i , j ] = Jaccard_dir_vals_reshaped[ i , j ]
 			plt.figure( 8 , figsize = ( 8.0 , 5.0 ) )
-			c5 = plt.pcolormesh( height_mat , hl_mat , Jaccard_dir_mat )
+			c5 = plt.pcolormesh( height_mat , hl_mat , Jaccard_dir_mat , cmap = 'viridis' )
 			plt.colorbar( c5 )
 			plt.xlabel( 'Collapse height [m]' )
 			plt.ylabel( 'H/L' )
@@ -2069,7 +2069,7 @@ def plot_utm( run_name , type_sim , polygon , matrix_east , matrix_north , east_
 				for j in range( leny ):
 					Jaccard_mat[ i , j ] = Jaccard_vals_reshaped[ i , j ]
 			plt.figure( 5 , figsize = ( 8.0 , 5.0 ) )
-			c1 = plt.pcolormesh( height_mat , hl_mat , Jaccard_mat )
+			c1 = plt.pcolormesh( height_mat , hl_mat , Jaccard_mat , cmap = 'viridis' )
 			plt.colorbar( c1 )
 			plt.xlabel( 'Collapse height [m]' )
 			plt.ylabel( 'H/L' )
@@ -2082,7 +2082,7 @@ def plot_utm( run_name , type_sim , polygon , matrix_east , matrix_north , east_
 				for j in range( leny ):
 					MSD_mat[ i , j ] = MSD_vals_reshaped[ i , j ]
 			plt.figure( 6 , figsize = ( 8.0 , 5.0 ) )
-			c2 = plt.pcolormesh( height_mat , hl_mat , MSD_mat )
+			c2 = plt.pcolormesh( height_mat , hl_mat , MSD_mat , cmap = 'viridis_r' )
 			plt.colorbar( c2 )
 			plt.xlabel( 'Collapse height [m]' )
 			plt.ylabel( 'H/L' )
@@ -2095,7 +2095,7 @@ def plot_utm( run_name , type_sim , polygon , matrix_east , matrix_north , east_
 				for j in range( leny ):
 					HD_mat[ i , j ] = HD_vals_reshaped[ i , j ]
 			plt.figure( 7 , figsize = ( 8.0 , 5.0 ) )
-			c3 = plt.pcolormesh( height_mat , hl_mat , HD_mat )
+			c3 = plt.pcolormesh( height_mat , hl_mat , HD_mat , cmap = 'viridis_r' )
 			plt.colorbar( c3 )
 			plt.xlabel( 'Collapse height [m]' )
 			plt.ylabel( 'H/L' )
@@ -2108,7 +2108,7 @@ def plot_utm( run_name , type_sim , polygon , matrix_east , matrix_north , east_
 				for j in range( leny ):
 					Jaccard_dir_mat[ i , j ] = Jaccard_dir_vals_reshaped[ i , j ]
 			plt.figure( 8 , figsize = ( 8.0 , 5.0 ) )
-			c5 = plt.pcolormesh( height_mat , hl_mat , Jaccard_dir_mat )
+			c5 = plt.pcolormesh( height_mat , hl_mat , Jaccard_dir_mat , cmap = 'viridis' )
 			plt.colorbar( c5 )
 			plt.xlabel( 'Collapse height [m]' )
 			plt.ylabel( 'H/L' )
