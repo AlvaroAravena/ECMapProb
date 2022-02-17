@@ -5,6 +5,10 @@ Citation of the paper describing the branching strategy adopted here:
 
 Aravena, A., Cioni, R., Bevilacqua, A., de' Michieli Vitturi, M., Esposti Ongaro, T., and Neri, A. (2020). Tree‐branching based enhancement of kinetic energy models for reproducing channelization processes of pyroclastic density currents. Journal of Geophysical Research: Solid Earth, 125, e2019JB019271.
 
+Citation of the paper describing calibration strategies and user manuals:
+
+Aravena, A., Bevilacqua, A., de' Michieli Vitturi, M., Esposti Ongaro, T., Neri, A., and Cioni, R. (2022). Calibration strategies of PDC kinetic energy models and their application to the construction of hazard maps. Bulletin of Volcanology 84, 29. 
+
 Application to the San Salvador and Nejapa-Chiltepe volcanic complexes:
 
 Bevilacqua, A., Aravena, A., Neri, A., Gutierrez, E., Escobar, D., Schliz, M., Aiuppa, A., and Cioni, R. (2021). Thematic vent opening probability maps and hazard assessment of small-scale pyroclastic density currents in the San Salvador volcanic complex (El Salvador) and Nejapa-Chiltepe volcanic complex (Nicaragua). Natural Hazards and Earth System Sciences, 21, 1639-1665.
