@@ -9,6 +9,10 @@ Citation of the paper describing calibration strategies and user manuals:
 
 Aravena, A., Bevilacqua, A., de' Michieli Vitturi, M., Esposti Ongaro, T., Neri, A., and Cioni, R. (2022). Calibration strategies of PDC kinetic energy models and their application to the construction of hazard maps. Bulletin of Volcanology 84, 29. 
 
+Citation of the paper using this model systematically to study the effect of topography of a set of 50 volcanoes:
+
+Aravena, A., Roche, O (2022). Influence of the topography of stratovolcanoes on the propagation and channelization of dense pyroclastic density currents analyzed through numerical simulations. Bulletin of Volcanology 84, 67.
+
 Application to the San Salvador and Nejapa-Chiltepe volcanic complexes:
 
 Bevilacqua, A., Aravena, A., Neri, A., Gutierrez, E., Escobar, D., Schliz, M., Aiuppa, A., and Cioni, R. (2021). Thematic vent opening probability maps and hazard assessment of small-scale pyroclastic density currents in the San Salvador volcanic complex (El Salvador) and Nejapa-Chiltepe volcanic complex (Nicaragua). Natural Hazards and Earth System Sciences, 21, 1639-1665.
