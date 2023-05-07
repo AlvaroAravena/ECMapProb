@@ -1043,8 +1043,8 @@ def compute_energy_cones_deg( type_sim , lon1 , lon2 , lat1 , lat2 , step_lon_de
 						polygons_new.append( distance - distep )
 						break
 			if( ( redist_energy == 3 or redist_energy == 4 ) and polygon[ j ][ 4 ] > -1 ):
-				lim = np.int( polygon[ j ][ 4 ] )
-				if( polygon[ j ][ 4 ] == np.int( polygon[ j ][ 4 ] ) ):
+				lim = int( polygon[ j ][ 4 ] )
+				if( polygon[ j ][ 4 ] == int( polygon[ j ][ 4 ] ) ):
 					for ii in range( int( anglen ) ):
 						vector_correc[ ii ] = vector_backward_1[ int( ( ii - polygon[ j ][ 4 ] + index_max ) % anglen ) ]
 				else:
@@ -1148,7 +1148,7 @@ def compute_energy_cones_deg( type_sim , lon1 , lon2 , lat1 , lat2 , step_lon_de
 				if( len( wh_max ) > 0 ):
 					if( redist_energy == 1 or redist_energy == 3 or len( wh_max ) == 1 ):
 						for l_max_real in wh_max:
-							lmax = np.int( l_max_real )
+							lmax = int( l_max_real )
 							l_it = len( polygons_new ) - 1		
 							for l in range( 1 , len( polygons_new ) ):
 								l_index = lmax + l
@@ -1171,10 +1171,10 @@ def compute_energy_cones_deg( type_sim , lon1 , lon2 , lat1 , lat2 , step_lon_de
 						if( wh_min[ 0 ] > wh_max[ 0 ] ):
 							for l_ind in range( len( wh_max ) ):
 								l_max_real = wh_max[ l_ind ]	
-								l_max_int = np.int( l_max_real )
+								l_max_int = int( l_max_real )
 								step_right = wh_min[ l_ind ] - l_max_int
 								l_right_real = wh_min[ l_ind ]
-								l_right_int = np.int( l_right_real )
+								l_right_int = int( l_right_real )
 								if( l_ind == 0 ):
 									step_left = anglen + l_max_int - wh_min[ len( wh_min ) - 1 ]
 									l_left_real = wh_min[ len( wh_min ) - 1 ]
@@ -1184,7 +1184,7 @@ def compute_energy_cones_deg( type_sim , lon1 , lon2 , lat1 , lat2 , step_lon_de
 									l_left_real = wh_min[ l_ind - 1 ]
 									left_index = l_ind - 1
 								
-								l_left_int = np.int( l_left_real )
+								l_left_int = int( l_left_real )
 								for l in range( 1 , int( step_right ) ):
 									l_index = l_max_int + l
 									if( l_index >= len( polygons_new ) ):
@@ -1206,10 +1206,10 @@ def compute_energy_cones_deg( type_sim , lon1 , lon2 , lat1 , lat2 , step_lon_de
 						else:
 							for l_ind in range( len( wh_max ) ):
 								l_max_real = wh_max[ l_ind ]	
-								l_max_int = np.int( l_max_real )
+								l_max_int = int( l_max_real )
 								step_left = l_max_int - wh_min[ l_ind ]
 								l_left_real = wh_min[ l_ind ]
-								l_left_int = np.int( l_left_real )
+								l_left_int = int( l_left_real )
 								if( l_ind == len( wh_max ) - 1 ):
 									step_right = anglen - l_max_int + wh_min[ 0 ]
 									l_right_real = wh_min[ 0 ]
@@ -1218,7 +1218,7 @@ def compute_energy_cones_deg( type_sim , lon1 , lon2 , lat1 , lat2 , step_lon_de
 									step_right = wh_min[ l_ind + 1 ] - l_max_int
 									l_right_real = wh_min[ l_ind + 1 ]
 									right_index = l_ind + 1
-								l_right_int = np.int( l_right_real )
+								l_right_int = int( l_right_real )
 								for l in range( 1 , int( step_right ) ):
 									l_index = l_max_int + l
 									if( l_index >= len( polygons_new ) ):
@@ -1239,7 +1239,7 @@ def compute_energy_cones_deg( type_sim , lon1 , lon2 , lat1 , lat2 , step_lon_de
 									wh_sum[ l_max_int ] = wh_sum[ l_max_int ] + ( polygons_new[ l_max_int ] - polygons_new[ l_left_int ] )
 					wh_sum = wh_sum * hl_current * angstep / 360
 					for l in wh_max:
-						lint = np.int( l )
+						lint = int( l )
 						if( wh_sum[ lint ] > 0 ):
 							new_x = polygon[ j ][ 0 ] + polygons_new[ lint ] * cos( ( vec_ang[ lint ] + angstep * ( l - lint ) ) * np.pi / 180 ) * step_lon_deg / step_lon_m
 							new_y = polygon[ j ][ 1 ] + polygons_new[ lint ] * sin( ( vec_ang[ lint ] + angstep * ( l - lint ) ) * np.pi / 180 ) * step_lat_deg / step_lat_m
@@ -1372,8 +1372,8 @@ def compute_energy_cones_utm( type_sim , n_north , n_east , east_cor , north_cor
 						polygons_new.append( distance - distep )
 						break		
 			if( ( redist_energy == 3 or redist_energy == 4 ) and polygon[ j ][ 4 ] > -1 ):
-				lim = np.int( polygon[ j ][ 4 ] )
-				if( polygon[ j ][ 4 ] == np.int( polygon[ j ][ 4 ] ) ):
+				lim = int( polygon[ j ][ 4 ] )
+				if( polygon[ j ][ 4 ] == int( polygon[ j ][ 4 ] ) ):
 					for ii in range( int( anglen ) ):
 						vector_correc[ ii ] = vector_backward_1[ int( ( ii - polygon[ j ][ 4 ] + index_max ) % anglen ) ]
 				else:
@@ -1477,7 +1477,7 @@ def compute_energy_cones_utm( type_sim , n_north , n_east , east_cor , north_cor
 				if( len( wh_max ) > 0 ):
 					if( redist_energy == 1 or redist_energy == 3 or len( wh_max ) == 1 ):
 						for l_max_real in wh_max:
-							lmax = np.int( l_max_real )
+							lmax = int( l_max_real )
 							l_it = len( polygons_new ) - 1
 							for l in range( 1 , len( polygons_new ) ):
 								l_index = lmax + l
@@ -1500,10 +1500,10 @@ def compute_energy_cones_utm( type_sim , n_north , n_east , east_cor , north_cor
 						if( wh_min[ 0 ] > wh_max[ 0 ] ):
 							for l_ind in range( len( wh_max ) ):
 								l_max_real = wh_max[ l_ind ]	
-								l_max_int = np.int( l_max_real )
+								l_max_int = int( l_max_real )
 								step_right = wh_min[ l_ind ] - l_max_int
 								l_right_real = wh_min[ l_ind ]
-								l_right_int = np.int( l_right_real )
+								l_right_int = int( l_right_real )
 								if( l_ind == 0 ):
 									step_left = anglen + l_max_int - wh_min[ len( wh_min ) - 1 ]
 									l_left_real = wh_min[ len( wh_min ) - 1 ]
@@ -1512,7 +1512,7 @@ def compute_energy_cones_utm( type_sim , n_north , n_east , east_cor , north_cor
 									step_left = l_max_int - wh_min[ l_ind - 1 ]
 									l_left_real = wh_min[ l_ind - 1 ]
 									left_index = l_ind - 1
-								l_left_int = np.int( l_left_real )
+								l_left_int = int( l_left_real )
 								for l in range( 1 , int( step_right ) ):
 									l_index = l_max_int + l
 									if( l_index >= len( polygons_new ) ):
@@ -1534,10 +1534,10 @@ def compute_energy_cones_utm( type_sim , n_north , n_east , east_cor , north_cor
 						else:
 							for l_ind in range( len( wh_max ) ):
 								l_max_real = wh_max[ l_ind ]
-								l_max_int = np.int( l_max_real )
+								l_max_int = int( l_max_real )
 								step_left = l_max_int - wh_min[ l_ind ]
 								l_left_real = wh_min[ l_ind ]
-								l_left_int = np.int( l_left_real )
+								l_left_int = int( l_left_real )
 								if( l_ind == len( wh_max ) - 1 ):
 									step_right = anglen - l_max_int + wh_min[ 0 ]
 									l_right_real = wh_min[ 0 ]
@@ -1546,7 +1546,7 @@ def compute_energy_cones_utm( type_sim , n_north , n_east , east_cor , north_cor
 									step_right = wh_min[ l_ind + 1 ] - l_max_int
 									l_right_real = wh_min[ l_ind + 1 ]
 									right_index = l_ind + 1
-								l_right_int = np.int( l_right_real )
+								l_right_int = int( l_right_real )
 								for l in range( 1 , int( step_right ) ):
 									l_index = l_max_int + l
 									if( l_index >= len( polygons_new ) ):
@@ -1567,7 +1567,7 @@ def compute_energy_cones_utm( type_sim , n_north , n_east , east_cor , north_cor
 									wh_sum[ l_max_int ] = wh_sum[ l_max_int ] + ( polygons_new[ l_max_int ] - polygons_new[ l_left_int ] )
 					wh_sum = wh_sum * hl_current * angstep / 360
 					for l in wh_max:
-						lint = np.int( l )
+						lint = int( l )
 						if( wh_sum[ lint ] > 0 ):
 							new_x = polygon[ j ][ 0 ] + polygons_new[ lint ] * cos( ( vec_ang[ lint ] + angstep * ( l - lint ) ) * np.pi / 180 )
 							new_y = polygon[ j ][ 1 ] + polygons_new[ lint ] * sin( ( vec_ang[ lint ] + angstep * ( l - lint ) ) * np.pi / 180 )
@@ -1658,9 +1658,9 @@ def save_data_deg( run_name , source_dem , sea_flag , lon1 , lon2 , lat1 , lat2 
 	cellsize = max( step_lon_m , step_lat_m )
 	if( cellsize == step_lon_m ):
 		output_cells_lon = cells_lon - 1
-		output_cells_lat = np.int( cells_lat * step_lat_m / step_lon_m )
+		output_cells_lat = int( cells_lat * step_lat_m / step_lon_m )
 	else:
-		output_cells_lon = np.int( cells_lon * step_lon_m / step_lat_m )
+		output_cells_lon = int( cells_lon * step_lon_m / step_lat_m )
 		output_cells_lat = cells_lat - 1
 	text_file = open( 'Results/' + run_name + '/' + 'output_map.asc' , 'w' )
 	text_file.write( 'ncols' + ' ' + str( output_cells_lon ) + '\n' )
