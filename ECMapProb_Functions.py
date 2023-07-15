@@ -1809,40 +1809,8 @@ def plot_deg( run_name , type_sim , Cities , polygon , lon1 , lon2 , lat1 , lat2
 		dist_dir_vals_reshaped = dist_dir_vals.reshape( int( np.sqrt( N ) ) , int( np.sqrt( N ) ) )
 		area_vals = calibration_data[ : , 8 ]
 		area_vals_reshaped = area_vals.reshape( int( np.sqrt( N ) ) , int( np.sqrt( N ) ) )
-		lenx = len( height_vals_reshaped[ : , 1 ] )
-		leny = len( height_vals_reshaped[ 1 , : ] )
-		height_mat = np.zeros( ( lenx + 1 , leny + 1 ) )
-		for i in range( lenx ):
-			height_mat[ i , 0 ] = height_vals_reshaped[ i , 0 ]
-			height_mat[ i , leny ] = height_vals_reshaped[ i , leny - 1 ]
-		for i in range( 0 , lenx ):
-			for j in range( 1 , leny ):
-				height_mat[ i , j ] = height_vals_reshaped[ i , j ] * 0.5 + height_vals_reshaped[ i , j - 1 ] * 0.5 
-		height_mat[ lenx , : ] = height_mat[ lenx - 1 , : ]
-		hl_mat = np.zeros( ( lenx + 1 , leny + 1 ) )
-		for j in range( leny ):
-			hl_mat[ 0 , j ] = hl_vals_reshaped[ 0 , j ]
-			hl_mat[ lenx , j ] = hl_vals_reshaped[ lenx - 1 , j ]
-		for i in range( 1 , lenx ):
-			for j in range( 0 , leny ):
-				hl_mat[ i , j ] = hl_vals_reshaped[ i , j ] * 0.5 + hl_vals_reshaped[ i - 1 , j - 1 ] * 0.5 
-		for j in range( lenx + 1 ):
-			hl_mat[ j , leny ] = - hl_mat[ j , leny - 2 ] + 2 * hl_mat[ j , leny - 1 ]
-		hl_mat[ : , leny ] = hl_mat[ : , leny - 1 ]
-		dist_mat = np.zeros( ( lenx + 1 , leny + 1 ) )
-		for i in range( lenx ):
-			for j in range( leny ):
-				dist_mat[ i , j ] = dist_vals_reshaped[ i , j ]
-		dist_dir_mat = np.zeros( ( lenx + 1 , leny + 1 ) )
-		for i in range( lenx ):
-			for j in range( leny ):
-				dist_dir_mat[ i , j ] = dist_dir_vals_reshaped[ i , j ]
-		area_mat = np.zeros( ( lenx + 1 , leny + 1 ) )
-		for i in range( lenx ):
-			for j in range( leny ):
-				area_mat[ i , j ] = area_vals_reshaped[ i , j ]
 		plt.figure( 2 , figsize = ( 8.0 , 5.0 ) )
-		c4 = plt.pcolormesh( height_mat , hl_mat , dist_mat )
+		c4 = plt.pcolormesh( height_vals_reshaped , hl_vals_reshaped , dist_vals_reshaped )
 		plt.colorbar( c4 )
 		plt.xlabel( 'Collapse height [m]' )
 		plt.ylabel( 'H/L' )
@@ -1851,7 +1819,7 @@ def plot_deg( run_name , type_sim , Cities , polygon , lon1 , lon2 , lat1 , lat2
 		plt.ylim( np.min( calibration_data[ : , 1 ] ) , np.max( calibration_data[ : , 1 ] ) )
 		plt.savefig( 'Results/' + run_name + '/Calibration_Distance.png' )
 		plt.figure( 3 , figsize = ( 8.0 , 5.0 ) )
-		c6 = plt.pcolormesh( height_mat , hl_mat , dist_dir_mat )
+		c6 = plt.pcolormesh( height_vals_reshaped , hl_vals_reshaped , dist_dir_vals_reshaped )
 		plt.colorbar( c6 )
 		plt.xlabel( 'Collapse height [m]' )
 		plt.ylabel( 'H/L' )
@@ -1860,7 +1828,7 @@ def plot_deg( run_name , type_sim , Cities , polygon , lon1 , lon2 , lat1 , lat2
 		plt.ylim( np.min( calibration_data[ : , 1 ] ) , np.max( calibration_data[ : , 1 ] ) )
 		plt.savefig( 'Results/' + run_name + '/Calibration_Distance_Directional.png' )
 		plt.figure( 4 , figsize = ( 8.0 , 5.0 ) )
-		c7 = plt.pcolormesh( height_mat , hl_mat , area_mat )
+		c7 = plt.pcolormesh( height_vals_reshaped , hl_vals_reshaped , area_vals_reshaped )
 		plt.colorbar( c7 )
 		plt.xlabel( 'Collapse height [m]' )
 		plt.ylabel( 'H/L' )
@@ -1877,12 +1845,8 @@ def plot_deg( run_name , type_sim , Cities , polygon , lon1 , lon2 , lat1 , lat2
 			HD_vals_reshaped = HD_vals.reshape( int( np.sqrt( N ) ) , int( np.sqrt( N ) ) )
 			Jaccard_dir_vals = calibration_data[ : , 6 ]
 			Jaccard_dir_vals_reshaped = Jaccard_dir_vals.reshape( int( np.sqrt( N ) ) , int( np.sqrt( N ) ) )
-			Jaccard_mat = np.zeros( ( lenx + 1 , leny + 1 ) )
-			for i in range( lenx ):
-				for j in range( leny ):
-					Jaccard_mat[ i , j ] = Jaccard_vals_reshaped[ i , j ]
 			plt.figure( 5 , figsize = ( 8.0 , 5.0 ) )
-			c1 = plt.pcolormesh( height_mat , hl_mat , Jaccard_mat , cmap = 'viridis' )
+			c1 = plt.pcolormesh( height_vals_reshaped , hl_vals_reshaped , Jaccard_vals_reshaped , cmap = 'viridis' )
 			plt.colorbar( c1 )
 			plt.xlabel( 'Collapse height [m]' )
 			plt.ylabel( 'H/L' )
@@ -1890,12 +1854,8 @@ def plot_deg( run_name , type_sim , Cities , polygon , lon1 , lon2 , lat1 , lat2
 			plt.xlim( np.min( calibration_data[ : , 0 ] ) , np.max( calibration_data[ : , 0 ] ) )
 			plt.ylim( np.min( calibration_data[ : , 1 ] ) , np.max( calibration_data[ : , 1 ] ) )
 			plt.savefig( 'Results/' + run_name + '/Calibration_Jaccard.png' )
-			MSD_mat = np.zeros( ( lenx + 1 , leny + 1 ) )
-			for i in range( lenx ):
-				for j in range( leny ):
-					MSD_mat[ i , j ] = MSD_vals_reshaped[ i , j ]
 			plt.figure( 6 , figsize = ( 8.0 , 5.0 ) )
-			c2 = plt.pcolormesh( height_mat , hl_mat , MSD_mat , cmap = 'viridis_r' )
+			c2 = plt.pcolormesh( height_vals_reshaped , hl_vals_reshaped , MSD_vals_reshaped , cmap = 'viridis_r' )
 			plt.colorbar( c2 )
 			plt.xlabel( 'Collapse height [m]' )
 			plt.ylabel( 'H/L' )
@@ -1903,12 +1863,8 @@ def plot_deg( run_name , type_sim , Cities , polygon , lon1 , lon2 , lat1 , lat2
 			plt.xlim( np.min( calibration_data[ : , 0 ] ) , np.max( calibration_data[ : , 0 ] ) )
 			plt.ylim( np.min( calibration_data[ : , 1 ] ) , np.max( calibration_data[ : , 1 ] ) )
 			plt.savefig( 'Results/' + run_name + '/Calibration_RMSD.png' )
-			HD_mat = np.zeros( ( lenx + 1 , leny + 1 ) )
-			for i in range( lenx ):
-				for j in range( leny ):
-					HD_mat[ i , j ] = HD_vals_reshaped[ i , j ]
 			plt.figure( 7 , figsize = ( 8.0 , 5.0 ) )
-			c3 = plt.pcolormesh( height_mat , hl_mat , HD_mat , cmap = 'viridis_r' )
+			c3 = plt.pcolormesh( height_vals_reshaped , hl_vals_reshaped , HD_vals_reshaped , cmap = 'viridis_r' )
 			plt.colorbar( c3 )
 			plt.xlabel( 'Collapse height [m]' )
 			plt.ylabel( 'H/L' )
@@ -1916,12 +1872,8 @@ def plot_deg( run_name , type_sim , Cities , polygon , lon1 , lon2 , lat1 , lat2
 			plt.xlim( np.min( calibration_data[ : , 0 ] ) , np.max( calibration_data[ : , 0 ] ) )
 			plt.ylim( np.min( calibration_data[ : , 1 ] ) , np.max( calibration_data[ : , 1 ] ) )
 			plt.savefig( 'Results/' + run_name + '/Calibration_HD.png' )
-			Jaccard_dir_mat = np.zeros( ( lenx + 1 , leny + 1 ) )
-			for i in range( lenx ):
-				for j in range( leny ):
-					Jaccard_dir_mat[ i , j ] = Jaccard_dir_vals_reshaped[ i , j ]
 			plt.figure( 8 , figsize = ( 8.0 , 5.0 ) )
-			c5 = plt.pcolormesh( height_mat , hl_mat , Jaccard_dir_mat , cmap = 'viridis' )
+			c5 = plt.pcolormesh( height_vals_reshaped , hl_vals_reshaped , Jaccard_dir_vals_reshaped , cmap = 'viridis' )
 			plt.colorbar( c5 )
 			plt.xlabel( 'Collapse height [m]' )
 			plt.ylabel( 'H/L' )
@@ -1996,40 +1948,8 @@ def plot_utm( run_name , type_sim , polygon , matrix_east , matrix_north , east_
 		dist_dir_vals_reshaped = dist_dir_vals.reshape( int( np.sqrt( N ) ) , int( np.sqrt( N ) ) )
 		area_vals = calibration_data[ : , 8 ]
 		area_vals_reshaped = area_vals.reshape( int( np.sqrt( N ) ) , int( np.sqrt( N ) ) )
-		lenx = len( height_vals_reshaped[ : , 1 ] )
-		leny = len( height_vals_reshaped[ 1 , : ] )
-		height_mat = np.zeros( ( lenx + 1 , leny + 1 ) )
-		for i in range( lenx ):
-			height_mat[ i , 0 ] = height_vals_reshaped[ i , 0 ]
-			height_mat[ i , leny ] = height_vals_reshaped[ i , leny - 1 ]
-		for i in range( 0 , lenx ):
-			for j in range( 1 , leny ):
-				height_mat[ i , j ] = height_vals_reshaped[ i , j ] * 0.5 + height_vals_reshaped[ i , j - 1 ] * 0.5 
-		height_mat[ lenx , : ] = height_mat[ lenx - 1 , : ]
-		hl_mat = np.zeros( ( lenx + 1 , leny + 1 ) )
-		for j in range( leny ):
-			hl_mat[ 0 , j ] = hl_vals_reshaped[ 0 , j ]
-			hl_mat[ lenx , j ] = hl_vals_reshaped[ lenx - 1 , j ]
-		for i in range( 1 , lenx ):
-			for j in range( 0 , leny ):
-				hl_mat[ i , j ] = hl_vals_reshaped[ i , j ] * 0.5 + hl_vals_reshaped[ i - 1 , j - 1 ] * 0.5 
-		for j in range( lenx + 1 ):
-			hl_mat[ j , leny ] = - hl_mat[ j , leny - 2 ] + 2 * hl_mat[ j , leny - 1 ]
-		hl_mat[ : , leny ] = hl_mat[ : , leny - 1 ]
-		dist_mat = np.zeros( ( lenx + 1 , leny + 1 ) )
-		for i in range( lenx ):
-			for j in range( leny ):
-				dist_mat[ i , j ] = dist_vals_reshaped[ i , j ]
-		dist_dir_mat = np.zeros( ( lenx + 1 , leny + 1 ) )
-		for i in range( lenx ):
-			for j in range( leny ):
-				dist_dir_mat[ i , j ] = dist_dir_vals_reshaped[ i , j ]
-		area_mat = np.zeros( ( lenx + 1 , leny + 1 ) )
-		for i in range( lenx ):
-			for j in range( leny ):
-				area_mat[ i , j ] = area_vals_reshaped[ i , j ]
 		plt.figure( 2 , figsize = ( 8.0 , 5.0 ) )
-		c4 = plt.pcolormesh( height_mat , hl_mat , dist_mat )
+		c4 = plt.pcolormesh( height_vals_reshaped , hl_vals_reshaped , dist_vals_reshaped )
 		plt.colorbar( c4 )
 		plt.xlabel( 'Collapse height [m]' )
 		plt.ylabel( 'H/L' )
@@ -2038,7 +1958,7 @@ def plot_utm( run_name , type_sim , polygon , matrix_east , matrix_north , east_
 		plt.ylim( np.min( calibration_data[ : , 1 ] ) , np.max( calibration_data[ : , 1 ] ) )
 		plt.savefig( 'Results/' + run_name + '/Calibration_Distance.png' )
 		plt.figure( 3 , figsize = ( 8.0 , 5.0 ) )
-		c6 = plt.pcolormesh( height_mat , hl_mat , dist_dir_mat )
+		c6 = plt.pcolormesh( height_vals_reshaped , hl_vals_reshaped , dist_vals_reshaped )
 		plt.colorbar( c6 )
 		plt.xlabel( 'Collapse height [m]' )
 		plt.ylabel( 'H/L' )
@@ -2047,7 +1967,7 @@ def plot_utm( run_name , type_sim , polygon , matrix_east , matrix_north , east_
 		plt.ylim( np.min( calibration_data[ : , 1 ] ) , np.max( calibration_data[ : , 1 ] ) )
 		plt.savefig( 'Results/' + run_name + '/Calibration_Distance_Directional.png' )
 		plt.figure( 4 , figsize = ( 8.0 , 5.0 ) )
-		c7 = plt.pcolormesh( height_mat , hl_mat , area_mat )
+		c7 = plt.pcolormesh( height_vals_reshaped , hl_vals_reshaped , area_vals_reshaped )
 		plt.colorbar( c7 )
 		plt.xlabel( 'Collapse height [m]' )
 		plt.ylabel( 'H/L' )
@@ -2064,12 +1984,8 @@ def plot_utm( run_name , type_sim , polygon , matrix_east , matrix_north , east_
 			HD_vals_reshaped = HD_vals.reshape( int( np.sqrt( N ) ) , int( np.sqrt( N ) ) )
 			Jaccard_dir_vals = calibration_data[ : , 6 ]
 			Jaccard_dir_vals_reshaped = Jaccard_dir_vals.reshape( int( np.sqrt( N ) ) , int( np.sqrt( N ) ) )
-			Jaccard_mat = np.zeros( ( lenx + 1 , leny + 1 ) )
-			for i in range( lenx ):
-				for j in range( leny ):
-					Jaccard_mat[ i , j ] = Jaccard_vals_reshaped[ i , j ]
 			plt.figure( 5 , figsize = ( 8.0 , 5.0 ) )
-			c1 = plt.pcolormesh( height_mat , hl_mat , Jaccard_mat , cmap = 'viridis' )
+			c1 = plt.pcolormesh( height_vals_reshaped , hl_vals_reshaped , Jaccard_vals_reshaped , cmap = 'viridis' )
 			plt.colorbar( c1 )
 			plt.xlabel( 'Collapse height [m]' )
 			plt.ylabel( 'H/L' )
@@ -2082,7 +1998,7 @@ def plot_utm( run_name , type_sim , polygon , matrix_east , matrix_north , east_
 				for j in range( leny ):
 					MSD_mat[ i , j ] = MSD_vals_reshaped[ i , j ]
 			plt.figure( 6 , figsize = ( 8.0 , 5.0 ) )
-			c2 = plt.pcolormesh( height_mat , hl_mat , MSD_mat , cmap = 'viridis_r' )
+			c2 = plt.pcolormesh( height_vals_reshaped , hl_vals_reshaped , MSD_vals_reshaped , cmap = 'viridis_r' )
 			plt.colorbar( c2 )
 			plt.xlabel( 'Collapse height [m]' )
 			plt.ylabel( 'H/L' )
@@ -2090,12 +2006,8 @@ def plot_utm( run_name , type_sim , polygon , matrix_east , matrix_north , east_
 			plt.xlim( np.min( calibration_data[ : , 0 ] ) , np.max( calibration_data[ : , 0 ] ) )
 			plt.ylim( np.min( calibration_data[ : , 1 ] ) , np.max( calibration_data[ : , 1 ] ) )
 			plt.savefig( 'Results/' + run_name + '/Calibration_RMSD.png' )
-			HD_mat = np.zeros( ( lenx + 1 , leny + 1 ) )
-			for i in range( lenx ):
-				for j in range( leny ):
-					HD_mat[ i , j ] = HD_vals_reshaped[ i , j ]
 			plt.figure( 7 , figsize = ( 8.0 , 5.0 ) )
-			c3 = plt.pcolormesh( height_mat , hl_mat , HD_mat , cmap = 'viridis_r' )
+			c3 = plt.pcolormesh( height_vals_reshaped , hl_vals_reshaped , HD_vals_reshaped , cmap = 'viridis_r' )
 			plt.colorbar( c3 )
 			plt.xlabel( 'Collapse height [m]' )
 			plt.ylabel( 'H/L' )
@@ -2103,12 +2015,8 @@ def plot_utm( run_name , type_sim , polygon , matrix_east , matrix_north , east_
 			plt.xlim( np.min( calibration_data[ : , 0 ] ) , np.max( calibration_data[ : , 0 ] ) )
 			plt.ylim( np.min( calibration_data[ : , 1 ] ) , np.max( calibration_data[ : , 1 ] ) )
 			plt.savefig( 'Results/' + run_name + '/Calibration_HD.png' )
-			Jaccard_dir_mat = np.zeros( ( lenx + 1 , leny + 1 ) )
-			for i in range( lenx ):
-				for j in range( leny ):
-					Jaccard_dir_mat[ i , j ] = Jaccard_dir_vals_reshaped[ i , j ]
 			plt.figure( 8 , figsize = ( 8.0 , 5.0 ) )
-			c5 = plt.pcolormesh( height_mat , hl_mat , Jaccard_dir_mat , cmap = 'viridis' )
+			c5 = plt.pcolormesh( height_vals_reshaped , hl_vals_reshaped , Jaccard_dir_vals_reshaped , cmap = 'viridis' )
 			plt.colorbar( c5 )
 			plt.xlabel( 'Collapse height [m]' )
 			plt.ylabel( 'H/L' )
@@ -2374,36 +2282,8 @@ def plot_only_calibration( calibration_data , vertices_compare , N , comparison_
 	dist_vals_reshaped = dist_vals.reshape( int( np.sqrt( N ) ) , int( np.sqrt( N ) ) )
 	area_vals = calibration_data[ : , 8 ]
 	area_vals_reshaped = area_vals.reshape( int( np.sqrt( N ) ) , int( np.sqrt( N ) ) )
-	lenx = len( height_vals_reshaped[ : , 1 ] )
-	leny = len( height_vals_reshaped[ 1 , : ] )
-	height_mat = np.zeros( ( lenx + 1 , leny + 1 ) )
-	for i in range( lenx ):
-		height_mat[ i , 0 ] = height_vals_reshaped[ i , 0 ]
-		height_mat[ i , leny ] = height_vals_reshaped[ i , leny - 1 ]
-	for i in range( 0 , lenx ):
-		for j in range( 1 , leny ):
-			height_mat[ i , j ] = height_vals_reshaped[ i , j ] * 0.5 + height_vals_reshaped[ i , j - 1 ] * 0.5 
-	height_mat[ lenx , : ] = height_mat[ lenx - 1 , : ]
-	hl_mat = np.zeros( ( lenx + 1 , leny + 1 ) )
-	for j in range( leny ):
-		hl_mat[ 0 , j ] = hl_vals_reshaped[ 0 , j ]
-		hl_mat[ lenx , j ] = hl_vals_reshaped[ lenx - 1 , j ]
-	for i in range( 1 , lenx ):
-		for j in range( 0 , leny ):
-			hl_mat[ i , j ] = hl_vals_reshaped[ i , j ] * 0.5 + hl_vals_reshaped[ i - 1 , j - 1 ] * 0.5 
-	for j in range( lenx + 1 ):
-		hl_mat[ j , leny ] = - hl_mat[ j , leny - 2 ] + 2 * hl_mat[ j , leny - 1 ]
-	hl_mat[ : , leny ] = hl_mat[ : , leny - 1 ]
-	dist_mat = np.zeros( ( lenx + 1 , leny + 1 ) )
-	for i in range( lenx ):
-		for j in range( leny ):
-			dist_mat[ i , j ] = dist_vals_reshaped[ i , j ]
-	area_mat = np.zeros( ( lenx + 1 , leny + 1 ) )
-	for i in range( lenx ):
-		for j in range( leny ):
-			area_mat[ i , j ] = area_vals_reshaped[ i , j ]
 	plt.figure( 4 , figsize = ( 8.0 , 5.0 ) )
-	c4 = plt.pcolormesh( height_mat , hl_mat , dist_mat , cmap = 'viridis' )
+	c4 = plt.pcolormesh( height_vals_reshaped , hl_vals_reshaped , dist_vals_reshaped , cmap = 'viridis' )
 	plt.colorbar( c4 )
 	plt.xlabel( 'Collapse height [m]' )
 	plt.ylabel( 'H/L' )
@@ -2411,7 +2291,7 @@ def plot_only_calibration( calibration_data , vertices_compare , N , comparison_
 	plt.xlim( np.min( calibration_data[ : , 0 ] ) , np.max( calibration_data[ : , 0 ] ) )
 	plt.ylim( np.min( calibration_data[ : , 1 ] ) , np.max( calibration_data[ : , 1 ] ) )
 	plt.figure( 5 , figsize = ( 8.0 , 5.0 ) )
-	c7 = plt.pcolormesh( height_mat , hl_mat , area_mat , cmap = 'viridis' )
+	c7 = plt.pcolormesh( height_vals_reshaped , hl_vals_reshaped , area_vals_reshaped , cmap = 'viridis' )
 	plt.colorbar( c7 )
 	plt.xlabel( 'Collapse height [m]' )
 	plt.ylabel( 'H/L' )
@@ -2425,36 +2305,24 @@ def plot_only_calibration( calibration_data , vertices_compare , N , comparison_
 		MSD_vals_reshaped = MSD_vals.reshape( int( np.sqrt( N ) ) , int( np.sqrt( N ) ) )
 		HD_vals = calibration_data[ : , 4 ]
 		HD_vals_reshaped = HD_vals.reshape( int( np.sqrt( N ) ) , int( np.sqrt( N ) ) )
-		Jaccard_mat = np.zeros( ( lenx + 1 , leny + 1 ) )
-		for i in range( lenx ):
-			for j in range( leny ):
-				Jaccard_mat[ i , j ] = Jaccard_vals_reshaped[ i , j ]
 		plt.figure( 6 , figsize = ( 8.0 , 5.0 ) )
-		c1 = plt.pcolormesh( height_mat , hl_mat , Jaccard_mat , cmap = 'viridis' )
+		c1 = plt.pcolormesh( height_vals_reshaped , hl_vals_reshaped , Jaccard_vals_reshaped , cmap = 'viridis' )
 		plt.colorbar( c1 )
 		plt.xlabel( 'Collapse height [m]' )
 		plt.ylabel( 'H/L' )
 		plt.title( 'Jaccard Index' )
 		plt.xlim( np.min( calibration_data[ : , 0 ] ) , np.max( calibration_data[ : , 0 ] ) )
 		plt.ylim( np.min( calibration_data[ : , 1 ] ) , np.max( calibration_data[ : , 1 ] ) )
-		MSD_mat = np.zeros( ( lenx + 1 , leny + 1 ) )
-		for i in range( lenx ):
-			for j in range( leny ):
-				MSD_mat[ i , j ] = MSD_vals_reshaped[ i , j ]
 		plt.figure( 7 , figsize = ( 8.0 , 5.0 ) )
-		c2 = plt.pcolormesh( height_mat , hl_mat , MSD_mat , cmap = 'viridis_r' )
+		c2 = plt.pcolormesh( height_vals_reshaped , hl_vals_reshaped , MSD_vals_reshaped , cmap = 'viridis_r' )
 		plt.colorbar( c2 )
 		plt.xlabel( 'Collapse height [m]' )
 		plt.ylabel( 'H/L' )
 		plt.title( 'RMSD [m]' )
 		plt.xlim( np.min( calibration_data[ : , 0 ] ) , np.max( calibration_data[ : , 0 ] ) )
 		plt.ylim( np.min( calibration_data[ : , 1 ] ) , np.max( calibration_data[ : , 1 ] ) )
-		HD_mat = np.zeros( ( lenx + 1 , leny + 1 ) )
-		for i in range( lenx ):
-			for j in range( leny ):
-				HD_mat[ i , j ] = HD_vals_reshaped[ i , j ]
 		plt.figure( 8 , figsize = ( 8.0 , 5.0 ) )
-		c3 = plt.pcolormesh( height_mat , hl_mat , HD_mat , cmap = 'viridis_r' )
+		c3 = plt.pcolormesh( height_vals_reshaped , hl_vals_reshaped , HD_vals_reshaped , cmap = 'viridis_r' )
 		plt.colorbar( c3 )
 		plt.xlabel( 'Collapse height [m]' )
 		plt.ylabel( 'H/L' )
