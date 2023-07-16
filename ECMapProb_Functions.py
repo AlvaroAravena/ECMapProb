@@ -797,7 +797,7 @@ def create_vent_utm( vent_type , input_file_vent , east_cen , north_cen , var_ce
 
 	return [ east_cen_vector , north_cen_vector , N ]
 
-def read_comparison_polygon_deg( comparison_polygon , ang_cal , ang_cal_range , lon1 , lon2 , lat1 , lat2 , lon_cen , lat_cen , step_lat_m , step_lon_m , cells_lon , cells_lat , matrix_lon , matrix_lat , step_lon_deg , step_lat_deg , N ):
+def read_comparison_polygon_deg( comparison_polygon , input_file_cal , ang_cal , ang_cal_range , lon1 , lon2 , lat1 , lat2 , lon_cen , lat_cen , step_lat_m , step_lon_m , cells_lon , cells_lat , matrix_lon , matrix_lat , step_lon_deg , step_lat_deg , N ):
 
 	if( not comparison_polygon == '' ):
 		points = np.loadtxt( comparison_polygon )
@@ -807,7 +807,10 @@ def read_comparison_polygon_deg( comparison_polygon , ang_cal , ang_cal_range , 
 		img_compare = Image.new( 'L' , ( cells_lon , cells_lat ) , 0 )
 		draw = ImageDraw.Draw( img_compare ).polygon( polygon_compare , outline = 1 , fill = 1 )
 		matrix_compare = np.array( img_compare )
-		string_compare = np.zeros( ( N , 9 ) ) * np.nan
+		if( input_file_cal == '' ):
+			string_compare = np.zeros( ( N , 10 ) ) * np.nan
+		else:
+			string_compare = np.loadtxt( input_file_cal , skiprows = 1 )
 		line_compare = plt.contour( matrix_lon , matrix_lat , matrix_compare[ range( len( matrix_compare[ : , 0 ] ) -1 , -1 , -1 ) , : ], np.array( [ 0 ] ) , colors = 'r' , interpolation = 'linear' )
 		plt.close()
 		path_compare = line_compare.collections[ 0 ].get_paths()[ 0 ]
@@ -838,7 +841,10 @@ def read_comparison_polygon_deg( comparison_polygon , ang_cal , ang_cal_range , 
 	else:
 		vertices_compare = np.nan
 		matrix_compare = np.nan
-		string_compare = np.zeros( ( N , 9 ) ) * np.nan
+		if( input_file_cal == '' ):
+			string_compare = np.zeros( ( N , 10 ) ) * np.nan
+		else:
+			string_compare = np.loadtxt( input_file_cal , skiprows = 1 )
 	if( ang_cal_range < 360 and not np.isnan( ang_cal ) ):
 		wh_negative = np.where( ( matrix_lat - lat_cen ) <= 0 )
 		ang_direction = 180 * np.arctan( ( matrix_lon - lon_cen ) * ( step_lon_m / step_lon_deg ) / ( matrix_lat - lat_cen ) / ( step_lat_m / step_lat_deg ) ) / np.pi
@@ -869,7 +875,7 @@ def read_comparison_polygon_deg( comparison_polygon , ang_cal , ang_cal_range , 
 
 	return [ matrix_compare , vertices_compare , string_compare , data_direction ]
 
-def read_comparison_polygon_utm( comparison_polygon , ang_cal , ang_cal_range , east_cor , north_cor , east_cen , north_cen , cellsize , n_east , n_north , matrix_east , matrix_north , N ):
+def read_comparison_polygon_utm( comparison_polygon , input_file_cal , ang_cal , ang_cal_range , east_cor , north_cor , east_cen , north_cen , cellsize , n_east , n_north , matrix_east , matrix_north , N ):
 
 	if( not comparison_polygon == '' ):
 		points = np.loadtxt( comparison_polygon )
@@ -879,7 +885,10 @@ def read_comparison_polygon_utm( comparison_polygon , ang_cal , ang_cal_range , 
 		img_compare = Image.new( 'L' , ( n_east , n_north ) , 0 )
 		draw = ImageDraw.Draw( img_compare ).polygon( polygon_compare , outline = 1 , fill = 1 )
 		matrix_compare = np.array( img_compare )
-		string_compare = np.zeros( ( N , 9 ) ) * np.nan
+		if( input_file_cal == '' ):
+			string_compare = np.zeros( ( N , 10 ) ) * np.nan
+		else:
+			string_compare = np.loadtxt( input_file_cal , skiprows = 1 )
 		line_compare = plt.contour( matrix_east , matrix_north , matrix_compare[ range( len( matrix_compare[ : , 0 ] ) -1 , -1 , -1 ) , : ], np.array( [ 0 ] ) , colors = 'r' , interpolation = 'linear' )
 		plt.close()
 		path_compare = line_compare.collections[ 0 ].get_paths()[ 0 ]
@@ -906,7 +915,10 @@ def read_comparison_polygon_utm( comparison_polygon , ang_cal , ang_cal_range , 
 	else:
 		vertices_compare = np.nan
 		matrix_compare = np.nan
-		string_compare = np.zeros( ( N , 9 ) ) * np.nan
+		if( input_file_cal == '' ):
+			string_compare = np.zeros( ( N , 10 ) ) * np.nan
+		else:
+			string_compare = np.loadtxt( input_file_cal , skiprows = 1 )
 	if( ang_cal_range < 360 and not np.isnan( ang_cal ) ):
 		wh_negative = np.where( ( matrix_north - north_cen ) <= 0 )
 		ang_direction = 180 * np.arctan( ( matrix_east - east_cen ) / ( matrix_north - north_cen ) ) / np.pi
@@ -1008,7 +1020,13 @@ def compute_energy_cones_deg( type_sim , lon1 , lon2 , lat1 , lat2 , step_lon_de
 	vec_ang = np.arange( 0 , 360 , angstep )
 	vec_ang_res2 = np.arange( 0, 360, angstep_res2 )
 	vec_ang_res3 = np.arange( 0, 360, angstep_res3 )
+	skipped = 0
 	for i in range( 0 , N ):
+		if( type_sim == 2 ):
+			if( string_compare[ i , 9 ] == 0 ):
+				print( ' Simulation N = ' + str( i + 1 ) + ' skipped.' )
+				skipped = skipped + 1
+				continue
 		runout_min = -1
 		current_level = 0
 		data_step = np.zeros( ( cells_lat , cells_lon ) )
@@ -1246,7 +1264,7 @@ def compute_energy_cones_deg( type_sim , lon1 , lon2 , lat1 , lat2 , step_lon_de
 							height_eff = wh_sum[ lint ] + interpol_pos( lon1 , lat1 , step_lon_deg , step_lat_deg , new_x , new_y , cells_lon , cells_lat , Topography )
 							if( not np.isnan( interpol_pos( lon1 , lat1 , step_lon_deg , step_lat_deg , new_x , new_y , cells_lon , cells_lat , Topography ) ) ):
 								polygon.append( ( new_x , new_y , height_eff , polygon[ j ][ 3 ] + 1 , l , wh_sum[ lint ] ) )
-			sum_pixels = sum( sum( data_step ) )	
+			sum_pixels = sum( sum( data_step ) )
 			print( ( j , len( polygon ) , polygon[ j ][ 3 ] , polygon[ j ][ 2 ] , sum( sum( data_step ) ) , polygon[ j ][ 4 ] ) )
 			if( save_data == 1 or type_sim == 2 ):
 				if( j == 0 or ( j + 1 == len( polygon ) ) ):
@@ -1261,6 +1279,10 @@ def compute_energy_cones_deg( type_sim , lon1 , lon2 , lat1 , lat2 , step_lon_de
 					string_cones = string_cones + "\n" + str( j ) + " " + str( polygon[ j ][ 3 ] ) + " " + str( polygon[ j ][ 2 ] ) + " " + str( polygon[ j ][ 5 ] ) 
 		if( N > 1 ):
 			if( type_sim == 2 ):
+				limit = ( 0 < sum( data_step[ : , 0 ] ) + sum( data_step[ 0 , : ] ) + sum( data_step[ : , -1 ] ) + sum( data_step[ -1 , : ] ) )
+				out_of_limit = 0
+				if( limit ):
+					out_of_limit = 1
 				if( not comparison_polygon == '' ):
 					data_step_border = data_step[ range( len( data_step[ : , 0 ] ) -1 , -1 , -1 ) , : ]
 					data_step_border[ 0 , : ] = 0.0
@@ -1315,9 +1337,9 @@ def compute_energy_cones_deg( type_sim , lon1 , lon2 , lat1 , lat2 , step_lon_de
 						dist_dir2[ ic ] = np.sqrt( np.min( distance_lines ) )
 						sum_differences = sum_differences + ( np.min( distance_lines ) ) / ( len( vertices_compare ) + len( vertices_new ) )
 					plt.close()
-					string_compare[ i , : ] = [ height_vector[ i ] , hl_vector[ i ] , ( sum( sum( data_step * matrix_compare ) ) ) / ( sum( sum( np.maximum( data_step , matrix_compare ) ) ) ) , np.sqrt( sum_differences ) , max( max( dist_dir1[ : ] ) , max( dist_dir2[ : ] ) )[ 0 ] , distances.max() , ( sum( sum( data_step * matrix_compare * data_direction[ range( len( data_direction[ : , 0 ] ) -1 , -1 , -1 ) , : ] ) ) ) / ( sum( sum( np.maximum( data_step , matrix_compare ) * data_direction[ range( len( data_direction[ : , 0 ] ) -1 , -1 , -1 ) , : ] ) ) ) , ( distances * data_direction ).max() , sum( sum( data_step ) ) * area_pixel ]
+					string_compare[ i , : ] = [ height_vector[ i ] , hl_vector[ i ] , ( sum( sum( data_step * matrix_compare ) ) ) / ( sum( sum( np.maximum( data_step , matrix_compare ) ) ) ) , np.sqrt( sum_differences ) , max( max( dist_dir1[ : ] ) , max( dist_dir2[ : ] ) )[ 0 ] , distances.max() , ( sum( sum( data_step * matrix_compare * data_direction[ range( len( data_direction[ : , 0 ] ) -1 , -1 , -1 ) , : ] ) ) ) / ( sum( sum( np.maximum( data_step , matrix_compare ) * data_direction[ range( len( data_direction[ : , 0 ] ) -1 , -1 , -1 ) , : ] ) ) ) , ( distances * data_direction ).max() , sum( sum( data_step ) ) * area_pixel , out_of_limit ]
 				else:
-					string_compare[ i , : ] = [ height_vector[ i ] , hl_vector[ i ] , np.nan , np.nan , np.nan , distances.max() , np.nan , ( distances * data_direction ).max() , sum( sum( data_step ) ) * area_pixel ]
+					string_compare[ i , : ] = [ height_vector[ i ] , hl_vector[ i ] , np.nan , np.nan , np.nan , distances.max() , np.nan , ( distances * data_direction ).max() , sum( sum( data_step ) ) * area_pixel , out_of_limit ]
 			data_cones = data_cones + data_step
 		if( save_data == 1 or type_sim == 2 ):
 			distances = np.power( np.power( ( matrix_lon - lon_cen_vector[ i ] ) * ( step_lon_m / step_lon_deg ) , 2 ) + np.power( ( matrix_lat - lat_cen_vector[ i ] ) * ( step_lat_m / step_lat_deg ) , 2 ) , 0.5 ) 
@@ -1326,8 +1348,11 @@ def compute_energy_cones_deg( type_sim , lon1 , lon2 , lat1 , lat2 , step_lon_de
 			summary_data[ i , 5 ] = distances.max() / 1000.0
 			summary_data[ i , 6 ] = runout_min / 1000.0
 		print( ' Simulation finished (N = ' + str( i + 1 ) + ')' )
-
-	return [ summary_data , string_data , string_cones , string_compare , sim_data , data_cones , polygon ]
+	if( skipped < N ):
+		return [ summary_data , string_data , string_cones , string_compare , sim_data , data_cones , polygon ]
+	else:
+		print(' All the simulations were skipped' )
+		return [ np.nan , np.nan , np.nan , np.nan , np.nan , np.nan , np.nan ]
 
 def compute_energy_cones_utm( type_sim , n_north , n_east , east_cor , north_cor , east_cen_vector , north_cen_vector , matrix_north , matrix_east , height_vector , hl_vector , cellsize , Topography , angstep , angstep_res2 , angstep_res3 , distep , area_pixel , cone_levels , N , redist_energy , save_data , summary_data , string_data , string_cones , sim_data , anglen , pix_min , vector_backward_1 , vector_backward_2 , index_max , vector_correc , matrix_compare , vertices_compare , string_compare , data_direction , comparison_polygon ):
 
@@ -1337,7 +1362,13 @@ def compute_energy_cones_utm( type_sim , n_north , n_east , east_cor , north_cor
 	vec_ang = range( 0 , 360 , angstep )
 	vec_ang_res2 = np.arange( 0 , 360 , angstep_res2 )
 	vec_ang_res3 = np.arange( 0 , 360 , angstep_res3 )
+	skipped = 0
 	for i in range( 0 , N ):
+		if( type_sim == 2 ):
+			if( string_compare[ i , 9 ] == 0 ):
+				print( ' Simulation N = ' + str( i + 1 ) + ' skipped.' )
+				skipped = skipped + 1
+				continue
 		runout_min = -1
 		current_level = 0
 		data_step = np.zeros( ( n_north , n_east ) )
@@ -1589,6 +1620,10 @@ def compute_energy_cones_utm( type_sim , n_north , n_east , east_cor , north_cor
 					string_cones = string_cones + "\n" + str( j ) + " " + str( polygon[ j ][ 3 ] ) + " " + str( polygon[ j ][ 2 ] ) + " " + str( polygon[ j ][ 5 ] ) 
 		if( N > 1 ):
 			if( type_sim == 2 ):
+				limit = ( 0 < sum( data_step[ : , 0 ] ) + sum( data_step[ 0 , : ] ) + sum( data_step[ : , -1 ] ) + sum( data_step[ -1 , : ] ) )
+				out_of_limit = 0
+				if( limit ):
+					out_of_limit = 1
 				if( not comparison_polygon == '' ):
 					data_step_border = data_step[ range( len( data_step[ : , 0 ] ) -1 , -1 , -1 ) , : ]
 					data_step_border[ 0 , : ] = 0.0
@@ -1639,9 +1674,9 @@ def compute_energy_cones_utm( type_sim , n_north , n_east , east_cor , north_cor
 						dist_dir2[ ic ] = np.sqrt( np.min( distance_lines ) )
 						sum_differences = sum_differences + ( np.min( distance_lines ) ) / ( len( vertices_compare ) + len( vertices_new ) )
 					plt.close()
-					string_compare[ i , : ] = [ height_vector[ i ] , hl_vector[ i ] , ( sum( sum( data_step * matrix_compare ) ) ) / ( sum( sum( np.maximum( data_step , matrix_compare ) ) ) ) , np.sqrt( sum_differences ) , max( max( dist_dir1[ : ] ) , max( dist_dir2[ : ] ) )[ 0 ] , distances.max() , ( sum( sum( data_step * matrix_compare * data_direction[ range( len( data_direction[ : , 0 ] ) -1 , -1 , -1 ) , : ] ) ) ) / ( sum( sum( np.maximum( data_step , matrix_compare ) * data_direction[ range( len( data_direction[ : , 0 ] ) -1 , -1 , -1 ) , : ] ) ) ) , ( distances * data_direction ).max() , sum( sum( data_step ) ) * area_pixel ]
+					string_compare[ i , : ] = [ height_vector[ i ] , hl_vector[ i ] , ( sum( sum( data_step * matrix_compare ) ) ) / ( sum( sum( np.maximum( data_step , matrix_compare ) ) ) ) , np.sqrt( sum_differences ) , max( max( dist_dir1[ : ] ) , max( dist_dir2[ : ] ) )[ 0 ] , distances.max() , ( sum( sum( data_step * matrix_compare * data_direction[ range( len( data_direction[ : , 0 ] ) -1 , -1 , -1 ) , : ] ) ) ) / ( sum( sum( np.maximum( data_step , matrix_compare ) * data_direction[ range( len( data_direction[ : , 0 ] ) -1 , -1 , -1 ) , : ] ) ) ) , ( distances * data_direction ).max() , sum( sum( data_step ) ) * area_pixel , out_of_limit ]
 				else:
-					string_compare[ i , : ] = [ height_vector[ i ] , hl_vector[ i ] , np.nan , np.nan , np.nan , distances.max() , np.nan , ( distances * data_direction ).max() , sum( sum( data_step ) ) * area_pixel ]
+					string_compare[ i , : ] = [ height_vector[ i ] , hl_vector[ i ] , np.nan , np.nan , np.nan , distances.max() , np.nan , ( distances * data_direction ).max() , sum( sum( data_step ) ) * area_pixel , out_of_limit ]
 			data_cones = data_cones + data_step
 		if( save_data == 1 or type_sim == 2 ):
 			distances = np.power( np.power( ( matrix_east - east_cen_vector[ i ] ) , 2 ) + np.power( ( matrix_north - north_cen_vector[ i ] ) , 2 ) , 0.5 ) 
@@ -1651,7 +1686,11 @@ def compute_energy_cones_utm( type_sim , n_north , n_east , east_cor , north_cor
 			summary_data[ i , 6 ] = runout_min / 1000.0
 		print( ' Simulation finished (N = ' + str( i + 1 ) + ')' )
 
-	return [ summary_data , string_data , string_cones , string_compare , sim_data , data_cones , polygon ]
+	if( skipped < N ):
+		return [ summary_data , string_data , string_cones , string_compare , sim_data , data_cones , polygon ]
+	else:
+		print(' All the simulations were skipped' )
+		return [ np.nan , np.nan , np.nan , np.nan , np.nan , np.nan , np.nan ]
 
 def save_data_deg( run_name , source_dem , sea_flag , lon1 , lon2 , lat1 , lat2 , step_lon_m , step_lat_m , cells_lon , cells_lat , matrix_lon , matrix_lat , Topography , Topography_Sea , N , summary_data , string_data , string_cones , sim_data , data_cones , utm_save , save_type ):
 
@@ -1993,10 +2032,6 @@ def plot_utm( run_name , type_sim , polygon , matrix_east , matrix_north , east_
 			plt.xlim( np.min( calibration_data[ : , 0 ] ) , np.max( calibration_data[ : , 0 ] ) )
 			plt.ylim( np.min( calibration_data[ : , 1 ] ) , np.max( calibration_data[ : , 1 ] ) )
 			plt.savefig( 'Results/' + run_name + '/Calibration_Jaccard.png' )
-			MSD_mat = np.zeros( ( lenx + 1 , leny + 1 ) )
-			for i in range( lenx ):
-				for j in range( leny ):
-					MSD_mat[ i , j ] = MSD_vals_reshaped[ i , j ]
 			plt.figure( 6 , figsize = ( 8.0 , 5.0 ) )
 			c2 = plt.pcolormesh( height_vals_reshaped , hl_vals_reshaped , MSD_vals_reshaped , cmap = 'viridis_r' )
 			plt.colorbar( c2 )

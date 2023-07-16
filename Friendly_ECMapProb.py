@@ -729,9 +729,9 @@ class MainFrame:
 				path_calib = ""
 			self.type_sim = self.type_sim_choice
 			if( self.source_dem == 1 or self.source_dem == 3 ):
-				[ self.matrix_compare , self.vertices_compare , self.string_compare , self.data_direction ] = read_comparison_polygon_deg( path_calib , 0.0 , 360.0 , self.lon1 , self.lon2 , self.lat1 , self.lat2 , self.lon_cen , self.lat_cen , self.step_lat_m , self.step_lon_m , self.cells_lon , self.cells_lat , self.matrix_lon , self.matrix_lat , self.step_lon_deg , self.step_lat_deg , self.N )
+				[ self.matrix_compare , self.vertices_compare , self.string_compare , self.data_direction ] = read_comparison_polygon_deg( path_calib , '' , 0.0 , 360.0 , self.lon1 , self.lon2 , self.lat1 , self.lat2 , self.lon_cen , self.lat_cen , self.step_lat_m , self.step_lon_m , self.cells_lon , self.cells_lat , self.matrix_lon , self.matrix_lat , self.step_lon_deg , self.step_lat_deg , self.N )
 			else:
-				[ self.matrix_compare , self.vertices_compare , self.string_compare , self.data_direction ] = read_comparison_polygon_utm( path_calib , 0.0 , 360.0 , self.east_cor , self.north_cor , self.east_cen , self.north_cen , self.cellsize , self.n_east , self.n_north , self.matrix_east , self.matrix_north , self.N )
+				[ self.matrix_compare , self.vertices_compare , self.string_compare , self.data_direction ] = read_comparison_polygon_utm( path_calib , '' , 0.0 , 360.0 , self.east_cor , self.north_cor , self.east_cen , self.north_cen , self.cellsize , self.n_east , self.n_north , self.matrix_east , self.matrix_north , self.N )
 			self.sample_cal_availability = 1
 			self.enabled_disabled()
 			if( self.boolean_polygon == 1 ):

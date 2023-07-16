@@ -52,9 +52,9 @@ def main_program():
 	if( type_sim == 2 ):
 		print('Reading polygon for comparison')
 		if( source_dem == 1 or source_dem == 3 ):
-			[ matrix_compare , vertices_compare , string_compare , data_direction ] = read_comparison_polygon_deg( comparison_polygon , ang_cal , ang_cal_range , lon1 , lon2 , lat1 , lat2 , lon_cen , lat_cen , step_lat_m , step_lon_m , cells_lon , cells_lat , matrix_lon , matrix_lat , step_lon_deg , step_lat_deg , N )
+			[ matrix_compare , vertices_compare , string_compare , data_direction ] = read_comparison_polygon_deg( comparison_polygon , input_file_cal , ang_cal , ang_cal_range , lon1 , lon2 , lat1 , lat2 , lon_cen , lat_cen , step_lat_m , step_lon_m , cells_lon , cells_lat , matrix_lon , matrix_lat , step_lon_deg , step_lat_deg , N )
 		else:
-			[ matrix_compare , vertices_compare , string_compare , data_direction ] = read_comparison_polygon_utm( comparison_polygon , ang_cal , ang_cal_range , east_cor , north_cor , east_cen , north_cen , cellsize , n_east , n_north , matrix_east , matrix_north , N )
+			[ matrix_compare , vertices_compare , string_compare , data_direction ] = read_comparison_polygon_utm( comparison_polygon , input_file_cal , ang_cal , ang_cal_range , east_cor , north_cor , east_cen , north_cen , cellsize , n_east , n_north , matrix_east , matrix_north , N )
 	else:
 		[ matrix_compare , vertices_compare , string_compare , data_direction ] = [ np.nan , np.nan , np.nan , np.nan ]
 
@@ -74,7 +74,7 @@ def main_program():
 		[ summary_data , string_data , string_cones , string_compare , sim_data , data_cones , polygon ] = compute_energy_cones_utm( type_sim , n_north , n_east , east_cor , north_cor , east_cen_vector , north_cen_vector , matrix_north , matrix_east , height_vector , hl_vector , cellsize , Topography , angstep , angstep_res2 , angstep_res3 , distep , area_pixel , cone_levels , N , redist_energy , save_data , summary_data , string_data , string_cones , sim_data , anglen , pix_min , vector_backward_1 , vector_backward_2 , index_max , vector_correc , matrix_compare , vertices_compare , string_compare , data_direction , comparison_polygon )
 
 	# SAVE DATA
-	if( save_data == 1 ):
+	if( save_data == 1 and not np.isnan( data_cones ).any( ) ):
 		print('Saving data')
 		if( source_dem == 1 or source_dem == 3 ):
 			save_data_deg( run_name , source_dem , sea_flag , lon1 , lon2 , lat1 , lat2 , step_lon_m , step_lat_m , cells_lon , cells_lat , matrix_lon , matrix_lat , Topography , Topography_Sea , N , summary_data , string_data , string_cones , sim_data , data_cones , utm_save , 0 )
@@ -83,7 +83,7 @@ def main_program():
 		if( type_sim == 2 ):
 			calibration( run_name , string_compare , resolution_factor )
 
-	if( plot_flag == 1 ):
+	if( plot_flag == 1 and not np.isnan( data_cones ).any( ) ):
 		if( source_dem == 1 or source_dem == 3 ):
 			plot_deg( run_name , type_sim , Cities , polygon , lon1 , lon2 , lat1 , lat2 , step_lat_m , step_lon_m , matrix_lon , matrix_lat , lon_cen_vector , lat_cen_vector , height_vector , hl_vector , Topography , Topography_Sea , N , data_cones , matrix_compare , ang_cal_range , data_direction , string_compare , comparison_polygon )
 		else:
