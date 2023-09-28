@@ -1,8 +1,8 @@
 # Name of the run (used to save the parameters and the output).
-run_name = Vesuvius_B
+run_name = Chaiten_G
 
 # Type of simulation (1: Default mode: Construction of probability map. 2: Calibration mode).
-type_sim = 1
+type_sim = 2
 
 # Source of DEM.
 # source_dem = type of input data (1: SRTM 30 m. 2: Uploaded DEM (UTM). 3: Uploaded Data (lat, lon)).
@@ -16,16 +16,18 @@ source_dem = 1
 # comparison_type = when a comparison polygon is present, it allows to consider it as closed polygon (comparison_type = 1) or only a set of control points (comparison_type = 2).
 # ang_cal = angle from vent to circumference arch center that defines the PDC dispersion direction used to calibrate. If absent, all the transport directions are considered.
 # ang_cal_range = extent of the circumference arch that defines the PDC dispersion direction used to calibrate. If absent, all the transport directions are considered.
+comparison_polygon = ./EXAMPLES/Normal_Version/Chaiten_G/Chaiten_ControlPoints.txt
+comparison_type = 2
 
 # Map limits (only considered if source_dem = 1).
 # lon1 = longitude of the first limit of the map.
 # lon2 = longitude of the second limit of the map.
 # lat1 = latitude of the first limit of the map.
 # lat2 = latitude of the second limit of the map.
-lon1 = 14.2
-lon2 = 14.7
-lat1 = 40.6
-lat2 = 41.0
+lon1 = -72.8
+lon2 = -72.5
+lat1 = -42.95
+lat2 = -42.75
 
 # Parameters of the collapse position.
 # vent_type = type of distribution of collapse position (1: Pointwise. 2: Linear. 3: Circumference arch. 4: Input file. Only considered if type_sim = 1, otherwise vent_type = 1).
@@ -41,11 +43,8 @@ lat2 = 41.0
 # var_cen = uncertainty of collapse position (in meters. Only considered if type_sim = 1 and vent_type = 1, 2 or 3).
 # dist_input_cen = type of distribution for collapse position variability (1: Gaussian. 2: Uniform. Only considered if type_sim = 1 and vent_type = 1, 2 or 3).
 # input_file_vent = name of the file with the set of values for vent positions (only considered if vent_type = 4).
-vent_type = 1
-lon_cen = 14.427
-lat_cen = 40.822
-var_cen = 500.0
-dist_input_cen = 2
+lon_cen = -72.650
+lat_cen = -42.835
 
 # Other parameters of energy cones
 # type_input = type of distribution for height and H/L (1: Prescribed distribution. 2: Input file with values of height and hl. 3: Calibration-based sampling. Only considered if type_sim = 1, otherwise type_input = 1).
@@ -73,13 +72,10 @@ dist_input_cen = 2
 # area_calibration_k = k in gamma area distribution used for area-based calibration (only considered if type_sim = 1, type_input = 3, calibration_type = 7, and dist_area_calibration = 3).
 # area_calibration_theta = theta in gamma area distribution used for area-based calibration (only considered if type_sim = 1, type_input = 3, calibration_type = 7, and dist_area_calibration = 3).
 # file_cumulative_area = name of the file with the cumulative distribution of runout distance or inundation area used in the calibration (only considered if type_sim = 1, type_input = 3, calibration_type = 7, and dist_area_calibration = 5).
-type_input = 1
-dist_input_height = 4
-height = 300.0
-var_height = 300.0
-dist_input_hl = 4
-hl = 0.40
-var_hl = 0.10
+height = 500.0
+var_height = 500.0
+hl = 0.50
+var_hl = 0.30
 
 # Maximum order of energy cones.
 cone_levels = 100

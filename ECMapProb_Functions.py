@@ -4,7 +4,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from math import sin , cos , sqrt , atan2 , radians , log , factorial , tan
 from scipy import interpolate
-from scipy.stats import norm, uniform , gamma , lognorm
+from scipy.stats import norm , uniform , gamma , lognorm
 from scipy.ndimage import gaussian_filter
 import sys
 import os
@@ -13,7 +13,12 @@ import shutil
 import utm
 import warnings
 import matplotlib.tri as tri
-warnings.filterwarnings("ignore")
+warnings.filterwarnings( "ignore" )
+from scipy import sparse
+import cv2 as cv
+from shapely import geometry
+import alphashape
+import gc
 
 # Auxiliary functions
 
@@ -28,7 +33,7 @@ def read_input():
 	line = file_txt.readlines()
 	file_txt.close()
 	[ run_name , type_sim , source_dem , topography_file , comparison_polygon , ang_cal , ang_cal_range ] = [ '' , np.nan , np.nan , '' , '' , np.nan , np.nan ] 
-	[ lon1 , lon2 , lat1 , lat2 ] = [ np.nan , np.nan , np.nan , np.nan ]
+	[ comparison_type , lon1 , lon2 , lat1 , lat2 ] = [ np.nan , np.nan , np.nan , np.nan , np.nan ]
 	[ vent_type , lon_cen , lat_cen , east_cen , north_cen , azimuth_lin , length_lin ] = [ np.nan , np.nan , np.nan , np.nan , np.nan , np.nan , np.nan ]
 	[ radius_rad , ang1_rad , ang2_rad , var_cen , dist_input_cen , input_file_vent ] = [ np.nan , np.nan , np.nan , np.nan , np.nan , '' ]
 	[ type_input , dist_input_height , height , var_height , height_k , height_theta ] = [ np.nan , np.nan , np.nan , np.nan , np.nan , np.nan ]
@@ -55,6 +60,8 @@ def read_input():
 				if( aux[ 0 ] == 'comparison_polygon' ):
 					comparison_polygon = aux[ 1 ]
 					comparison_polygon = comparison_polygon.replace( "'" , "" )
+				if( aux[ 0 ] == 'comparison_type' ):
+					comparison_type = int( aux[ 1 ] )
 				if( aux[ 0 ] == 'ang_cal' ):
 					ang_cal = float( aux[ 1 ] ) % 360.0
 				if( aux[ 0 ] == 'ang_cal_range' ):
@@ -203,7 +210,7 @@ def read_input():
 				print( 'Problems with input parameters. Variable input_file_cal must be defined.' )
 				sys.exit( 0 )
 			if( type_input == 3 ):
-				if( not calibration_type in [ 1 , 2 , 3 , 4 , 5 , 6 , 7 ] ):
+				if( not calibration_type in [ 1 , 2 , 3 , 4 , 5 , 6 , 7 , 8 ] ):
 					print( 'Problems with input parameters. Variable calibration_type must be defined properly.' )
 					sys.exit( 0 )
 				if( calibration_type in [ 5 , 6 ] ):
@@ -242,6 +249,10 @@ def read_input():
 		if( np.isnan( ang_cal ) or np.isnan( ang_cal_range ) ):
 			ang_cal = 0.0
 			ang_cal_range = 360.0
+		if( not comparison_polygon == '' ):
+			if( not comparison_type in [ 1 , 2 ] ):
+				print( 'Problems with input parameters. Variable comparison_type must be defined correctly.' )
+				sys.exit( 0 )
 		if( var_height == 0.0 or var_hl == 0.0 ):
 			print( 'Problems with input parameters. Variabilities of height and H/L (var_height, var_hl) must be higher than zero.' )
 			sys.exit( 0 )
@@ -284,7 +295,7 @@ def read_input():
 		pass
 	shutil.copyfile( 'input_data.py' , 'Results/' + run_name + '/input_data.py' )
 
-	return [ current_path , run_name , type_sim , source_dem , topography_file , comparison_polygon , ang_cal , ang_cal_range , lon1 , lon2 , lat1 , lat2 , vent_type , lon_cen , lat_cen , east_cen , north_cen , azimuth_lin , length_lin , radius_rad , ang1_rad , ang2_rad , var_cen , dist_input_cen , input_file_vent , type_input , dist_input_height , height , var_height , height_k , height_theta , dist_input_hl , hl , var_hl , hl_k , hl_theta , input_file_cal , calibration_type , dist_distance_calibration , distance_calibration , var_distance_calibration , distance_calibration_k , distance_calibration_theta , file_cumulative_distance , dist_area_calibration , area_calibration , var_area_calibration , area_calibration_k , area_calibration_theta , file_cumulative_area , cone_levels , N , save_data , redist_energy , plot_flag , sea_flag ]
+	return [ current_path , run_name , type_sim , source_dem , topography_file , comparison_polygon , comparison_type , ang_cal , ang_cal_range , lon1 , lon2 , lat1 , lat2 , vent_type , lon_cen , lat_cen , east_cen , north_cen , azimuth_lin , length_lin , radius_rad , ang1_rad , ang2_rad , var_cen , dist_input_cen , input_file_vent , type_input , dist_input_height , height , var_height , height_k , height_theta , dist_input_hl , hl , var_hl , hl_k , hl_theta , input_file_cal , calibration_type , dist_distance_calibration , distance_calibration , var_distance_calibration , distance_calibration_k , distance_calibration_theta , file_cumulative_distance , dist_area_calibration , area_calibration , var_area_calibration , area_calibration_k , area_calibration_theta , file_cumulative_area , cone_levels , N , save_data , redist_energy , plot_flag , sea_flag ]
 
 def import_map( current_path , run_name , lon1 , lon2 , lat1 , lat2 ):
 
@@ -356,7 +367,7 @@ def read_map_utm( current_path , topography_file ):
 	Topography = np.zeros( ( n_north , n_east ) )
 	for i in range( indexini , indexini + n_north ):
 		aux = line[ i ].split()
-		for j in range( 0, n_east ):
+		for j in range( 0 , n_east ):
 			Topography[ i - indexini , j ] = float( aux[ j ] )
 	if( not np.isnan( nodata_value ) ):
 		aux = np.where( Topography == nodata_value )
@@ -492,8 +503,14 @@ def create_inputs( type_sim , type_input , dist_input_height , dist_input_hl , i
 		[ Xi , Yi ] = np.meshgrid( xi , yi )
 		Xi_reshaped = np.reshape( Xi , ( number_steps_dense * number_steps_dense , 1 ) )
 		Yi_reshaped = np.reshape( Yi , ( number_steps_dense * number_steps_dense , 1 ) )
-		if( calibration_type in [ 1 , 2 , 3 , 4 ] ):
-			if( np.isnan( file_data[ : , 2 ] ).any() ):
+		if( calibration_type in [ 1 , 2 , 3 , 4 , 8 ] ):
+			if( calibration_type in [ 1 , 2 , 3 , 4 ] and np.isnan( file_data[ : , 2 ] ).any() ):
+				print( 'Calibration data is only associated with distance- and area-based calibrations.' )
+				if( bol_friendly == 0 ):
+					sys.exit( 0 )
+				else:
+					return [ np.zeros( ( 0 ) ) , np.zeros( ( 0 ) ) , N , variable_vector , limits_calib , Probability_Save ]
+			if( calibration_type in [ 8 ] and np.isnan( file_data[ : , 9 ] ).any() ):
 				print( 'Calibration data is only associated with distance- and area-based calibrations.' )
 				if( bol_friendly == 0 ):
 					sys.exit( 0 )
@@ -517,6 +534,11 @@ def create_inputs( type_sim , type_input , dist_input_height , dist_input_hl , i
 				z = np.reshape( file_data[ : , 6 ] , ( number_steps , number_steps ) )
 				interpolator = interpolate.interp2d( xi_sim , yi_sim , z , kind = 'cubic' )
 				zi_reshaped = np.reshape( interpolator( xi , yi ) , ( number_steps_dense * number_steps_dense , 1 ) )
+			elif( calibration_type == 8 ):
+				z = np.reshape( file_data[ : , 9 ] , ( number_steps , number_steps ) )
+				interpolator = interpolate.interp2d( xi_sim , yi_sim , z , kind = 'cubic' )
+				zi_reshaped = np.reshape( interpolator( xi , yi ) , ( number_steps_dense * number_steps_dense , 1 ) )
+				zi_reshaped = 1.0 / ( zi_reshaped + resolution )
 			Probability_Save = gaussian_filter( np.reshape( zi_reshaped * zi_reshaped / sum( zi_reshaped * zi_reshaped ) , ( number_steps_dense , number_steps_dense ) ) , 5 )
 			Probability = np.cumsum( np.reshape( Probability_Save , ( number_steps_dense * number_steps_dense , 1 ) ) / np.sum( np.reshape( Probability_Save , ( number_steps_dense * number_steps_dense , 1 ) ) ) )
 			sampling = np.random.uniform( 0.0 , 1.0 , N )
@@ -610,7 +632,7 @@ def create_inputs( type_sim , type_input , dist_input_height , dist_input_hl , i
 					vector_p = np.arange( mincum + ( maxcum - mincum ) / ( 2 * number_steps_var ) , maxcum , ( maxcum - mincum ) / ( number_steps_var ) )
 					variable_vector_used = gamma.ppf( vector_p , area_calibration_k , 0 , area_calibration_theta )
 					variable_vector[ : , 0 ] = np.linspace( np.minimum( 0.0 , np.min( variable_vector_used ) ) , np.max( variable_vector_used ) , number_steps_var_plot )
-					variable_vector[ : , 1 ]= gamma.pdf( variable_vector[ : , 0 ] , area_calibration_k , 0 , area_calibration_theta )
+					variable_vector[ : , 1 ] = gamma.pdf( variable_vector[ : , 0 ] , area_calibration_k , 0 , area_calibration_theta )
 				elif( dist_area_calibration == 4 ):
 					parameter_sigma = np.sqrt( np.log( var_area_calibration * var_area_calibration / area_calibration / area_calibration + 1.0 ) )
 					parameter_mu = np.log( area_calibration * area_calibration / np.sqrt( area_calibration * area_calibration + var_area_calibration * var_area_calibration ) )
@@ -797,9 +819,9 @@ def create_vent_utm( vent_type , input_file_vent , east_cen , north_cen , var_ce
 
 	return [ east_cen_vector , north_cen_vector , N ]
 
-def read_comparison_polygon_deg( comparison_polygon , input_file_cal , ang_cal , ang_cal_range , lon1 , lon2 , lat1 , lat2 , lon_cen , lat_cen , step_lat_m , step_lon_m , cells_lon , cells_lat , matrix_lon , matrix_lat , step_lon_deg , step_lat_deg , N ):
+def read_comparison_polygon_deg( comparison_polygon , comparison_type , input_file_cal , ang_cal , ang_cal_range , lon1 , lon2 , lat1 , lat2 , lon_cen , lat_cen , step_lat_m , step_lon_m , cells_lon , cells_lat , matrix_lon , matrix_lat , step_lon_deg , step_lat_deg , N ):
 
-	if( not comparison_polygon == '' ):
+	if( not comparison_polygon == '' and comparison_type == 1 ):
 		points = np.loadtxt( comparison_polygon )
 		polygon_compare = []
 		for i in range( 0 , len( points ) ):
@@ -807,11 +829,15 @@ def read_comparison_polygon_deg( comparison_polygon , input_file_cal , ang_cal ,
 		img_compare = Image.new( 'L' , ( cells_lon , cells_lat ) , 0 )
 		draw = ImageDraw.Draw( img_compare ).polygon( polygon_compare , outline = 1 , fill = 1 )
 		matrix_compare = np.array( img_compare )
+		img = matrix_compare[ range( len( matrix_compare[ : , 0 ] ) -1 , -1 , -1 ) , : ].astype( np.uint8 )
+		contours = cv.findContours( img , cv.RETR_EXTERNAL , cv.CHAIN_APPROX_SIMPLE )
+		contours = np.vstack( contours[ 0 ] ).squeeze()
+		polygon_compare = geometry.Polygon( contours )
 		if( input_file_cal == '' ):
-			string_compare = np.zeros( ( N , 10 ) ) * np.nan
+			string_compare = np.zeros( ( N , 11 ) ) * np.nan
 		else:
 			string_compare = np.loadtxt( input_file_cal , skiprows = 1 )
-		line_compare = plt.contour( matrix_lon , matrix_lat , matrix_compare[ range( len( matrix_compare[ : , 0 ] ) -1 , -1 , -1 ) , : ], np.array( [ 0 ] ) , colors = 'r' , interpolation = 'linear' )
+		line_compare = plt.contour( matrix_lon , matrix_lat , matrix_compare[ range( len( matrix_compare[ : , 0 ] ) -1 , -1 , -1 ) , : ] , np.array( [ 0 ] ) , colors = 'r' , interpolation = 'linear' )
 		plt.close()
 		path_compare = line_compare.collections[ 0 ].get_paths()[ 0 ]
 		ver_compare = path_compare.vertices
@@ -838,11 +864,20 @@ def read_comparison_polygon_deg( comparison_polygon , input_file_cal , ang_cal ,
 					vertices_compare[ i , 0 ] = ver_compare[ j + 1 ][ 0 ] * ( 1 - factor ) + ver_compare[ j ][ 0 ] * ( factor )
 					vertices_compare[ i , 1 ] = ver_compare[ j + 1 ][ 1 ] * ( 1 - factor ) + ver_compare[ j ][ 1 ] * ( factor )
 					break
+	elif( not comparison_polygon == '' ):
+		vertices_compare = np.loadtxt( comparison_polygon )
+		matrix_compare = np.nan
+		polygon_compare = np.nan
+		if( input_file_cal == '' ):
+			string_compare = np.zeros( ( N , 11 ) ) * np.nan
+		else:
+			string_compare = np.loadtxt( input_file_cal , skiprows = 1 )
 	else:
 		vertices_compare = np.nan
 		matrix_compare = np.nan
+		polygon_compare = np.nan
 		if( input_file_cal == '' ):
-			string_compare = np.zeros( ( N , 10 ) ) * np.nan
+			string_compare = np.zeros( ( N , 11 ) ) * np.nan
 		else:
 			string_compare = np.loadtxt( input_file_cal , skiprows = 1 )
 	if( ang_cal_range < 360 and not np.isnan( ang_cal ) ):
@@ -872,12 +907,16 @@ def read_comparison_polygon_deg( comparison_polygon , input_file_cal , ang_cal ,
 			data_direction = matrix_aux_1 * matrix_aux_2
 	else:
 		data_direction = np.ones( ( cells_lat , cells_lon ) )
+	img = data_direction.astype( np.uint8 )
+	contours = cv.findContours( img , cv.RETR_EXTERNAL , cv.CHAIN_APPROX_SIMPLE )
+	contours = np.vstack( contours[ 0 ] ).squeeze()
+	data_direction = geometry.Polygon( contours )
 
-	return [ matrix_compare , vertices_compare , string_compare , data_direction ]
+	return [ matrix_compare , vertices_compare , polygon_compare , string_compare , data_direction ]
 
-def read_comparison_polygon_utm( comparison_polygon , input_file_cal , ang_cal , ang_cal_range , east_cor , north_cor , east_cen , north_cen , cellsize , n_east , n_north , matrix_east , matrix_north , N ):
+def read_comparison_polygon_utm( comparison_polygon , comparison_type , input_file_cal , ang_cal , ang_cal_range , east_cor , north_cor , east_cen , north_cen , cellsize , n_east , n_north , matrix_east , matrix_north , N ):
 
-	if( not comparison_polygon == '' ):
+	if( not comparison_polygon == '' and comparison_type == 1 ):
 		points = np.loadtxt( comparison_polygon )
 		polygon_compare = []
 		for i in range( 0 , len( points ) ):
@@ -885,11 +924,15 @@ def read_comparison_polygon_utm( comparison_polygon , input_file_cal , ang_cal ,
 		img_compare = Image.new( 'L' , ( n_east , n_north ) , 0 )
 		draw = ImageDraw.Draw( img_compare ).polygon( polygon_compare , outline = 1 , fill = 1 )
 		matrix_compare = np.array( img_compare )
+		img = matrix_compare[ range( len( matrix_compare[ : , 0 ] ) -1 , -1 , -1 ) , : ].astype( np.uint8 )
+		contours = cv.findContours( img , cv.RETR_EXTERNAL , cv.CHAIN_APPROX_SIMPLE )
+		contours = np.vstack( contours[ 0 ] ).squeeze()
+		polygon_compare = geometry.Polygon( contours )
 		if( input_file_cal == '' ):
-			string_compare = np.zeros( ( N , 10 ) ) * np.nan
+			string_compare = np.zeros( ( N , 11 ) ) * np.nan
 		else:
 			string_compare = np.loadtxt( input_file_cal , skiprows = 1 )
-		line_compare = plt.contour( matrix_east , matrix_north , matrix_compare[ range( len( matrix_compare[ : , 0 ] ) -1 , -1 , -1 ) , : ], np.array( [ 0 ] ) , colors = 'r' , interpolation = 'linear' )
+		line_compare = plt.contour( matrix_east , matrix_north , matrix_compare[ range( len( matrix_compare[ : , 0 ] ) -1 , -1 , -1 ) , : ] , np.array( [ 0 ] ) , colors = 'r' , interpolation = 'linear' )
 		plt.close()
 		path_compare = line_compare.collections[ 0 ].get_paths()[ 0 ]
 		ver_compare = path_compare.vertices
@@ -912,11 +955,20 @@ def read_comparison_polygon_utm( comparison_polygon , input_file_cal , ang_cal ,
 					vertices_compare[ i , 0 ] = ver_compare[ j + 1 ][ 0 ] * ( 1 - factor ) + ver_compare[ j ][ 0 ] * ( factor )
 					vertices_compare[ i , 1 ] = ver_compare[ j + 1 ][ 1 ] * ( 1 - factor ) + ver_compare[ j ][ 1 ] * ( factor )
 					break
+	elif( not comparison_polygon == '' ):
+		vertices_compare = np.loadtxt( comparison_polygon )
+		matrix_compare = np.nan
+		polygon_compare = np.nan
+		if( input_file_cal == '' ):
+			string_compare = np.zeros( ( N , 11 ) ) * np.nan
+		else:
+			string_compare = np.loadtxt( input_file_cal , skiprows = 1 )
 	else:
 		vertices_compare = np.nan
 		matrix_compare = np.nan
+		polygon_compare = np.nan
 		if( input_file_cal == '' ):
-			string_compare = np.zeros( ( N , 10 ) ) * np.nan
+			string_compare = np.zeros( ( N , 11 ) ) * np.nan
 		else:
 			string_compare = np.loadtxt( input_file_cal , skiprows = 1 )
 	if( ang_cal_range < 360 and not np.isnan( ang_cal ) ):
@@ -946,8 +998,12 @@ def read_comparison_polygon_utm( comparison_polygon , input_file_cal , ang_cal ,
 			data_direction = matrix_aux_1 * matrix_aux_2
 	else:
 		data_direction = np.ones( ( n_north , n_east ) )
+	img = data_direction.astype( np.uint8 )
+	contours = cv.findContours( img , cv.RETR_EXTERNAL , cv.CHAIN_APPROX_SIMPLE )
+	contours = np.vstack( contours[ 0 ] ).squeeze()
+	data_direction = geometry.Polygon( contours )
 
-	return [ matrix_compare , vertices_compare , string_compare , data_direction ]
+	return [ matrix_compare , vertices_compare , polygon_compare , string_compare , data_direction ]
 
 def initial_definitions( redist_energy ):
 
@@ -962,7 +1018,7 @@ def initial_definitions( redist_energy ):
 	if( redist_energy == 3 or redist_energy == 4 ):
 		factor_mult = 50.0
 		center_elim = 0.5
-		aux_backward = 1 / ( 1 + np.exp( factor_mult * ( np.linspace( 0.0, 1.0, int( anglen / 2 ) + 1 ) - center_elim ) ) )
+		aux_backward = 1 / ( 1 + np.exp( factor_mult * ( np.linspace( 0.0 , 1.0 , int( anglen / 2 ) + 1 ) - center_elim ) ) )
 		vector_backward_1 = np.zeros( int( anglen ) )
 		vector_backward_1[ 0 : int( anglen / 2 - 1 ) ] = aux_backward[ int( anglen / 2 - 1 ) : 0 : -1 ]
 		vector_backward_1[ int( anglen / 2 - 1 ) : ] = aux_backward[ : ]
@@ -1012,24 +1068,23 @@ def definitions_save_data_utm( source_dem , height_vector , hl_vector , east_cen
 
 	return [ summary_data , area_pixel , sim_data , string_data , string_cones ]
 
-def compute_energy_cones_deg( type_sim , lon1 , lon2 , lat1 , lat2 , step_lon_deg , step_lat_deg , step_lon_m , step_lat_m , lon_cen_vector , lat_cen_vector , matrix_lon , matrix_lat , height_vector , hl_vector , cells_lon , cells_lat , Topography , angstep , angstep_res2 , angstep_res3 , distep , area_pixel , cone_levels , N , redist_energy , save_data , summary_data , string_data , string_cones , sim_data , anglen , pix_min , vector_backward_1 , vector_backward_2 , index_max , vector_correc , matrix_compare , vertices_compare , string_compare , data_direction , comparison_polygon ):
+def compute_energy_cones_deg( type_sim , lon1 , lon2 , lat1 , lat2 , step_lon_deg , step_lat_deg , step_lon_m , step_lat_m , lon_cen_vector , lat_cen_vector , matrix_lon , matrix_lat , height_vector , hl_vector , cells_lon , cells_lat , Topography , angstep , angstep_res2 , angstep_res3 , distep , area_pixel , cone_levels , N , redist_energy , save_data , summary_data , string_data , string_cones , sim_data , anglen , pix_min , vector_backward_1 , vector_backward_2 , index_max , vector_correc , matrix_compare , vertices_compare , polygon_compare , string_compare , data_direction , comparison_polygon , comparison_type ):
 
-	data_cones = np.zeros( ( cells_lat , cells_lon ) )
-	data_aux_t = np.ones( ( cells_lat , cells_lon ) )
-	data_aux_b = np.zeros( ( cells_lat , cells_lon ) )
+	data_cones = np.zeros( ( cells_lat , cells_lon ) , dtype = int )
 	vec_ang = np.arange( 0 , 360 , angstep )
-	vec_ang_res2 = np.arange( 0, 360, angstep_res2 )
-	vec_ang_res3 = np.arange( 0, 360, angstep_res3 )
+	vec_ang_res2 = np.arange( 0 , 360 , angstep_res2 )
+	vec_ang_res3 = np.arange( 0 , 360 , angstep_res3 )
 	skipped = 0
 	for i in range( 0 , N ):
 		if( type_sim == 2 ):
-			if( string_compare[ i , 9 ] == 0 ):
+			if( string_compare[ i , 10 ] == 0 ):
 				print( ' Simulation N = ' + str( i + 1 ) + ' skipped.' )
 				skipped = skipped + 1
 				continue
+		gc.collect()
 		runout_min = -1
 		current_level = 0
-		data_step = np.zeros( ( cells_lat , cells_lon ) )
+		data_step = np.zeros( ( cells_lat , cells_lon ) , dtype = int )
 		polygon = []
 		height_eff = height_vector[ i ] + interpol_pos( lon1 , lat1 , step_lon_deg , step_lat_deg , lon_cen_vector[ i ] , lat_cen_vector[ i ] , cells_lon , cells_lat , Topography )
 		polygon.append( ( lon_cen_vector[ i ] , lat_cen_vector[ i ] , height_eff , 1.0 , -1 , height_vector[ i ] ) )
@@ -1095,7 +1150,7 @@ def compute_energy_cones_deg( type_sim , lon1 , lon2 , lat1 , lat2 , step_lon_de
 					draw = ImageDraw.Draw( img ).polygon( polygon_xy_res2 , outline = 1 , fill = 1 )
 				else:
 					draw = ImageDraw.Draw( img ).polygon( polygon_xy_res3 , outline = 1 , fill = 1 )
-				data_step = np.maximum( np.minimum( data_aux_t , data_step + np.array( img ) ) , data_aux_b )
+				data_step = np.maximum( np.minimum( 1 , data_step + np.array( img , dtype = int ) ) , 0 )
 			if( cone_levels > polygon[ j ][ 3 ] and sum( sum( data_step ) ) > sum_pixels + pix_min ):
 				aux = np.zeros( len( polygons_new ) + 2 ) 
 				aux[ 1 : len( polygons_new ) + 1 ] = np.array( polygons_new )
@@ -1148,11 +1203,11 @@ def compute_energy_cones_deg( type_sim , lon1 , lon2 , lat1 , lat2 , step_lon_de
 					if( np.min( wh_grouped[ 0 ] ) == 0 and np.max( wh_grouped[ len( wh_grouped ) - 1 ] ) == anglen - 1 ):
 						if( len( np.intersect1d( wh_grouped[ 0 ] , wh5 ) ) > 0 and len( np.intersect1d( wh_grouped[ len( wh_grouped ) - 1 ] , wh6 ) ) > 0 ):
 							grouped_filter[ len( wh_grouped ) - 1 ] = 1
-						aux_grouped = np.concatenate( ( wh_grouped[ len( wh_grouped ) - 1 ], wh_grouped[ 0 ] + len( polygons_new ) ) )
+						aux_grouped = np.concatenate( ( wh_grouped[ len( wh_grouped ) - 1 ] , wh_grouped[ 0 ] + len( polygons_new ) ) )
 						aux_filter = grouped_filter[ len( wh_grouped ) - 1 ] + grouped_filter[ 0 ]
 						wh_grouped = wh_grouped[ 1 : -1 ]
 						wh_grouped.append( aux_grouped )
-						grouped_filter = np.append( grouped_filter[ 1 : -1 ], aux_filter )
+						grouped_filter = np.append( grouped_filter[ 1 : -1 ] , aux_filter )
 					wh_min = []
 					for k in range( len( grouped_filter ) ):
 						if( grouped_filter[ k ] > 0 ):
@@ -1267,16 +1322,19 @@ def compute_energy_cones_deg( type_sim , lon1 , lon2 , lat1 , lat2 , step_lon_de
 			sum_pixels = sum( sum( data_step ) )
 			print( ( j , len( polygon ) , polygon[ j ][ 3 ] , polygon[ j ][ 2 ] , sum( sum( data_step ) ) , polygon[ j ][ 4 ] ) )
 			if( save_data == 1 or type_sim == 2 ):
-				if( j == 0 or ( j + 1 == len( polygon ) ) ):
-					distances = np.power( np.power( ( matrix_lon - lon_cen_vector[ i ] ) * ( step_lon_m / step_lon_deg ) , 2 ) + np.power( ( matrix_lat - lat_cen_vector[ i ] ) * ( step_lat_m / step_lat_deg ) , 2 ) , 0.5 ) 
-					distances = distances * data_step[ range( len( data_cones[ : , 0 ] ) -1 , -1 , -1 ) , : ]
-					string_data = string_data + "\n" + str( polygon[ j ][ 3 ] ) + " " + str( sum( sum( data_step ) ) * area_pixel ) + " " + str( distances.max() / 1000.0 ) + " " + str( distances.min() / 1000.0 )
-				elif( polygon[ j ][ 3 ] < polygon[ j + 1 ][ 3 ] ):
-					distances = np.power( np.power( ( matrix_lon - lon_cen_vector[ i ] ) * ( step_lon_m / step_lon_deg ) , 2 ) + np.power( ( matrix_lat - lat_cen_vector[ i ] ) * ( step_lat_m / step_lat_deg ) , 2 ) , 0.5 ) 
-					distances = distances * data_step[ range( len( data_cones[ : , 0 ] ) -1 , -1 , -1 ) , : ]
-					string_data = string_data + "\n" + str( polygon[ j ] [ 3 ] ) + " " + str( sum( sum( data_step ) ) * area_pixel ) + " " + str( distances.max() / 1000.0 ) + " " + str( distances.min() / 1000.0 )
+				if( ( j == 0 or ( j + 1 == len( polygon ) ) ) or ( polygon[ j ][ 3 ] < polygon[ j + 1 ][ 3 ] ) ):
+					img = data_step[ range( len( data_cones[ : , 0 ] ) -1 , -1 , -1 ) , : ].astype( np.uint8 )
+					contours = cv.findContours( img , cv.RETR_EXTERNAL , cv.CHAIN_APPROX_SIMPLE )
+					contours = np.vstack( contours[ 0 ] ).squeeze()
+					data_inundation = geometry.Polygon( contours )
+					data_inundation = data_inundation.buffer( 0 )
+					contours = contours.transpose()
+					points_lon = matrix_lon[ contours[ 1 ] , contours[ 0 ] ]
+					points_lat = matrix_lat[ contours[ 1 ] , contours[ 0 ] ]
+					distances = np.power( np.power( ( points_lon - lon_cen_vector[ i ] ) * ( step_lon_m / step_lon_deg ) , 2 ) + np.power( ( points_lat - lat_cen_vector[ i ] ) * ( step_lat_m / step_lat_deg ) , 2 ) , 0.5 )
+					string_data = string_data + "\n" + str( polygon[ j ][ 3 ] ) + " " + str( sum( sum( data_step ) ) * area_pixel ) + " " + str( distances.max() / 1000.0 )
 				if( N == 1 ):
-					string_cones = string_cones + "\n" + str( j ) + " " + str( polygon[ j ][ 3 ] ) + " " + str( polygon[ j ][ 2 ] ) + " " + str( polygon[ j ][ 5 ] ) 
+					string_cones = string_cones + "\n" + str( j ) + " " + str( polygon[ j ][ 3 ] ) + " " + str( polygon[ j ][ 2 ] ) + " " + str( polygon[ j ][ 5 ] )
 		if( N > 1 ):
 			if( type_sim == 2 ):
 				limit = ( 0 < sum( data_step[ : , 0 ] ) + sum( data_step[ 0 , : ] ) + sum( data_step[ : , -1 ] ) + sum( data_step[ -1 , : ] ) )
@@ -1330,20 +1388,63 @@ def compute_energy_cones_deg( type_sim , lon1 , lon2 , lat1 , lat2 , step_lon_de
 						distance_lines = ( distance_lines[ : , 0 ] * step_lon_m / step_lon_deg * distance_lines[ : , 0 ] * step_lon_m / step_lon_deg ) + ( distance_lines[ : , 1 ] * step_lat_m / step_lat_deg * distance_lines[ : , 1 ] * step_lat_m / step_lat_deg )
 						dist_dir1[ ic ] = np.sqrt( np.min( distance_lines ) )
 						sum_differences = sum_differences + ( np.min( distance_lines ) ) / ( len( vertices_compare ) + len( vertices_new ) )
-					dist_dir2 = np.zeros( ( len( vertices_new ) , 1 ) )
-					for ic in range( 0 , len( vertices_new ) ):
-						distance_lines = np.abs( vertices_new[ ic , : ] - vertices_compare )
-						distance_lines = ( distance_lines[ : , 0 ] * step_lon_m / step_lon_deg * distance_lines[ : , 0 ] * step_lon_m / step_lon_deg ) + ( distance_lines[ : , 1 ] * step_lat_m / step_lat_deg * distance_lines[ : , 1 ] * step_lat_m / step_lat_deg )
-						dist_dir2[ ic ] = np.sqrt( np.min( distance_lines ) )
-						sum_differences = sum_differences + ( np.min( distance_lines ) ) / ( len( vertices_compare ) + len( vertices_new ) )
 					plt.close()
-					string_compare[ i , : ] = [ height_vector[ i ] , hl_vector[ i ] , ( sum( sum( data_step * matrix_compare ) ) ) / ( sum( sum( np.maximum( data_step , matrix_compare ) ) ) ) , np.sqrt( sum_differences ) , max( max( dist_dir1[ : ] ) , max( dist_dir2[ : ] ) )[ 0 ] , distances.max() , ( sum( sum( data_step * matrix_compare * data_direction[ range( len( data_direction[ : , 0 ] ) -1 , -1 , -1 ) , : ] ) ) ) / ( sum( sum( np.maximum( data_step , matrix_compare ) * data_direction[ range( len( data_direction[ : , 0 ] ) -1 , -1 , -1 ) , : ] ) ) ) , ( distances * data_direction ).max() , sum( sum( data_step ) ) * area_pixel , out_of_limit ]
+					if( comparison_type == 1 ):
+						dist_dir2 = np.zeros( ( len( vertices_new ) , 1 ) )
+						for ic in range( 0 , len( vertices_new ) ):
+							distance_lines = np.abs( vertices_new[ ic , : ] - vertices_compare )
+							distance_lines = ( distance_lines[ : , 0 ] * step_lon_m / step_lon_deg * distance_lines[ : , 0 ] * step_lon_m / step_lon_deg ) + ( distance_lines[ : , 1 ] * step_lat_m / step_lat_deg * distance_lines[ : , 1 ] * step_lat_m / step_lat_deg )
+							dist_dir2[ ic ] = np.sqrt( np.min( distance_lines ) )
+							sum_differences = sum_differences + ( np.min( distance_lines ) ) / ( len( vertices_compare ) + len( vertices_new ) )
+						plt.close()
+					if( data_inundation.intersection( data_direction ).geom_type == 'Polygon' ):
+						[ points_x , points_y ] = data_inundation.intersection( data_direction ).exterior.coords.xy
+						points_x = np.array( points_x , int )
+						points_y = np.array( points_y , int )
+						points_lon = matrix_lon[ points_y , points_x ]
+						points_lat = matrix_lat[ points_y , points_x ]
+						max_distances_directional = ( np.power( np.power( ( points_lon - lon_cen_vector[ i ] ) * step_lon_m / step_lon_deg , 2 ) + np.power( ( points_lat - lat_cen_vector[ i ] ) * step_lat_m / step_lat_deg , 2 ) , 0.5 ) ).max()
+					else:
+						max_distances_directional = 0.0
+						for geometries in data_inundation.intersection( data_direction ).geoms:
+							if( geometries.geom_type == 'Polygon' ):
+								[ points_x , points_y ] = geometries.exterior.coords.xy
+								points_x = np.array( points_x , int )
+								points_y = np.array( points_y , int )
+								points_lon = matrix_lon[ points_y , points_x ]
+								points_lat = matrix_lat[ points_y , points_x ]
+								max_distances_directional = np.maximum( max_distances_directional , ( np.power( np.power( ( points_lon - lon_cen_vector[ i ] ) * step_lon_m / step_lon_deg , 2 ) + np.power( ( points_lat - lat_cen_vector[ i ] ) * step_lat_m / step_lat_deg , 2 ) , 0.5 ) ).max() )
+					if( comparison_type == 1 ):
+						string_compare[ i , : ] = [ height_vector[ i ] , hl_vector[ i ] , ( data_inundation.intersection( polygon_compare ).area ) / ( data_inundation.union( polygon_compare ).area ) , np.sqrt( sum_differences ) , max( max( dist_dir1[ : ] ) , max( dist_dir2[ : ] ) )[ 0 ] , distances.max() , ( data_inundation.intersection( polygon_compare ).intersection( data_direction ).area ) / ( data_inundation.union( polygon_compare ).intersection( data_direction ).area ) , max_distances_directional , sum( sum( data_step ) ) * area_pixel , np.nan , out_of_limit ]
+					else:
+						string_compare[ i , : ] = [ height_vector[ i ] , hl_vector[ i ] , np.nan , np.nan , np.nan , distances.max() , np.nan , max_distances_directional , sum( sum( data_step ) ) * area_pixel , np.sqrt( sum_differences * ( len( vertices_compare ) + len( vertices_new ) ) ) / len( vertices_compare ) , out_of_limit ]
 				else:
-					string_compare[ i , : ] = [ height_vector[ i ] , hl_vector[ i ] , np.nan , np.nan , np.nan , distances.max() , np.nan , ( distances * data_direction ).max() , sum( sum( data_step ) ) * area_pixel , out_of_limit ]
+					if( data_inundation.intersection( data_direction ).geom_type == 'Polygon' ):
+						[ points_x , points_y ] = data_inundation.intersection( data_direction ).exterior.coords.xy
+						points_x = np.array( points_x , int )
+						points_y = np.array( points_y , int )
+						points_lon = matrix_lon[ points_y , points_x ]
+						points_lat = matrix_lat[ points_y , points_x ]
+						max_distances_directional = ( np.power( np.power( ( points_lon - lon_cen_vector[ i ] ) * step_lon_m / step_lon_deg , 2 ) + np.power( ( points_lat - lat_cen_vector[ i ] ) * step_lat_m / step_lat_deg , 2 ) , 0.5 ) ).max()
+					else:
+						max_distances_directional = 0.0
+						for geometries in data_inundation.intersection( data_direction ).geoms:
+							if( geometries.geom_type == 'Polygon' ):
+								[ points_x , points_y ] = geometries.exterior.coords.xy
+								points_x = np.array( points_x , int )
+								points_y = np.array( points_y , int )
+								points_lon = matrix_lon[ points_y , points_x ]
+								points_lat = matrix_lat[ points_y , points_x ]
+								max_distances_directional = np.maximum( max_distances_directional , ( np.power( np.power( ( points_lon - lon_cen_vector[ i ] ) * step_lon_m / step_lon_deg , 2 ) + np.power( ( points_lat - lat_cen_vector[ i ] ) * step_lat_m / step_lat_deg , 2 ) , 0.5 ) ).max() )
+					string_compare[ i , : ] = [ height_vector[ i ] , hl_vector[ i ] , np.nan , np.nan , np.nan , distances.max() , np.nan , max_distances_directional , sum( sum( data_step ) ) * area_pixel , np.nan , out_of_limit ]
 			data_cones = data_cones + data_step
 		if( save_data == 1 or type_sim == 2 ):
-			distances = np.power( np.power( ( matrix_lon - lon_cen_vector[ i ] ) * ( step_lon_m / step_lon_deg ) , 2 ) + np.power( ( matrix_lat - lat_cen_vector[ i ] ) * ( step_lat_m / step_lat_deg ) , 2 ) , 0.5 ) 
-			distances = distances * data_step[ range( len( data_cones[ : , 0 ] ) -1 , -1 , -1 ) , : ]
+			img = data_step[ range( len( data_cones[ : , 0 ] ) -1 , -1 , -1 ) , : ].astype( np.uint8 )
+			contours = cv.findContours( img , cv.RETR_EXTERNAL , cv.CHAIN_APPROX_SIMPLE )
+			contours = np.vstack( contours[ 0 ] ).squeeze().transpose()
+			points_lon = matrix_lon[ contours[ 1 ] , contours[ 0 ] ]
+			points_lat = matrix_lat[ contours[ 1 ] , contours[ 0 ] ]
+			distances = np.power( np.power( ( points_lon - lon_cen_vector[ i ] ) * step_lon_m / step_lon_deg , 2 ) + np.power( ( points_lat - lat_cen_vector[ i ] ) , 2 ) * step_lat_m / step_lat_deg , 0.5 )
 			summary_data[ i , 4 ] = sum( sum( data_step ) ) * area_pixel
 			summary_data[ i , 5 ] = distances.max() / 1000.0
 			summary_data[ i , 6 ] = runout_min / 1000.0
@@ -1354,24 +1455,23 @@ def compute_energy_cones_deg( type_sim , lon1 , lon2 , lat1 , lat2 , step_lon_de
 		print(' All the simulations were skipped' )
 		return [ np.nan , np.nan , np.nan , np.nan , np.nan , np.nan , np.nan ]
 
-def compute_energy_cones_utm( type_sim , n_north , n_east , east_cor , north_cor , east_cen_vector , north_cen_vector , matrix_north , matrix_east , height_vector , hl_vector , cellsize , Topography , angstep , angstep_res2 , angstep_res3 , distep , area_pixel , cone_levels , N , redist_energy , save_data , summary_data , string_data , string_cones , sim_data , anglen , pix_min , vector_backward_1 , vector_backward_2 , index_max , vector_correc , matrix_compare , vertices_compare , string_compare , data_direction , comparison_polygon ):
+def compute_energy_cones_utm( type_sim , n_north , n_east , east_cor , north_cor , east_cen_vector , north_cen_vector , matrix_north , matrix_east , height_vector , hl_vector , cellsize , Topography , angstep , angstep_res2 , angstep_res3 , distep , area_pixel , cone_levels , N , redist_energy , save_data , summary_data , string_data , string_cones , sim_data , anglen , pix_min , vector_backward_1 , vector_backward_2 , index_max , vector_correc , matrix_compare , vertices_compare , polygon_compare , string_compare , data_direction , comparison_polygon , comparison_type ):
 
-	data_cones = np.zeros( ( n_north , n_east ) )
-	data_aux_t = np.ones( ( n_north , n_east ) )
-	data_aux_b = np.zeros( ( n_north , n_east ) )
+	data_cones = np.zeros( ( n_north , n_east ) , dtype = int )
 	vec_ang = range( 0 , 360 , angstep )
 	vec_ang_res2 = np.arange( 0 , 360 , angstep_res2 )
 	vec_ang_res3 = np.arange( 0 , 360 , angstep_res3 )
 	skipped = 0
 	for i in range( 0 , N ):
 		if( type_sim == 2 ):
-			if( string_compare[ i , 9 ] == 0 ):
+			if( string_compare[ i , 10 ] == 0 ):
 				print( ' Simulation N = ' + str( i + 1 ) + ' skipped.' )
 				skipped = skipped + 1
 				continue
+		gc.collect()
 		runout_min = -1
 		current_level = 0
-		data_step = np.zeros( ( n_north , n_east ) )
+		data_step = np.zeros( ( n_north , n_east ) , dtype = int )
 		polygon = []
 		height_eff = height_vector[ i ] + interpol_pos( east_cor , north_cor , cellsize , cellsize , east_cen_vector[ i ] , north_cen_vector[ i ] , n_east , n_north , Topography )
 		polygon.append( ( east_cen_vector[ i ] , north_cen_vector[ i ] , height_eff , 1.0 , -1 , height_vector[ i ] ) )
@@ -1437,7 +1537,7 @@ def compute_energy_cones_utm( type_sim , n_north , n_east , east_cor , north_cor
 					draw = ImageDraw.Draw( img ).polygon( polygon_xy_res2 , outline = 1 , fill = 1 )
 				else:
 					draw = ImageDraw.Draw( img ).polygon( polygon_xy_res3 , outline = 1 , fill = 1 )
-				data_step = np.maximum( np.minimum( data_aux_t , data_step + np.array( img ) ) , data_aux_b )
+				data_step = np.maximum( np.minimum( 1 , data_step + np.array( img , dtype = int ) ) , 0 )
 			if( cone_levels > polygon[ j ][ 3 ] and sum( sum( data_step ) ) > sum_pixels + pix_min ):
 				aux = np.zeros( len( polygons_new ) + 2 ) 
 				aux[ 1 : len( polygons_new ) + 1 ] = np.array( polygons_new ) 
@@ -1490,7 +1590,7 @@ def compute_energy_cones_utm( type_sim , n_north , n_east , east_cor , north_cor
 					if( np.min( wh_grouped[ 0 ] ) == 0 and np.max( wh_grouped[ len( wh_grouped ) - 1 ] ) == anglen - 1 ):
 						if( len( np.intersect1d( wh_grouped[ 0 ] , wh5 ) ) > 0 and len( np.intersect1d( wh_grouped[ len( wh_grouped ) - 1 ] , wh6 ) ) > 0 ):
 							grouped_filter[ len( wh_grouped ) - 1 ] = 1
-						aux_grouped = np.concatenate( ( wh_grouped[ len( wh_grouped ) - 1 ], wh_grouped[ 0 ] + len( polygons_new ) ) )
+						aux_grouped = np.concatenate( ( wh_grouped[ len( wh_grouped ) - 1 ] , wh_grouped[ 0 ] + len( polygons_new ) ) )
 						aux_filter = grouped_filter[ len( wh_grouped ) - 1 ] + grouped_filter[ 0 ]
 						wh_grouped = wh_grouped[ 1 : -1 ]
 						wh_grouped.append( aux_grouped )
@@ -1608,16 +1708,19 @@ def compute_energy_cones_utm( type_sim , n_north , n_east , east_cor , north_cor
 			sum_pixels = sum( sum( data_step ) )
 			print( ( j , len( polygon ) , polygon[ j ][ 3 ] , polygon[ j ][ 2 ] , sum( sum( data_step ) ) , polygon[ j ][ 4 ] ) )
 			if( save_data == 1 or type_sim == 2 ):
-				if( j == 0 or ( j + 1 == len( polygon ) ) ):
-					distances = np.power( np.power( ( matrix_east - east_cen_vector[ i ] ) , 2 ) + np.power( ( matrix_north - north_cen_vector[ i ] ) , 2 ) , 0.5 ) 
-					distances = distances * data_step[ range( len( data_cones[ : , 0 ] ) -1 , -1 , -1 ) , : ]
-					string_data = string_data + "\n" + str( polygon[ j ][ 3 ] ) + " " + str( sum( sum( data_step ) ) * area_pixel ) + " " + str( distances.max() / 1000.0 ) + " " + str( distances.min() / 1000.0 )
-				elif( polygon[ j ][ 3 ] < polygon[ j + 1 ][ 3 ] ):
-					distances = np.power( np.power( ( matrix_east - east_cen_vector[ i ] ) , 2 ) + np.power( ( matrix_north - north_cen_vector[ i ] ) ,2 ) , 0.5 ) 
-					distances = distances * data_step[ range( len( data_cones[ : , 0 ] ) -1 , -1 , -1 ) , : ]
-					string_data = string_data + "\n" + str( polygon[ j ][ 3 ] ) + " " + str( sum( sum( data_step ) ) * area_pixel ) + " " + str( distances.max() / 1000.0 ) + " " + str( distances.min() / 1000.0 )
+				if( ( j == 0 or ( j + 1 == len( polygon ) ) ) or ( polygon[ j ][ 3 ] < polygon[ j + 1 ][ 3 ] ) ):
+					img = data_step[ range( len( data_cones[ : , 0 ] ) -1 , -1 , -1 ) , : ].astype( np.uint8 )
+					contours = cv.findContours( img , cv.RETR_EXTERNAL , cv.CHAIN_APPROX_SIMPLE )
+					contours = np.vstack( contours[ 0 ] ).squeeze()
+					data_inundation = geometry.Polygon( contours )
+					data_inundation = data_inundation.buffer( 0 )
+					contours = contours.transpose()
+					points_east = matrix_east[ contours[ 1 ] , contours[ 0 ] ]
+					points_north = matrix_north[ contours[ 1 ] , contours[ 0 ] ]
+					distances = np.power( np.power( ( points_east - east_cen_vector[ i ] ) , 2 ) + np.power( ( points_north - north_cen_vector[ i ] ) , 2 ) , 0.5 )
+					string_data = string_data + "\n" + str( polygon[ j ][ 3 ] ) + " " + str( sum( sum( data_step ) ) * area_pixel ) + " " + str( distances.max() / 1000.0 )
 				if( N == 1 ):
-					string_cones = string_cones + "\n" + str( j ) + " " + str( polygon[ j ][ 3 ] ) + " " + str( polygon[ j ][ 2 ] ) + " " + str( polygon[ j ][ 5 ] ) 
+					string_cones = string_cones + "\n" + str( j ) + " " + str( polygon[ j ][ 3 ] ) + " " + str( polygon[ j ][ 2 ] ) + " " + str( polygon[ j ][ 5 ] )
 		if( N > 1 ):
 			if( type_sim == 2 ):
 				limit = ( 0 < sum( data_step[ : , 0 ] ) + sum( data_step[ 0 , : ] ) + sum( data_step[ : , -1 ] ) + sum( data_step[ -1 , : ] ) )
@@ -1667,20 +1770,63 @@ def compute_energy_cones_utm( type_sim , n_north , n_east , east_cor , north_cor
 						distance_lines = ( distance_lines[ : , 0 ] * distance_lines[ : , 0 ] ) + ( distance_lines[ : , 1 ] * distance_lines[ : , 1 ] )
 						dist_dir1[ ic ] = np.sqrt( np.min( distance_lines ) )
 						sum_differences = sum_differences + ( np.min( distance_lines ) ) / ( len( vertices_compare ) + len( vertices_new ) )
-					dist_dir2 = np.zeros( ( len( vertices_new ) , 1 ) )
-					for ic in range( 0 , len( vertices_new ) ):
-						distance_lines = np.abs( vertices_new[ ic , : ] - vertices_compare )
-						distance_lines = ( distance_lines[ : , 0 ] * distance_lines[ : , 0 ] ) + ( distance_lines[ : , 1 ] * distance_lines[ : , 1 ] )
-						dist_dir2[ ic ] = np.sqrt( np.min( distance_lines ) )
-						sum_differences = sum_differences + ( np.min( distance_lines ) ) / ( len( vertices_compare ) + len( vertices_new ) )
 					plt.close()
-					string_compare[ i , : ] = [ height_vector[ i ] , hl_vector[ i ] , ( sum( sum( data_step * matrix_compare ) ) ) / ( sum( sum( np.maximum( data_step , matrix_compare ) ) ) ) , np.sqrt( sum_differences ) , max( max( dist_dir1[ : ] ) , max( dist_dir2[ : ] ) )[ 0 ] , distances.max() , ( sum( sum( data_step * matrix_compare * data_direction[ range( len( data_direction[ : , 0 ] ) -1 , -1 , -1 ) , : ] ) ) ) / ( sum( sum( np.maximum( data_step , matrix_compare ) * data_direction[ range( len( data_direction[ : , 0 ] ) -1 , -1 , -1 ) , : ] ) ) ) , ( distances * data_direction ).max() , sum( sum( data_step ) ) * area_pixel , out_of_limit ]
+					if( comparison_type == 1 ):
+						dist_dir2 = np.zeros( ( len( vertices_new ) , 1 ) )
+						for ic in range( 0 , len( vertices_new ) ):
+							distance_lines = np.abs( vertices_new[ ic , : ] - vertices_compare )
+							distance_lines = ( distance_lines[ : , 0 ] * distance_lines[ : , 0 ] ) + ( distance_lines[ : , 1 ] * distance_lines[ : , 1 ] )
+							dist_dir2[ ic ] = np.sqrt( np.min( distance_lines ) )
+							sum_differences = sum_differences + ( np.min( distance_lines ) ) / ( len( vertices_compare ) + len( vertices_new ) )
+						plt.close()
+					if( data_inundation.intersection( data_direction ).geom_type == 'Polygon' ):
+						[ points_x , points_y ] = data_inundation.intersection( data_direction ).exterior.coords.xy
+						points_x = np.array( points_x , int )
+						points_y = np.array( points_y , int )
+						points_east = matrix_east[ points_y , points_x ]
+						points_north = matrix_north[ points_y , points_x ]
+						max_distances_directional = ( np.power( np.power( ( points_east - east_cen_vector[ i ] ) , 2 ) + np.power( ( points_north - north_cen_vector[ i ] ) , 2 ) , 0.5 ) ).max()
+					else:
+						max_distances_directional = 0.0
+						for geometries in data_inundation.intersection( data_direction ).geoms:
+							if( geometries.geom_type == 'Polygon' ):
+								[ points_x , points_y ] = geometries.exterior.coords.xy
+								points_x = np.array( points_x , int )
+								points_y = np.array( points_y , int )
+								points_east = matrix_east[ points_y , points_x ]
+								points_north = matrix_north[ points_y , points_x ]
+								max_distances_directional = np.maximum( max_distances_directional , ( np.power( np.power( ( points_east - east_cen_vector[ i ] ) , 2 ) + np.power( ( points_north - north_cen_vector[ i ] ) , 2 ) , 0.5 ) ).max() )
+					if( comparison_type == 1 ):
+						string_compare[ i , : ] = [ height_vector[ i ] , hl_vector[ i ] , ( data_inundation.intersection( polygon_compare ).area ) / ( data_inundation.union( polygon_compare ).area ) , np.sqrt( sum_differences ) , max( max( dist_dir1[ : ] ) , max( dist_dir2[ : ] ) )[ 0 ] , distances.max() , ( data_inundation.intersection( polygon_compare ).intersection( data_direction ).area ) / ( data_inundation.union( polygon_compare ).intersection( data_direction ).area ) , max_distances_directional , sum( sum( data_step ) ) * area_pixel , np.nan , out_of_limit ]
+					else:
+						string_compare[ i , : ] = [ height_vector[ i ] , hl_vector[ i ] , np.nan , np.nan , np.nan , distances.max() , np.nan , max_distances_directional , sum( sum( data_step ) ) * area_pixel , np.sqrt( sum_differences * ( len( vertices_compare ) + len( vertices_new ) ) ) / len( vertices_compare ) , out_of_limit ]
 				else:
-					string_compare[ i , : ] = [ height_vector[ i ] , hl_vector[ i ] , np.nan , np.nan , np.nan , distances.max() , np.nan , ( distances * data_direction ).max() , sum( sum( data_step ) ) * area_pixel , out_of_limit ]
+					if( data_inundation.intersection( data_direction ).geom_type == 'Polygon' ):
+						[ points_x , points_y ] = data_inundation.intersection( data_direction ).exterior.coords.xy
+						points_x = np.array( points_x , int )
+						points_y = np.array( points_y , int )
+						points_east = matrix_east[ points_y , points_x ]
+						points_north = matrix_north[ points_y , points_x ]
+						max_distances_directional = ( np.power( np.power( ( points_east - east_cen_vector[ i ] ) , 2 ) + np.power( ( points_north - north_cen_vector[ i ] ) , 2 ) , 0.5 ) ).max()
+					else:
+						max_distances_directional = 0.0
+						for geometries in data_inundation.intersection( data_direction ).geoms:
+							if( geometries.geom_type == 'Polygon' ):
+								[ points_x , points_y ] = geometries.exterior.coords.xy
+								points_x = np.array( points_x , int )
+								points_y = np.array( points_y , int )
+								points_east = matrix_east[ points_y , points_x ]
+								points_north = matrix_north[ points_y , points_x ]
+								max_distances_directional = np.maximum( max_distances_directional , ( np.power( np.power( ( points_east - east_cen_vector[ i ] ) , 2 ) + np.power( ( points_north - north_cen_vector[ i ] ) , 2 ) , 0.5 ) ).max() )
+					string_compare[ i , : ] = [ height_vector[ i ] , hl_vector[ i ] , np.nan , np.nan , np.nan , distances.max() , np.nan , max_distances_directional , sum( sum( data_step ) ) * area_pixel , np.nan , out_of_limit ]
 			data_cones = data_cones + data_step
 		if( save_data == 1 or type_sim == 2 ):
-			distances = np.power( np.power( ( matrix_east - east_cen_vector[ i ] ) , 2 ) + np.power( ( matrix_north - north_cen_vector[ i ] ) , 2 ) , 0.5 ) 
-			distances = distances * data_step[ range( len( data_cones[ : , 0 ] ) -1 , -1 , -1 ) , : ]
+			img = data_step[ range( len( data_cones[ : , 0 ] ) -1 , -1 , -1 ) , : ].astype( np.uint8 )
+			contours = cv.findContours( img , cv.RETR_EXTERNAL , cv.CHAIN_APPROX_SIMPLE )
+			contours = np.vstack( contours[ 0 ] ).squeeze().transpose()
+			points_east = matrix_east[ contours[ 1 ] , contours[ 0 ] ]
+			points_north = matrix_north[ contours[ 1 ] , contours[ 0 ] ]
+			distances = np.power( np.power( ( points_east - east_cen_vector[ i ] ) , 2 ) + np.power( ( points_north - north_cen_vector[ i ] ) , 2 ) , 0.5 )
 			summary_data[ i , 4 ] = sum( sum( data_step ) ) * area_pixel
 			summary_data[ i , 5 ] = distances.max() / 1000.0
 			summary_data[ i , 6 ] = runout_min / 1000.0
@@ -1781,7 +1927,7 @@ def save_data_utm( run_name , sea_flag , n_north , n_east , cellsize , matrix_ea
 		np.savetxt( 'Results/' + run_name + '/' + 'matrix_east.txt' , matrix_east , fmt = '%.5e' )
 		np.savetxt( 'Results/' + run_name + '/' + 'matrix_north.txt' , matrix_north , fmt = '%.5e' )
  
-def plot_deg( run_name , type_sim , Cities , polygon , lon1 , lon2 , lat1 , lat2 , step_lat_m , step_lon_m , matrix_lon , matrix_lat , lon_cen_vector , lat_cen_vector , height_vector , hl_vector , Topography , Topography_Sea , N , data_cones , matrix_compare , ang_cal_range , data_direction , calibration_data , comparison_polygon ):
+def plot_deg( run_name , type_sim , Cities , polygon , lon1 , lon2 , lat1 , lat2 , step_lat_m , step_lon_m , matrix_lon , matrix_lat , lon_cen_vector , lat_cen_vector , height_vector , hl_vector , Topography , Topography_Sea , N , data_cones , matrix_compare , ang_cal_range , data_direction , calibration_data , comparison_polygon , comparison_type , vertices_compare ):
 
 	data_cones = data_cones[ range( len( data_cones[ : , 0 ] ) -1 , -1 , -1 ) , : ] / N
 	line_val = data_cones.max()
@@ -1796,7 +1942,7 @@ def plot_deg( run_name , type_sim , Cities , polygon , lon1 , lon2 , lat1 , lat2
 	if( N > 1 ):
 		CS_Topo = plt.contourf( matrix_lon , matrix_lat , Topography , 100 , alpha = 1.0 , cmap = cmapg , antialiased = True )
 		CS_Sea = plt.contourf( matrix_lon , matrix_lat , Topography_Sea , 100 , alpha = 0.5 , cmap = cmaps , antialiased = True )
-		CS = plt.contourf( matrix_lon , matrix_lat , data_cones , 100 , vmin = 0.0 , vmax = 1.0 , alpha = 0.3 , interpolation = 'linear' , cmap = cmapr , antialiased = True )	
+		CS = plt.contourf( matrix_lon , matrix_lat , data_cones , 100 , vmin = 0.0 , vmax = 1.0 , alpha = 0.3 , interpolation = 'linear' , cmap = cmapr , antialiased = True )
 		fmt = '%.2f'
 		plt.colorbar()
 		CS_lines = plt.contour( matrix_lon , matrix_lat , data_cones , np.array( [ val_down , val_up ] ) , colors = 'r' , interpolation = 'linear' , linewidths = 0.1 )
@@ -1817,8 +1963,10 @@ def plot_deg( run_name , type_sim , Cities , polygon , lon1 , lon2 , lat1 , lat2
 		for i in range( 1 , len( polygon ) ):
 			plt.plot( polygon[ i ][ 0 ] , polygon[ i ][ 1 ] , 'b.' , markersize = 2 )
 	if( type_sim == 2 ):
-		if( not comparison_polygon == '' ):
-			line_compare = plt.contour( matrix_lon , matrix_lat , matrix_compare[ range( len( matrix_compare[ : , 0 ] ) -1 , -1 , -1 ) , : ], np.array( [ 0 ] ) , colors = 'b' , interpolation = 'linear' )
+		if( not comparison_polygon == '' and comparison_type == 1 ):
+			line_compare = plt.contour( matrix_lon , matrix_lat , matrix_compare[ range( len( matrix_compare[ : , 0 ] ) -1 , -1 , -1 ) , : ] , np.array( [ 0 ] ) , colors = 'b' , interpolation = 'linear' )
+		if( not comparison_polygon == '' and comparison_type == 2 ):
+			plt.plot( vertices_compare[ : , 0 ] , vertices_compare[ : , 1 ] , 'b.' , markersize = 2 )
 		if( ang_cal_range < 360 ):
 			line_direction = plt.contour( matrix_lon , matrix_lat , data_direction , np.array( [ 0 ] ) , colors = 'g' , interpolation = 'linear' )
 	plt.savefig( 'Results/' + run_name + '/Map.png' )
@@ -1875,7 +2023,7 @@ def plot_deg( run_name , type_sim , Cities , polygon , lon1 , lon2 , lat1 , lat2
 		plt.xlim( np.min( calibration_data[ : , 0 ] ) , np.max( calibration_data[ : , 0 ] ) )
 		plt.ylim( np.min( calibration_data[ : , 1 ] ) , np.max( calibration_data[ : , 1 ] ) )
 		plt.savefig( 'Results/' + run_name + '/Calibration_Area.png' )
-		if( not comparison_polygon == '' ):
+		if( not comparison_polygon == '' and comparison_type == 1 ):
 			Jaccard_vals = calibration_data[ : , 2 ]
 			Jaccard_vals_reshaped = Jaccard_vals.reshape( int( np.sqrt( N ) ) , int( np.sqrt( N ) ) )
 			MSD_vals = calibration_data[ : , 3 ]
@@ -1920,9 +2068,21 @@ def plot_deg( run_name , type_sim , Cities , polygon , lon1 , lon2 , lat1 , lat2
 			plt.xlim( np.min( calibration_data[ : , 0 ] ) , np.max( calibration_data[ : , 0 ] ) )
 			plt.ylim( np.min( calibration_data[ : , 1 ] ) , np.max( calibration_data[ : , 1 ] ) )
 			plt.savefig( 'Results/' + run_name + '/Calibration_Jaccard_Directional.png' )
+		elif( not comparison_polygon == '' and comparison_type == 2 ):
+			CP_vals = calibration_data[ : , 9 ]
+			CP_vals_reshaped = CP_vals.reshape( int( np.sqrt( N ) ) , int( np.sqrt( N ) ) )
+			plt.figure( 5 , figsize = ( 8.0 , 5.0 ) )
+			c1 = plt.pcolormesh( height_vals_reshaped , hl_vals_reshaped , CP_vals_reshaped , cmap = 'viridis' )
+			plt.colorbar( c1 )
+			plt.xlabel( 'Collapse height [m]' )
+			plt.ylabel( 'H/L' )
+			plt.title( 'Control Points Squared Mean Distance' )
+			plt.xlim( np.min( calibration_data[ : , 0 ] ) , np.max( calibration_data[ : , 0 ] ) )
+			plt.ylim( np.min( calibration_data[ : , 1 ] ) , np.max( calibration_data[ : , 1 ] ) )
+			plt.savefig( 'Results/' + run_name + '/Control_Points.png' )
 	plt.show()
 
-def plot_utm( run_name , type_sim , polygon , matrix_east , matrix_north , east_cor , north_cor , n_east , n_north , cellsize , east_cen_vector , north_cen_vector , height_vector , hl_vector , Topography , Topography_Sea , N , data_cones , matrix_compare , ang_cal_range , data_direction , calibration_data , comparison_polygon ):
+def plot_utm( run_name , type_sim , polygon , matrix_east , matrix_north , east_cor , north_cor , n_east , n_north , cellsize , east_cen_vector , north_cen_vector , height_vector , hl_vector , Topography , Topography_Sea , N , data_cones , matrix_compare , ang_cal_range , data_direction , calibration_data , comparison_polygon , comparison_type , vertices_compare ):
 
 	data_cones = data_cones[ range( len( data_cones[ : , 0 ] ) -1 , -1 , -1 ) , : ] / N
 	line_val = data_cones.max()
@@ -1937,7 +2097,7 @@ def plot_utm( run_name , type_sim , polygon , matrix_east , matrix_north , east_
 	if( N > 1 ):
 		CS_Topo = plt.contourf( matrix_east , matrix_north , Topography , 100 , alpha = 1.0 , cmap = cmapg , antialiased = True )
 		CS_Sea = plt.contourf( matrix_east , matrix_north , Topography_Sea , 100 , alpha = 0.5 , cmap = cmaps , antialiased = True )
-		CS = plt.contourf( matrix_east , matrix_north , data_cones , 100, vmin = 0.0 , vmax = 1.0 , alpha = 0.3 , interpolation = 'linear' , cmap = cmapr , antialiased = True )	
+		CS = plt.contourf( matrix_east , matrix_north , data_cones , 100 , vmin = 0.0 , vmax = 1.0 , alpha = 0.3 , interpolation = 'linear' , cmap = cmapr , antialiased = True )
 		fmt = '%.2f'
 		plt.colorbar()
 		CS_lines = plt.contour( matrix_east , matrix_north , data_cones , np.array( [ val_down , val_up ] ) , colors = 'r' , interpolation = 'linear' , linewidths = 0.1 )
@@ -1956,10 +2116,13 @@ def plot_utm( run_name , type_sim , polygon , matrix_east , matrix_north , east_
 		for i in range( 1 , len( polygon ) ):
 			plt.plot( polygon[ i ][ 0 ] , polygon[ i ][ 1 ] , 'b.' , markersize = 2 )
 	if( type_sim == 2 ):
-		if( not comparison_polygon == '' ):
+		if( not comparison_polygon == '' and comparison_type == 1 ):
 			line_compare = plt.contour( matrix_east , matrix_north , matrix_compare[ range( len( matrix_compare[ : , 0 ] ) -1 , -1 , -1 ) , : ] , np.array( [ 0 ] ) , colors = 'b' , interpolation = 'linear' )
+		if( not comparison_polygon == '' and comparison_type == 2 ):
+			plt.plot( vertices_compare[ : , 0 ] , vertices_compare[ : , 1 ] , 'b.' , markersize = 2 )
 		if( ang_cal_range < 360 ):
 			line_direction = plt.contour( matrix_east , matrix_north , data_direction , np.array( [ 0 ] ) , colors = 'g' , interpolation = 'linear' )
+
 	plt.savefig( 'Results/' + run_name + '/Map.png' )
 	if( N > 1 and type_sim == 1 ):
 		plt.figure( 2 , figsize = ( 14.0 , 5.0 ) )
@@ -2014,7 +2177,7 @@ def plot_utm( run_name , type_sim , polygon , matrix_east , matrix_north , east_
 		plt.xlim( np.min( calibration_data[ : , 0 ] ) , np.max( calibration_data[ : , 0 ] ) )
 		plt.ylim( np.min( calibration_data[ : , 1 ] ) , np.max( calibration_data[ : , 1 ] ) )
 		plt.savefig( 'Results/' + run_name + '/Calibration_Area.png' )
-		if( not comparison_polygon == '' ):
+		if( not comparison_polygon == '' and comparison_type == 1 ):
 			Jaccard_vals = calibration_data[ : , 2 ]
 			Jaccard_vals_reshaped = Jaccard_vals.reshape( int( np.sqrt( N ) ) , int( np.sqrt( N ) ) )
 			MSD_vals = calibration_data[ : , 3 ]
@@ -2059,6 +2222,18 @@ def plot_utm( run_name , type_sim , polygon , matrix_east , matrix_north , east_
 			plt.xlim( np.min( calibration_data[ : , 0 ] ) , np.max( calibration_data[ : , 0 ] ) )
 			plt.ylim( np.min( calibration_data[ : , 1 ] ) , np.max( calibration_data[ : , 1 ] ) )
 			plt.savefig( 'Results/' + run_name + '/Calibration_Jaccard_Directional.png' )
+		elif( not comparison_polygon == '' and comparison_type == 2 ):
+			CP_vals = calibration_data[ : , 9 ]
+			CP_vals_reshaped = CP_vals.reshape( int( np.sqrt( N ) ) , int( np.sqrt( N ) ) )
+			plt.figure( 5 , figsize = ( 8.0 , 5.0 ) )
+			c1 = plt.pcolormesh( height_vals_reshaped , hl_vals_reshaped , CP_vals_reshaped , cmap = 'viridis' )
+			plt.colorbar( c1 )
+			plt.xlabel( 'Collapse height [m]' )
+			plt.ylabel( 'H/L' )
+			plt.title( 'Control Points Squared Mean Distance' )
+			plt.xlim( np.min( calibration_data[ : , 0 ] ) , np.max( calibration_data[ : , 0 ] ) )
+			plt.ylim( np.min( calibration_data[ : , 1 ] ) , np.max( calibration_data[ : , 1 ] ) )
+			plt.savefig( 'Results/' + run_name + '/Control_Points.png' )
 	plt.show()
 
 def calibration( run_name , string_compare , resolution_factor ):
@@ -2206,14 +2381,20 @@ def plot_only_height( height_vector , hl_vector , variable_vector , type_input ,
 			plt.xlim( left = 0 )		
 			plt.grid()
 
-def plot_only_comparison_polygon_deg( matrix_lon , matrix_lat , matrix_compare ):
+def plot_only_comparison_polygon_deg( matrix_lon , matrix_lat , matrix_compare , comparison_type , vertices_compare ):
 
-	line_compare = plt.contour( matrix_lon , matrix_lat , matrix_compare[ range( len( matrix_compare[ : , 0 ] ) -1 , -1 , -1 ) , : ], np.array( [ 0 ] ) , colors = 'b' , interpolation = 'linear' )
+	if( comparison_type == 1 ):
+		line_compare = plt.contour( matrix_lon , matrix_lat , matrix_compare[ range( len( matrix_compare[ : , 0 ] ) -1 , -1 , -1 ) , : ] , np.array( [ 0 ] ) , colors = 'b' , interpolation = 'linear' )
+	else:
+		plt.plot( vertices_compare[ : , 0 ] , vertices_compare[ : , 1 ] , 'b.' , markersize = 2 )
 
-def plot_only_comparison_polygon_utm( matrix_east , matrix_north , matrix_compare ):
+def plot_only_comparison_polygon_utm( matrix_east , matrix_north , matrix_compare , comparison_type , vertices_compare ):
 
-	line_compare = plt.contour( matrix_east , matrix_north , matrix_compare[ range( len( matrix_compare[ : , 0 ] ) -1 , -1 , -1 ) , : ], np.array( [ 0 ] ) , colors = 'b' , interpolation = 'linear' )
-
+	if( comparison_type == 1 ):
+		line_compare = plt.contour( matrix_east , matrix_north , matrix_compare[ range( len( matrix_compare[ : , 0 ] ) -1 , -1 , -1 ) , : ] , np.array( [ 0 ] ) , colors = 'b' , interpolation = 'linear' )
+	else:
+		plt.plot( vertices_compare[ : , 0 ] , vertices_compare[ : , 1 ] , 'b.' , markersize = 2 )
+		
 def plot_only_map_deg( Cities , lon1 , lon2 , lat1 , lat2 , step_lat_m , step_lon_m , matrix_lon , matrix_lat , lon_cen_vector , lat_cen_vector , Topography , Topography_Sea , N , data_cones ):
 
 	data_cones = data_cones[ range( len( data_cones[ : , 0 ] ) -1 , -1 , -1 ) , : ] / N
@@ -2262,7 +2443,7 @@ def plot_only_map_utm( matrix_east , matrix_north , east_cor , north_cor , n_eas
 	if( N > 1 ):
 		CS_Topo = plt.contourf( matrix_east , matrix_north , Topography , 100 , alpha = 1.0 , cmap = cmapg , antialiased = True )
 		CS_Sea = plt.contourf( matrix_east , matrix_north , Topography_Sea , 100 , alpha = 0.5 , cmap = cmaps , antialiased = True )
-		CS = plt.contourf( matrix_east , matrix_north , data_cones , 100, vmin = 0.0 , vmax = 1.0 , alpha = 0.3 , interpolation = 'linear' , cmap = cmapr , antialiased = True )	
+		CS = plt.contourf( matrix_east , matrix_north , data_cones , 100 , vmin = 0.0 , vmax = 1.0 , alpha = 0.3 , interpolation = 'linear' , cmap = cmapr , antialiased = True )	
 		fmt = '%.2f'
 		plt.colorbar()
 		CS_lines = plt.contour( matrix_east , matrix_north , data_cones , np.array( [ val_down , val_up ] ) , colors = 'r' , interpolation = 'linear' , linewidths = 1 )
@@ -2307,7 +2488,7 @@ def plot_input_output( summary_data ):
 	plt.xlabel( 'Runout distance [km]' )
 	plt.grid()
 	
-def plot_only_calibration( calibration_data , vertices_compare , N , comparison_polygon ):
+def plot_only_calibration( calibration_data , vertices_compare , N , comparison_polygon , comparison_type ):
 
 	height_vals = calibration_data[ : , 0 ] 
 	height_vals_reshaped = height_vals.reshape( int( np.sqrt( N ) ) , int( np.sqrt( N ) ) )
@@ -2333,7 +2514,7 @@ def plot_only_calibration( calibration_data , vertices_compare , N , comparison_
 	plt.title( 'Area [km2]' )
 	plt.xlim( np.min( calibration_data[ : , 0 ] ) , np.max( calibration_data[ : , 0 ] ) )
 	plt.ylim( np.min( calibration_data[ : , 1 ] ) , np.max( calibration_data[ : , 1 ] ) )
-	if( not comparison_polygon == '' ):
+	if( not comparison_polygon == '' and comparison_type == 1 ):
 		Jaccard_vals = calibration_data[ : , 2 ]
 		Jaccard_vals_reshaped = Jaccard_vals.reshape( int( np.sqrt( N ) ) , int( np.sqrt( N ) ) )
 		MSD_vals = calibration_data[ : , 3 ]
@@ -2362,6 +2543,17 @@ def plot_only_calibration( calibration_data , vertices_compare , N , comparison_
 		plt.xlabel( 'Collapse height [m]' )
 		plt.ylabel( 'H/L' )
 		plt.title( 'HD [m]' )
+		plt.xlim( np.min( calibration_data[ : , 0 ] ) , np.max( calibration_data[ : , 0 ] ) )
+		plt.ylim( np.min( calibration_data[ : , 1 ] ) , np.max( calibration_data[ : , 1 ] ) )
+	elif( not comparison_polygon == '' ):
+		CP_vals = calibration_data[ : , 9 ]
+		CP_vals_reshaped = CP_vals.reshape( int( np.sqrt( N ) ) , int( np.sqrt( N ) ) )
+		plt.figure( 6 , figsize = ( 8.0 , 5.0 ) )
+		c1 = plt.pcolormesh( height_vals_reshaped , hl_vals_reshaped , CP_vals_reshaped , cmap = 'viridis' )
+		plt.colorbar( c1 )
+		plt.xlabel( 'Collapse height [m]' )
+		plt.ylabel( 'H/L' )
+		plt.title( 'Control Points Squared Mean Distance' )
 		plt.xlim( np.min( calibration_data[ : , 0 ] ) , np.max( calibration_data[ : , 0 ] ) )
 		plt.ylim( np.min( calibration_data[ : , 1 ] ) , np.max( calibration_data[ : , 1 ] ) )
 

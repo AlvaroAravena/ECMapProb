@@ -13,6 +13,7 @@ source_dem = 1
 
 # Inputs for calibration mode (Only considered if type_sim = 2).
 # comparison_polygon = name of file of bound points of comparison polygon (See an example in EXAMPLES/Normal_Version/Chaiten_D. If absent, only runout distance or inundation area-based calibrations can be performed).
+# comparison_type = when a comparison polygon is present, it allows to consider it as closed polygon (comparison_type = 1) or only a set of control points (comparison_type = 2).
 # ang_cal = angle from vent to circumference arch center that defines the PDC dispersion direction used to calibrate. If absent, all the transport directions are considered.
 # ang_cal_range = extent of the circumference arch that defines the PDC dispersion direction used to calibrate. If absent, all the transport directions are considered.
 
@@ -59,7 +60,7 @@ dist_input_cen = 2
 # hl_k = k in gamma distribution of H/L (only considered if type_input = 1 and dist_input_hl = 3).
 # hl_theta = theta in gamma distribution of H/L (only considered if type_input = 1 and dist_input_hl = 3).
 # input_file_cal = name of the file with the set of values of height and H/L (when type_input = 2) or name of the calibration file (when type_input = 3). Only considered if type_input = 2 or 3.
-# calibration_type = type of calibration (1: Jaccard. 2: HD. 3: RMSD. 4: Directional Jaccard. 5: Distance. 6: Directional distance. 7: Area). Only considered if type_sim = 1 and type_input = 3.
+# calibration_type = type of calibration (1: Jaccard. 2: HD. 3: RMSD. 4: Directional Jaccard. 5: Distance. 6: Directional distance. 7: Area. 8: Control Points). Only considered if type_sim = 1 and type_input = 3.
 # dist_distance_calibration = type of distance distribution used for distance-based calibration (1: Gaussian. 2: Uniform. 3: Gamma. 4: Lognormal. 5: Input cumulative distribution. Only considered if type_sim = 1, type_input = 3, and calibration_type = 5 or 6).
 # distance_calibration = expected distance used for distance-based calibration (In meters. Only considered if type_sim = 1, type_input = 3, calibration_type = 5 or 6, and dist_distance_calibration = 1, 2 or 4).
 # var_distance_calibration = variability of distance used for distance-based calibration (In meters. Only considered if type_sim = 1, type_input = 3, calibration_type = 5 or 6, and dist_distance_calibration = 1, 2 or 4).
@@ -78,7 +79,7 @@ height = 600.0
 var_height = 400.0
 dist_input_hl = 4
 hl = 0.40
-var_hl = 0.05
+var_hl = 0.2
 
 # Maximum order of energy cones.
 cone_levels = 100

@@ -10,7 +10,7 @@ import matplotlib
 matplotlib.use( "TkAgg" )
 from matplotlib.backends.backend_tkagg import ( FigureCanvasTkAgg , NavigationToolbar2Tk )
 from matplotlib.figure import Figure
-from ECMapProb_Functions import import_map , read_map_utm , read_map_deg , matrix_deg , matrix_utm , create_inputs , create_vent_deg , create_vent_utm , read_comparison_polygon_deg , read_comparison_polygon_utm , initial_definitions , definitions_save_data_deg , definitions_save_data_utm , compute_energy_cones_deg , compute_energy_cones_utm , save_data_deg , save_data_utm , plot_deg , plot_only_topography_deg , plot_only_topography_utm , plot_utm , calibration , plot_only_vent_deg , plot_only_vent_utm , plot_only_height , plot_only_comparison_polygon_deg , plot_only_comparison_polygon_utm , plot_only_map_deg , plot_only_map_utm , plot_only_calibration , plot_input_output
+from ECMapProb_Functions import import_map , read_map_utm , read_map_deg , matrix_deg , matrix_utm , create_inputs , create_vent_deg , create_vent_utm , read_comparison_polygon_deg , read_comparison_polygon_utm , initial_definitions , definitions_save_data_deg , definitions_save_data_utm , compute_energy_cones_deg , compute_energy_cones_utm , save_data_deg , save_data_utm , plot_only_topography_deg , plot_only_topography_utm , calibration , plot_only_vent_deg , plot_only_vent_utm , plot_only_height , plot_only_comparison_polygon_deg , plot_only_comparison_polygon_utm , plot_only_map_deg , plot_only_map_utm , plot_only_calibration , plot_input_output
 
 class MainFrame:
 
@@ -47,6 +47,8 @@ class MainFrame:
 		self.type_sim_choice = 1
 		self.boolean_polygon = 0
 		self.boolean_polygon_choice = 0
+		self.comparison_type = 1
+		self.comparison_type_choice = 1
 		self.cone_levels = 1
 		self.N = np.nan
 		self.N_choice = np.nan
@@ -168,7 +170,7 @@ class MainFrame:
 		
 		self.label_typesim = Label( tab1 , text = "Type of simulation" )
 		self.label_typesim.grid( row = 0 , column = 0 , columnspan = 3 , sticky = W )
-		self.typesim_entry = OptionMenu( tab1 , typesim , "Default mode: Construction of PDC inundation probability map" , "Calibration mode: Based on the distribution of PDC runout distance or inundation area" , "Calibration mode: Including reference PDC deposit polygon" , command = self.opt_typesim )
+		self.typesim_entry = OptionMenu( tab1 , typesim , "Default mode: Construction of PDC inundation probability map" , "Calibration mode: Based on the distribution of PDC runout distance or inundation area" , "Calibration mode: Including reference PDC deposit polygon" , "Calibration mode: Including reference control points" , command = self.opt_typesim )
 		self.typesim_entry.grid( row = 0 , column = 3 , columnspan = 3 , sticky = W + E )
 		self.label_cone_levels = Label( tab1 , text = "Cone generations" )
 		self.label_cone_levels.grid( row = 1 , column = 0 , columnspan = 3 , sticky = W )
@@ -310,7 +312,7 @@ class MainFrame:
 		self.label_calibrationbased.grid( row = 7 , column = 0 , columnspan = 6 , sticky = W + E )	
 		self.label_calibration_type = Label( tab3 , text = "Type of calibration" , state = 'disabled' )
 		self.label_calibration_type.grid( row = 8 , column = 0 , columnspan = 2 , sticky = W )
-		self.calibration_type_entry = OptionMenu( tab3 , calibrationtype , "Jaccard index" , "Hausdorff distance" , "RMSD" , "Runout distance-based" , "Inundation area-based", command = self.opt_calibrationtype )
+		self.calibration_type_entry = OptionMenu( tab3 , calibrationtype , "Jaccard index" , "Hausdorff distance" , "RMSD" , "Runout distance-based" , "Inundation area-based" , "Control points-based" , command = self.opt_calibrationtype )
 		self.calibration_type_entry.grid( row = 8 , column = 2 , columnspan = 4 , sticky = W + E )
 		self.calibration_type_entry.configure( state = 'disabled' )
 		self.label_dist_distance = Label( tab3 , text = "Distribution for runout distance" , state = 'disabled' )
@@ -406,8 +408,12 @@ class MainFrame:
 			self.type_sim_choice = 2
 			if( opt == "Calibration mode: Based on the distribution of PDC runout distance or inundation area" ):
 				self.boolean_polygon_choice = 0
+			elif( opt == "Calibration mode: Including reference PDC deposit polygon" ):
+				self.boolean_polygon_choice = 1
+				self.comparison_type_choice = 1 
 			else:
 				self.boolean_polygon_choice = 1
+				self.comparison_type_choice = 2			
 		self.enabled_disabled()
 
 	def opt_dem( self , opt ):
@@ -477,8 +483,10 @@ class MainFrame:
 			self.calibration_type_choice = 2
 		elif( opt == "Runout distance-based" ):
 			self.calibration_type_choice = 5
-		else:
+		elif( opt == "Inundation area-based" ):
 			self.calibration_type_choice = 7
+		else:
+			self.calibration_type_choice = 8
 		self.enabled_disabled()
 
 	def opt_distdistance( self , opt ):
@@ -517,6 +525,7 @@ class MainFrame:
 				self.sample_vent_availability = 0
 				self.sample_cal_availability = 0
 				self.boolean_polygon = 0
+				self.comparison_type = 1
 				self.results_availability = 0
 				self.source_dem = np.nan
 				self.vent_type = 1
@@ -587,6 +596,7 @@ class MainFrame:
 			else:
 				self.type_sim = np.nan
 				self.boolean_polygon = 0
+				self.comparison_type = 1
 				self.vent_type = 1
 				self.vent_dist = 1
 				self.type_input = 1
@@ -614,6 +624,7 @@ class MainFrame:
 			else:
 				self.type_sim = np.nan
 				self.boolean_polygon = 0
+				self.comparison_type = 1
 				self.vent_type = 1
 				self.vent_dist = 1
 				self.type_input = 1
@@ -723,15 +734,17 @@ class MainFrame:
 			return
 		try:
 			self.boolean_polygon = self.boolean_polygon_choice
+			self.comparison_type = self.comparison_type_choice
 			if( self.boolean_polygon == 1 ):
 				path_calib = filedialog.askopenfilename()
 			else:
 				path_calib = ""
 			self.type_sim = self.type_sim_choice
+
 			if( self.source_dem == 1 or self.source_dem == 3 ):
-				[ self.matrix_compare , self.vertices_compare , self.string_compare , self.data_direction ] = read_comparison_polygon_deg( path_calib , '' , 0.0 , 360.0 , self.lon1 , self.lon2 , self.lat1 , self.lat2 , self.lon_cen , self.lat_cen , self.step_lat_m , self.step_lon_m , self.cells_lon , self.cells_lat , self.matrix_lon , self.matrix_lat , self.step_lon_deg , self.step_lat_deg , self.N )
+				[ self.matrix_compare , self.vertices_compare , self.polygon_compare , self.string_compare , self.data_direction ] = read_comparison_polygon_deg( path_calib , self.comparison_type , '' , 0.0 , 360.0 , self.lon1 , self.lon2 , self.lat1 , self.lat2 , self.lon_cen , self.lat_cen , self.step_lat_m , self.step_lon_m , self.cells_lon , self.cells_lat , self.matrix_lon , self.matrix_lat , self.step_lon_deg , self.step_lat_deg , self.N )
 			else:
-				[ self.matrix_compare , self.vertices_compare , self.string_compare , self.data_direction ] = read_comparison_polygon_utm( path_calib , '' , 0.0 , 360.0 , self.east_cor , self.north_cor , self.east_cen , self.north_cen , self.cellsize , self.n_east , self.n_north , self.matrix_east , self.matrix_north , self.N )
+				[ self.matrix_compare , self.vertices_compare , self.polygon_compare , self.string_compare , self.data_direction ] = read_comparison_polygon_utm( path_calib , self.comparison_type , '' , 0.0 , 360.0 , self.east_cor , self.north_cor , self.east_cen , self.north_cen , self.cellsize , self.n_east , self.n_north , self.matrix_east , self.matrix_north , self.N )
 			self.sample_cal_availability = 1
 			self.enabled_disabled()
 			if( self.boolean_polygon == 1 ):
@@ -743,6 +756,7 @@ class MainFrame:
 			self.sample_cal_availability = 0
 			self.calib_inputs = ""
 			self.boolean_polygon = 0
+			self.comparison_type = 1
 			self.enabled_disabled()
 			messagebox.showerror( title = None , message = "Calibration inputs were not defined" )
 
@@ -750,11 +764,11 @@ class MainFrame:
 		if( self.source_dem == 1 or self.source_dem == 3 ):
 			plot_only_topography_deg( self.Cities , self.lon1 , self.lon2 , self.lat1 , self.lat2 , self.step_lat_m , self.step_lon_m , self.matrix_lon , self.matrix_lat , self.Topography , self.Topography_Sea )
 			plot_only_vent_deg( self.lon_cen_vector , self.lat_cen_vector , self.N )
-			plot_only_comparison_polygon_deg( self.matrix_lon , self.matrix_lat , self.matrix_compare )
+			plot_only_comparison_polygon_deg( self.matrix_lon , self.matrix_lat , self.matrix_compare , self.comparison_type , self.vertices_compare )
 		else:
 			plot_only_topography_utm( self.matrix_east , self.matrix_north , self.east_cor , self.north_cor , self.n_east , self.n_north , self.cellsize , self.Topography , self.Topography_Sea )
 			plot_only_vent_utm( self.east_cen_vector , self.north_cen_vector , self.N )
-			plot_only_comparison_polygon_utm( self.matrix_east , self.matrix_north , self.matrix_compare )
+			plot_only_comparison_polygon_utm( self.matrix_east , self.matrix_north , self.matrix_compare , self.comparison_type , self.vertices_compare )
 		plt.show()
 
 	def sample_height( self ):
@@ -765,6 +779,7 @@ class MainFrame:
 			else:
 				self.type_sim = np.nan
 				self.boolean_polygon = 0
+				self.comparison_type = 1
 				self.vent_type = 1
 				self.vent_dist = 1
 				self.type_input = 1
@@ -792,6 +807,7 @@ class MainFrame:
 			else:
 				self.type_sim = np.nan
 				self.boolean_polygon = 0
+				self.comparison_type = 1
 				self.vent_type = 1
 				self.vent_dist = 1
 				self.type_input = 1
@@ -933,10 +949,13 @@ class MainFrame:
 						self.height_inputs = self.height_inputs + "Parameter k in gamma distribution (inundation area [km2]): " + str( self.area_k ) + "\n" + "Parameter theta in gamma distribution (inundation area [km2]): " + str( self.area_theta ) + "\n"
 					else:
 						self.height_inputs = self.height_inputs + "File name: " + file_cumulative_area + "\n"
+				if( self.calibration_type == 8 ):
+					self.height_inputs = self.height_inputs + "Calibration type: Control points-based" + "\n" + "File name: " + file_path + "\n"
 			self.enabled_disabled()
 			messagebox.showinfo( title = None , message = "Height and H/L sampled successfully" )
 			if( not self.N == self.N_choice ):
 				self.boolean_polygon = 0
+				self.comparison_type = 1
 				self.vent_type = 1
 				self.vent_dist = 1
 				self.sample_vent_availability = 0
@@ -962,7 +981,7 @@ class MainFrame:
 			self.cone_levels = int( self.cone_levels_entry.get() )
 			comp_polygon = ""
 			if( self.type_sim == 1 ):
-				[ self.matrix_compare , self.vertices_compare , self.string_compare , self.data_direction ] = [ np.nan , np.nan , np.nan , np.nan ]
+				[ self.matrix_compare , self.vertices_compare , self.polygon_compare , self.string_compare , self.data_direction ] = [ np.nan , np.nan , np.nan , np.nan , np.nan ]
 			else:
 				if( self.boolean_polygon ):
 					comp_polygon = "Yes"
@@ -970,18 +989,20 @@ class MainFrame:
 			if( self.source_dem == 1 or self.source_dem == 3 ):
 				[ self.summary_data , self.area_pixel , self.sim_data , self.string_data , self.string_cones ] = definitions_save_data_deg( self.source_dem , self.height_vector , self.hl_vector , self.lon_cen_vector , self.lat_cen_vector , self.step_lon_m , self.step_lat_m , self.N , self.cone_levels )
 				[ self.data_cones , self.polygon ] = [ np.nan , np.nan ]
-				[ self.summary_data , self.string_data , self.string_cones , self.string_compare , self.sim_data , self.data_cones , self.polygon ] = compute_energy_cones_deg( self.type_sim , self.lon1 , self.lon2 , self.lat1 , self.lat2 , self.step_lon_deg , self.step_lat_deg , self.step_lon_m , self.step_lat_m , self.lon_cen_vector , self.lat_cen_vector , self.matrix_lon , self.matrix_lat , self.height_vector , self.hl_vector , self.cells_lon , self.cells_lat , self.Topography , self.angstep , self.angstep_res2 , self.angstep_res3 , self.distep , self.area_pixel , self.cone_levels , self.N , self.redist_energy , self.save_data , self.summary_data , self.string_data , self.string_cones , self.sim_data , self.anglen , self.pix_min , self.vector_backward_1 , self.vector_backward_2 , self.index_max , self.vector_correc , self.matrix_compare , self.vertices_compare , self.string_compare , self.data_direction , comp_polygon )
+				[ self.summary_data , self.string_data , self.string_cones , self.string_compare , self.sim_data , self.data_cones , self.polygon ] = compute_energy_cones_deg( self.type_sim , self.lon1 , self.lon2 , self.lat1 , self.lat2 , self.step_lon_deg , self.step_lat_deg , self.step_lon_m , self.step_lat_m , self.lon_cen_vector , self.lat_cen_vector , self.matrix_lon , self.matrix_lat , self.height_vector , self.hl_vector , self.cells_lon , self.cells_lat , self.Topography , self.angstep , self.angstep_res2 , self.angstep_res3 , self.distep , self.area_pixel , self.cone_levels , self.N , self.redist_energy , self.save_data , self.summary_data , self.string_data , self.string_cones , self.sim_data , self.anglen , self.pix_min , self.vector_backward_1 , self.vector_backward_2 , self.index_max , self.vector_correc , self.matrix_compare , self.vertices_compare , self.polygon_compare , self.string_compare , self.data_direction , comp_polygon , self.comparison_type )
 			else:
 				[ self.summary_data , self.area_pixel , self.sim_data , self.string_data , self.string_cones ] = definitions_save_data_utm( self.source_dem , self.height_vector , self.hl_vector , self.east_cen_vector , self.north_cen_vector , self.cellsize , self.N , self.cone_levels )
 				[ self.data_cones , self.polygon ] = [ np.nan , np.nan ]
-				[ self.summary_data , self.string_data , self.string_cones , self.string_compare , self.sim_data , self.data_cones , self.polygon ] = compute_energy_cones_utm( self.type_sim , self.n_north , self.n_east , self.east_cor , self.north_cor , self.east_cen_vector , self.north_cen_vector , self.matrix_north , self.matrix_east , self.height_vector , self.hl_vector , self.cellsize , self.Topography , self.angstep , self.angstep_res2 , self.angstep_res3 , self.distep , self.area_pixel , self.cone_levels , self.N , self.redist_energy , self.save_data , self.summary_data , self.string_data , self.string_cones , self.sim_data , self.anglen , self.pix_min , self.vector_backward_1 , self.vector_backward_2 , self.index_max , self.vector_correc , self.matrix_compare , self.vertices_compare , self.string_compare , self.data_direction , comp_polygon )
+				[ self.summary_data , self.string_data , self.string_cones , self.string_compare , self.sim_data , self.data_cones , self.polygon ] = compute_energy_cones_utm( self.type_sim , self.n_north , self.n_east , self.east_cor , self.north_cor , self.east_cen_vector , self.north_cen_vector , self.matrix_north , self.matrix_east , self.height_vector , self.hl_vector , self.cellsize , self.Topography , self.angstep , self.angstep_res2 , self.angstep_res3 , self.distep , self.area_pixel , self.cone_levels , self.N , self.redist_energy , self.save_data , self.summary_data , self.string_data , self.string_cones , self.sim_data , self.anglen , self.pix_min , self.vector_backward_1 , self.vector_backward_2 , self.index_max , self.vector_correc , self.matrix_compare , self.vertices_compare , self.polygon_compare , self.string_compare , self.data_direction , comp_polygon , self.comparison_type )
 			self.results_availability = 1
 			self.enabled_disabled()
 			if( self.type_sim == 1 ):
 				self.run_inputs = "Simulation type: Default mode" + "\n"
 			else:
-				if( self.boolean_polygon == 1 ):
+				if( self.boolean_polygon == 1 and self.comparison_type == 1 ):
 					self.run_inputs = "Simulation type: Calibration mode (Including reference PDC deposit polygon)" + "\n"
+				elif( self.boolean_polygon == 1 and self.comparison_type == 2 ):
+					self.run_inputs = "Simulation type: Calibration mode (Including reference control points)" + "\n"
 				else:
 					self.run_inputs = "Simulation type: Calibration mode (Based on the distribution of PDC runout distance or inundation area)" + "\n"
 			self.run_inputs = self.run_inputs + "Cone generations: " + str( self.cone_levels ) + "\n" + "Number of Simulations: " + str( self.N ) + "\n"
@@ -1001,7 +1022,7 @@ class MainFrame:
 			comp_polygon = ""
 			if( self.boolean_polygon ):
 				comp_polygon = "Yes"
-			plot_only_calibration( self.string_compare , self.vertices_compare , self.N , comp_polygon )
+			plot_only_calibration( self.string_compare , self.vertices_compare , self.N , comp_polygon , self.comparison_type )
 		else:
 			plot_input_output( self.summary_data )
 		plt.show()
@@ -1168,7 +1189,7 @@ class MainFrame:
 				bol_hl_gaus = 0
 				bol_hl_gam = 0
 				bol_label_calib = 1
-				if( self.calibration_type_choice <= 3 ):
+				if( self.calibration_type_choice in [ 1 , 2 , 3 , 8 ] ):
 					bol_dist_distance = 0
 					bol_distance_gaus = 0
 					bol_distance_gam = 0
