@@ -518,25 +518,25 @@ def create_inputs( type_sim , type_input , dist_input_height , dist_input_hl , i
 					return [ np.zeros( ( 0 ) ) , np.zeros( ( 0 ) ) , N , variable_vector , limits_calib , Probability_Save ]
 			if( calibration_type == 1 ):
 				z = np.reshape( file_data[ : , 2 ] , ( number_steps , number_steps ) )
-				interpolator = interpolate.interp2d( xi_sim , yi_sim , z , kind = 'cubic' )
+				interpolator = interpolate.RectBivariateSpline( xi_sim , yi_sim , z )
 				zi_reshaped = np.reshape( interpolator( xi , yi ) , ( number_steps_dense * number_steps_dense , 1 ) )
 			elif( calibration_type == 2 ):
 				z = np.reshape( file_data[ : , 3 ] , ( number_steps , number_steps ) )
-				interpolator = interpolate.interp2d( xi_sim , yi_sim , z , kind = 'cubic' )
+				interpolator = interpolate.RectBivariateSpline( xi_sim , yi_sim , z )
 				zi_reshaped = np.reshape( interpolator( xi , yi ) , ( number_steps_dense * number_steps_dense , 1 ) )
 				zi_reshaped = 1.0 / ( zi_reshaped + resolution )
 			elif( calibration_type == 3 ):
 				z = np.reshape( file_data[ : , 4 ] , ( number_steps , number_steps ) )
-				interpolator = interpolate.interp2d( xi_sim , yi_sim , z , kind = 'cubic' )
+				interpolator = interpolate.RectBivariateSpline( xi_sim , yi_sim , z )
 				zi_reshaped = np.reshape( interpolator( xi , yi ) , ( number_steps_dense * number_steps_dense , 1 ) )
 				zi_reshaped = 1.0 / ( zi_reshaped + resolution )
 			elif( calibration_type == 4 ):
 				z = np.reshape( file_data[ : , 6 ] , ( number_steps , number_steps ) )
-				interpolator = interpolate.interp2d( xi_sim , yi_sim , z , kind = 'cubic' )
+				interpolator = interpolate.RectBivariateSpline( xi_sim , yi_sim , z )
 				zi_reshaped = np.reshape( interpolator( xi , yi ) , ( number_steps_dense * number_steps_dense , 1 ) )
 			elif( calibration_type == 8 ):
 				z = np.reshape( file_data[ : , 9 ] , ( number_steps , number_steps ) )
-				interpolator = interpolate.interp2d( xi_sim , yi_sim , z , kind = 'cubic' )
+				interpolator = interpolate.RectBivariateSpline( xi_sim , yi_sim , z )
 				zi_reshaped = np.reshape( interpolator( xi , yi ) , ( number_steps_dense * number_steps_dense , 1 ) )
 				zi_reshaped = 1.0 / ( zi_reshaped + resolution )
 			Probability_Save = gaussian_filter( np.reshape( zi_reshaped * zi_reshaped / sum( zi_reshaped * zi_reshaped ) , ( number_steps_dense , number_steps_dense ) ) , 5 )
@@ -563,7 +563,7 @@ def create_inputs( type_sim , type_input , dist_input_height , dist_input_hl , i
 					max_val_cal = np.max( file_data[ : , 7 ] )
 					min_val_cal = np.min( file_data[ : , 7 ] )
 					z = np.reshape( file_data[ : , 7 ] , ( number_steps , number_steps ) )
-				interpolator = interpolate.interp2d( xi_sim , yi_sim , z , kind = 'cubic' )
+				interpolator = interpolate.RectBivariateSpline( xi_sim , yi_sim , z )
 				zi_reshaped = np.reshape( interpolator( xi , yi ) , ( number_steps_dense * number_steps_dense , 1 ) )
 				if( dist_distance_calibration == 1 ):
 					mincum = norm.cdf( min_val_cal , distance_calibration , var_distance_calibration )
@@ -610,7 +610,7 @@ def create_inputs( type_sim , type_input , dist_input_height , dist_input_hl , i
 				max_val_cal = np.max( file_data[ : , 8 ] )
 				min_val_cal = np.min( file_data[ : , 8 ] )
 				z = np.reshape( file_data[ : , 8 ] , ( number_steps , number_steps ) )
-				interpolator = interpolate.interp2d( xi_sim , yi_sim , z , kind = 'cubic' )
+				interpolator = interpolate.RectBivariateSpline( xi_sim , yi_sim , z )
 				zi_reshaped = np.reshape( interpolator( xi , yi ) , ( number_steps_dense * number_steps_dense , 1 ) )
 				if( dist_area_calibration == 1 ):
 					mincum = norm.cdf( min_val_cal , area_calibration , var_area_calibration )

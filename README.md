@@ -19,6 +19,10 @@ Aravena, A., Bevilacqua, A., Neri, A., Gabellini, P., Ferrés, D., Escobar, D., 
 
 Bevilacqua, A., Aravena, A., Neri, A., Gutierrez, E., Escobar, D., Schliz, M., Aiuppa, A., and Cioni, R. (2021). Thematic vent opening probability maps and hazard assessment of small-scale pyroclastic density currents in the San Salvador volcanic complex (El Salvador) and Nejapa-Chiltepe volcanic complex (Nicaragua). *Natural Hazards and Earth System Sciences*, 21, 1639-1665.
 
+**Application to Tungurahua volcano**:
+
+Aravena, A., Tadini, A., Bevilacqua, A., Samaniego, P., Bernard, B., Hidalgo, S., Le Pennec, J., Martinez-Yanez, P., García, J. and Roche, O. (2024). Probabilistic, scenario-based hazard assessment for pyroclastic density currents at Tungurahua volcano, Ecuador. *Bulletin of Volcanology*, 86, 10.
+
 **Usage normal version:**
  python3 ECMapProb.py
 
@@ -29,5 +33,5 @@ Bevilacqua, A., Aravena, A., Neri, A., Gutierrez, E., Escobar, D., Schliz, M., A
  python3 Friendly_ECMapProb.py
 
 **This code needs:**
- - Installation of matplotlib (https://matplotlib.org/), numpy (http://www.numpy.org/), elevation (https://pypi.org/project/elevation/), Pillow (https://pillow.readthedocs.io/), utm (https://pypi.org/project/utm/), and tifffile (https://pypi.org/project/tifffile/).
+ - Installation of matplotlib (https://matplotlib.org/), numpy (http://www.numpy.org/), elevation (https://pypi.org/project/elevation/), utm (https://pypi.org/project/utm/), and tifffile (https://pypi.org/project/tifffile/).
 
