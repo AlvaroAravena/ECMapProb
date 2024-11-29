@@ -15,6 +15,8 @@ warnings.filterwarnings("ignore")
 
 def main_program():
 
+	np.set_printoptions( legacy =' 1.25 ')
+
 	# INPUT PARAMETERS
 	print('Reading input file')
 	[ current_path , run_name , type_sim , source_dem , topography_file , comparison_polygon , comparison_type , ang_cal , ang_cal_range , lon1 , lon2 , lat1 , lat2 , vent_type , lon_cen , lat_cen , east_cen , north_cen , azimuth_lin , length_lin , radius_rad , ang1_rad , ang2_rad , var_cen , dist_input_cen , input_file_vent , type_input , dist_input_height , height , var_height , height_k , height_theta , dist_input_hl , hl , var_hl , hl_k , hl_theta , input_file_cal , calibration_type , dist_distance_calibration , distance_calibration , var_distance_calibration , distance_calibration_k , distance_calibration_theta , file_cumulative_distance , dist_area_calibration , area_calibration , var_area_calibration , area_calibration_k , area_calibration_theta , file_cumulative_area , cone_levels , N , save_data , redist_energy , plot_flag , sea_flag ] = read_input()
