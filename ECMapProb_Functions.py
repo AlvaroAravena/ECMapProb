@@ -600,8 +600,8 @@ def create_inputs( type_sim , type_input , dist_input_height , dist_input_hl , i
 					mincum = file_cumulative[ 0 ][ 1 ]
 					maxcum = file_cumulative[ len( file_cumulative ) - 1 ][ 1 ]
 					vector_p = np.arange( mincum + ( maxcum - mincum ) / ( 2 * number_steps_var ) , maxcum , ( maxcum - mincum ) / ( number_steps_var ) )
-					interpolator = interpolate.CubicSpline( file_cumulative[ : , 1 ] , file_cumulative[ : , 0 ] )
-					interpolator_inverse = interpolate.CubicSpline( file_cumulative[ 1 : len( file_cumulative ) - 2 , 0 ] , file_cumulative[ 2 : len( file_cumulative ) - 1 , 1 ] - file_cumulative[ 0 : len( file_cumulative ) - 3 , 1 ] , fill_value = "extrapolate" )
+					interpolator = interpolate.interp1d( file_cumulative[ : , 1 ] , file_cumulative[ : , 0 ] )
+					interpolator_inverse = interpolate.interp1d( file_cumulative[ 1 : len( file_cumulative ) - 2 , 0 ] , file_cumulative[ 2 : len( file_cumulative ) - 1 , 1 ] - file_cumulative[ 0 : len( file_cumulative ) - 3 , 1 ] , fill_value = "extrapolate" )
 					variable_vector_used = interpolator( vector_p )
 					variable_vector[ : , 0 ] = np.linspace( np.minimum( 0.0 , np.min( variable_vector_used ) ) , np.max( variable_vector_used ) , number_steps_var_plot )
 					variable_vector[ : , 1 ] = interpolator_inverse( variable_vector[ : , 0 ] )
@@ -647,8 +647,8 @@ def create_inputs( type_sim , type_input , dist_input_height , dist_input_hl , i
 					mincum = file_cumulative[ 0 ][ 1 ]
 					maxcum = file_cumulative[ len( file_cumulative ) - 1 ][ 1 ]
 					vector_p = np.arange( mincum + ( maxcum - mincum ) / ( 2 * number_steps_var ) , maxcum , ( maxcum - mincum ) / ( number_steps_var ) )
-					interpolator = interpolate.CubicSpline( file_cumulative[ : , 1 ] , file_cumulative[ : , 0 ] )
-					interpolator_inverse = interpolate.CubicSpline( file_cumulative[ 1 : len( file_cumulative ) - 2 , 0 ] , file_cumulative[ 2 : len( file_cumulative ) - 1 , 1 ] - file_cumulative[ 0 : len( file_cumulative ) - 3 , 1 ] , fill_value = "extrapolate" )
+					interpolator = interpolate.interp1d( file_cumulative[ : , 1 ] , file_cumulative[ : , 0 ] )
+					interpolator_inverse = interpolate.interp1d( file_cumulative[ 1 : len( file_cumulative ) - 2 , 0 ] , file_cumulative[ 2 : len( file_cumulative ) - 1 , 1 ] - file_cumulative[ 0 : len( file_cumulative ) - 3 , 1 ] , fill_value = "extrapolate" )
 					variable_vector_used = interpolator( vector_p )
 					variable_vector[ : , 0 ] = np.linspace( np.minimum( 0.0 , np.min( variable_vector_used ) ) , np.max( variable_vector_used ) , number_steps_var_plot )
 					variable_vector[ : , 1 ] = interpolator_inverse( variable_vector[ : , 0 ] )
