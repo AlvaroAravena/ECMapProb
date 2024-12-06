@@ -600,8 +600,8 @@ def create_inputs( type_sim , type_input , dist_input_height , dist_input_hl , i
 					mincum = file_cumulative[ 0 ][ 1 ]
 					maxcum = file_cumulative[ len( file_cumulative ) - 1 ][ 1 ]
 					vector_p = np.arange( mincum + ( maxcum - mincum ) / ( 2 * number_steps_var ) , maxcum , ( maxcum - mincum ) / ( number_steps_var ) )
-					interpolator = interpolate.interp1d( file_cumulative[ : , 1 ] , file_cumulative[ : , 0 ] )
-					interpolator_inverse = interpolate.interp1d( file_cumulative[ 1 : len( file_cumulative ) - 2 , 0 ] , file_cumulative[ 2 : len( file_cumulative ) - 1 , 1 ] - file_cumulative[ 0 : len( file_cumulative ) - 3 , 1 ] , fill_value = "extrapolate" )
+					interpolator = interpolate.CubicSpline( file_cumulative[ : , 1 ] , file_cumulative[ : , 0 ] )
+					interpolator_inverse = interpolate.CubicSpline( file_cumulative[ 1 : len( file_cumulative ) - 2 , 0 ] , file_cumulative[ 2 : len( file_cumulative ) - 1 , 1 ] - file_cumulative[ 0 : len( file_cumulative ) - 3 , 1 ] , fill_value = "extrapolate" )
 					variable_vector_used = interpolator( vector_p )
 					variable_vector[ : , 0 ] = np.linspace( np.minimum( 0.0 , np.min( variable_vector_used ) ) , np.max( variable_vector_used ) , number_steps_var_plot )
 					variable_vector[ : , 1 ] = interpolator_inverse( variable_vector[ : , 0 ] )
@@ -647,8 +647,8 @@ def create_inputs( type_sim , type_input , dist_input_height , dist_input_hl , i
 					mincum = file_cumulative[ 0 ][ 1 ]
 					maxcum = file_cumulative[ len( file_cumulative ) - 1 ][ 1 ]
 					vector_p = np.arange( mincum + ( maxcum - mincum ) / ( 2 * number_steps_var ) , maxcum , ( maxcum - mincum ) / ( number_steps_var ) )
-					interpolator = interpolate.interp1d( file_cumulative[ : , 1 ] , file_cumulative[ : , 0 ] )
-					interpolator_inverse = interpolate.interp1d( file_cumulative[ 1 : len( file_cumulative ) - 2 , 0 ] , file_cumulative[ 2 : len( file_cumulative ) - 1 , 1 ] - file_cumulative[ 0 : len( file_cumulative ) - 3 , 1 ] , fill_value = "extrapolate" )
+					interpolator = interpolate.CubicSpline( file_cumulative[ : , 1 ] , file_cumulative[ : , 0 ] )
+					interpolator_inverse = interpolate.CubicSpline( file_cumulative[ 1 : len( file_cumulative ) - 2 , 0 ] , file_cumulative[ 2 : len( file_cumulative ) - 1 , 1 ] - file_cumulative[ 0 : len( file_cumulative ) - 3 , 1 ] , fill_value = "extrapolate" )
 					variable_vector_used = interpolator( vector_p )
 					variable_vector[ : , 0 ] = np.linspace( np.minimum( 0.0 , np.min( variable_vector_used ) ) , np.max( variable_vector_used ) , number_steps_var_plot )
 					variable_vector[ : , 1 ] = interpolator_inverse( variable_vector[ : , 0 ] )
@@ -1320,7 +1320,7 @@ def compute_energy_cones_deg( type_sim , lon1 , lon2 , lat1 , lat2 , step_lon_de
 							if( not np.isnan( interpol_pos( lon1 , lat1 , step_lon_deg , step_lat_deg , new_x , new_y , cells_lon , cells_lat , Topography ) ) ):
 								polygon.append( ( new_x , new_y , height_eff , polygon[ j ][ 3 ] + 1 , l , wh_sum[ lint ] ) )
 			sum_pixels = sum( sum( data_step ) )
-			print( ( j , len( polygon ) , polygon[ j ][ 3 ] , polygon[ j ][ 2 ] , sum( sum( data_step ) ) , polygon[ j ][ 4 ] ) )
+			print( ( j , len( polygon ) , float( polygon[ j ][ 3 ] ) , float( polygon[ j ][ 2 ] ) , float( sum( sum( data_step ) ) ) , float( polygon[ j ][ 4 ] ) ) )
 			if( save_data == 1 or type_sim == 2 ):
 				if( ( j == 0 or ( j + 1 == len( polygon ) ) ) or ( polygon[ j ][ 3 ] < polygon[ j + 1 ][ 3 ] ) ):
 					img = data_step[ range( len( data_cones[ : , 0 ] ) -1 , -1 , -1 ) , : ].astype( np.uint8 )
@@ -1706,7 +1706,7 @@ def compute_energy_cones_utm( type_sim , n_north , n_east , east_cor , north_cor
 							if( not np.isnan( interpol_pos( east_cor , north_cor , cellsize , cellsize , new_x , new_y , n_east , n_north , Topography ) ) ):
 								polygon.append( ( new_x , new_y , height_eff , polygon[ j ][ 3 ] + 1 , l , wh_sum[ lint ] ) )
 			sum_pixels = sum( sum( data_step ) )
-			print( ( j , len( polygon ) , polygon[ j ][ 3 ] , polygon[ j ][ 2 ] , sum( sum( data_step ) ) , polygon[ j ][ 4 ] ) )
+			print( ( j , len( polygon ) , float( polygon[ j ][ 3 ] ) , float( polygon[ j ][ 2 ] ) , float( sum( sum( data_step ) ) ) , float( polygon[ j ][ 4 ] ) ) )
 			if( save_data == 1 or type_sim == 2 ):
 				if( ( j == 0 or ( j + 1 == len( polygon ) ) ) or ( polygon[ j ][ 3 ] < polygon[ j + 1 ][ 3 ] ) ):
 					img = data_step[ range( len( data_cones[ : , 0 ] ) -1 , -1 , -1 ) , : ].astype( np.uint8 )
