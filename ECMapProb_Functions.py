@@ -839,7 +839,7 @@ def read_comparison_polygon_deg( comparison_polygon , comparison_type , input_fi
 			string_compare = np.loadtxt( input_file_cal , skiprows = 1 )
 		line_compare = plt.contour( matrix_lon , matrix_lat , matrix_compare[ range( len( matrix_compare[ : , 0 ] ) -1 , -1 , -1 ) , : ] , np.array( [ 0 ] ) , colors = 'r' , interpolation = 'linear' )
 		plt.close()
-		path_compare = line_compare.collections[ 0 ].get_paths()[ 0 ]
+		path_compare = line_compare.get_paths()[ 0 ]
 		ver_compare = path_compare.vertices
 		dist_compare = np.zeros( len( ver_compare ) - 1 )
 		for i in range( len( ver_compare ) - 1 ):
@@ -934,7 +934,7 @@ def read_comparison_polygon_utm( comparison_polygon , comparison_type , input_fi
 			string_compare = np.loadtxt( input_file_cal , skiprows = 1 )
 		line_compare = plt.contour( matrix_east , matrix_north , matrix_compare[ range( len( matrix_compare[ : , 0 ] ) -1 , -1 , -1 ) , : ] , np.array( [ 0 ] ) , colors = 'r' , interpolation = 'linear' )
 		plt.close()
-		path_compare = line_compare.collections[ 0 ].get_paths()[ 0 ]
+		path_compare = line_compare.get_paths()[ 0 ]
 		ver_compare = path_compare.vertices
 		dist_compare = np.zeros( len( ver_compare ) - 1 )
 		for i in range( len( ver_compare ) - 1 ):
@@ -1348,7 +1348,7 @@ def compute_energy_cones_deg( type_sim , lon1 , lon2 , lat1 , lat2 , step_lon_de
 					data_step_border[ : , 0 ] = 0.0
 					data_step_border[ : , len( data_step_border[ 0 , : ] ) -1 ] = 0.0
 					line_new = plt.contour( matrix_lon , matrix_lat , data_step_border , np.array( [ 0 ] ) , colors = 'r' , interpolation = 'linear' )
-					path_new = line_new.collections[ 0 ].get_paths()
+					path_new = line_new.get_paths()
 					if( len( path_new ) == 1 ):
 						path_new = path_new[ 0 ]
 					else:
@@ -1734,7 +1734,7 @@ def compute_energy_cones_utm( type_sim , n_north , n_east , east_cor , north_cor
 					data_step_border[ : , 0 ] = 0.0
 					data_step_border[ : , len( data_step_border[ 0 , : ] ) -1 ] = 0.0
 					line_new = plt.contour( matrix_east , matrix_north , data_step_border , np.array( [ 0 ] ) , colors = 'r' , interpolation = 'linear' )
-					path_new = line_new.collections[ 0 ].get_paths()
+					path_new = line_new.get_paths()
 					if( len( path_new ) == 1 ):
 						path_new = path_new[ 0 ]
 					else:
@@ -1951,8 +1951,8 @@ def plot_deg( run_name , type_sim , Cities , polygon , lon1 , lon2 , lat1 , lat2
 		CS_Topo = plt.contourf( matrix_lon , matrix_lat , Topography , 100 , alpha = 1.0 , cmap = cmapg , antialiased = True )
 		CS_Sea = plt.contourf( matrix_lon , matrix_lat , Topography_Sea , 100 , alpha = 0.5 , cmap = cmaps , antialiased = True )
 		CS = plt.contourf( matrix_lon , matrix_lat , data_cones , 100 , alpha = 0.3 , cmap = cmapr , antialiased = True )
-	plt.xlabel( 'Longitude $[^\circ]$' )
-	plt.ylabel( 'Latitude $[^\circ]$' )
+	plt.xlabel( 'Longitude $[º]$' )
+	plt.ylabel( 'Latitude $[º]$' )
 	plt.xlim( lon1 , lon2 )
 	plt.ylim( lat1 , lat2 )
 	for i in range( len( Cities ) ):
@@ -2306,8 +2306,8 @@ def plot_only_topography_deg( Cities , lon1 , lon2 , lat1 , lat2 , step_lat_m , 
 	cmaps = plt.cm.get_cmap( 'Blues' ) 
 	CS_Topo = plt.contourf( matrix_lon , matrix_lat , Topography , 100 , alpha = 1.0 , cmap = cmapg , antialiased = True )
 	CS_Sea = plt.contourf( matrix_lon , matrix_lat , Topography_Sea , 100 , alpha = 0.5 , cmap = cmaps , antialiased = True )
-	plt.xlabel( 'Longitude $[^\circ]$' )
-	plt.ylabel( 'Latitude $[^\circ]$' )
+	plt.xlabel( 'Longitude $[º]$' )
+	plt.ylabel( 'Latitude $[º]$' )
 	plt.xlim( lon1, lon2 )
 	plt.ylim( lat1, lat2 )
 	for i in range( len( Cities ) ):
@@ -2419,8 +2419,8 @@ def plot_only_map_deg( Cities , lon1 , lon2 , lat1 , lat2 , step_lat_m , step_lo
 		CS_Topo = plt.contourf( matrix_lon , matrix_lat , Topography , 1000 , alpha = 1.0 , cmap = cmapg , antialiased = True )
 		CS_Sea = plt.contourf( matrix_lon , matrix_lat , Topography_Sea , 100 , alpha = 0.5 , cmap = cmaps , antialiased = True )
 		CS = plt.contourf( matrix_lon , matrix_lat , data_cones , 100 , alpha = 0.3 , cmap = cmapr , antialiased = True )
-	plt.xlabel( 'Longitude $[^\circ]$' )
-	plt.ylabel( 'Latitude $[^\circ]$' )
+	plt.xlabel( 'Longitude $[º]$' )
+	plt.ylabel( 'Latitude $[º]$' )
 	plt.xlim( lon1, lon2 )
 	plt.ylim( lat1, lat2 )
 	for i in range( len( Cities ) ):
