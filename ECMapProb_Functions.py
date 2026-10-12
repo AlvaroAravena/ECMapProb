@@ -714,13 +714,13 @@ def create_inputs( type_sim , type_input , dist_input_height , dist_input_hl , i
 					for i in range( 0 , N ):
 						if( height_vector[ i ] < 0 ):
 							if( dist_input_height == 1 ):
-								height_vector[ i ] = np.random.normal( height , var_height , 1 )
+								height_vector[ i ] = np.random.normal( height , var_height , 1 ).item()
 							elif( dist_input_height == 2 ):
-								height_vector[ i ] = np.random.uniform( height - var_height , height + var_height , 1 )
+								height_vector[ i ] = np.random.uniform( height - var_height , height + var_height , 1 ).item()
 							elif( dist_input_height == 3 ):
-								height_vector[ i ] = np.random.gamma( height_k , height_theta , 1 )
+								height_vector[ i ] = np.random.gamma( height_k , height_theta , 1 ).item()
 							else:
-								height_vector[ i ] = np.random.lognormal( np.log( height * height / np.sqrt( height * height + var_height * var_height ) ) , np.log( 1 + var_height * var_height / height / height ) , 1 )
+								height_vector[ i ] = np.random.lognormal( np.log( height * height / np.sqrt( height * height + var_height * var_height ) ) , np.log( 1 + var_height * var_height / height / height ) , 1 ).item()
 							aux_boolean = 1
 					if( aux_boolean == 0 ):
 						break
@@ -730,13 +730,13 @@ def create_inputs( type_sim , type_input , dist_input_height , dist_input_hl , i
 					for i in range( 0 , N ):
 						if( hl_vector[ i ] < 0.01 ):
 							if( dist_input_hl == 1 ):
-								hl_vector[ i ] = np.random.normal( hl , var_hl , 1 )
+								hl_vector[ i ] = np.random.normal( hl , var_hl , 1 ).item()
 							elif( dist_input_hl == 2 ):
-								hl_vector[ i ] = np.random.uniform( hl - var_hl , hl + var_hl , 1 )
+								hl_vector[ i ] = np.random.uniform( hl - var_hl , hl + var_hl , 1 ).item()
 							elif( dist_input_hl == 3 ):
-								hl_vector[ i ] = np.random.gamma( hl_k , hl_theta , 1 )
+								hl_vector[ i ] = np.random.gamma( hl_k , hl_theta , 1 ).item()
 							else:
-								hl_vector[ i ] = np.random.lognormal( np.log( hl * hl / np.sqrt( hl * hl + var_hl * var_hl ) ) , np.log( 1 + var_hl * var_hl / hl / hl ) , 1 )
+								hl_vector[ i ] = np.random.lognormal( np.log( hl * hl / np.sqrt( hl * hl + var_hl * var_hl ) ) , np.log( 1 + var_hl * var_hl / hl / hl ) , 1 ).item()
 							aux_boolean = 1
 					if( aux_boolean == 0 ):
 						break
@@ -762,8 +762,8 @@ def create_vent_deg( vent_type , input_file_vent , lon_cen , lat_cen , var_cen ,
 					aux_boolean = 0
 					for i in range( 0 , N ):
 						if( np.power( ( lon_cen_vector[ i ] - lon_cen ) * step_lon_m / step_lon_deg , 2 ) + np.power( ( lat_cen_vector[ i ] - lat_cen ) * step_lat_m / step_lat_deg , 2 ) > np.power( var_cen , 2 ) ):
-							lon_cen_vector[ i ] = np.random.uniform( lon_cen - var_cen * step_lon_deg / step_lon_m , lon_cen + var_cen * step_lon_deg / step_lon_m , 1 )
-							lat_cen_vector[ i ] = np.random.uniform( lat_cen - var_cen * step_lat_deg / step_lat_m , lat_cen + var_cen * step_lat_deg / step_lat_m , 1 )
+							lon_cen_vector[ i ] = np.random.uniform( lon_cen - var_cen * step_lon_deg / step_lon_m , lon_cen + var_cen * step_lon_deg / step_lon_m , 1 ).item()
+							lat_cen_vector[ i ] = np.random.uniform( lat_cen - var_cen * step_lat_deg / step_lat_m , lat_cen + var_cen * step_lat_deg / step_lat_m , 1 ).item()
 							aux_boolean = 1
 					if( aux_boolean == 0 ):
 						break
@@ -800,8 +800,8 @@ def create_vent_utm( vent_type , input_file_vent , east_cen , north_cen , var_ce
 					aux_boolean = 0
 					for i in range( 0 , N ):
 						if( np.power( ( east_cen_vector[ i ] - east_cen ) , 2 ) + np.power( ( north_cen_vector[ i ] - north_cen ) , 2 ) > np.power( var_cen , 2 ) ):
-							east_cen_vector[ i ] = np.random.uniform( east_cen - var_cen , east_cen + var_cen , 1 )
-							north_cen_vector[ i ] = np.random.uniform( north_cen - var_cen , north_cen + var_cen , 1 )
+							east_cen_vector[ i ] = np.random.uniform( east_cen - var_cen , east_cen + var_cen , 1 ).item()
+							north_cen_vector[ i ] = np.random.uniform( north_cen - var_cen , north_cen + var_cen , 1 ).item()
 							aux_boolean = 1
 					if( aux_boolean == 0 ):
 						break
@@ -1325,14 +1325,19 @@ def compute_energy_cones_deg( type_sim , lon1 , lon2 , lat1 , lat2 , step_lon_de
 				if( ( j == 0 or ( j + 1 == len( polygon ) ) ) or ( polygon[ j ][ 3 ] < polygon[ j + 1 ][ 3 ] ) ):
 					img = data_step[ range( len( data_cones[ : , 0 ] ) -1 , -1 , -1 ) , : ].astype( np.uint8 )
 					contours = cv.findContours( img , cv.RETR_EXTERNAL , cv.CHAIN_APPROX_SIMPLE )
-					contours = np.vstack( contours[ 0 ] ).squeeze()
-					data_inundation = geometry.Polygon( contours )
-					data_inundation = data_inundation.buffer( 0 )
-					contours = contours.transpose()
-					points_lon = matrix_lon[ contours[ 1 ] , contours[ 0 ] ]
-					points_lat = matrix_lat[ contours[ 1 ] , contours[ 0 ] ]
-					distances = np.power( np.power( ( points_lon - lon_cen_vector[ i ] ) * ( step_lon_m / step_lon_deg ) , 2 ) + np.power( ( points_lat - lat_cen_vector[ i ] ) * ( step_lat_m / step_lat_deg ) , 2 ) , 0.5 )
-					string_data = string_data + "\n" + str( polygon[ j ][ 3 ] ) + " " + str( sum( sum( data_step ) ) * area_pixel ) + " " + str( distances.max() / 1000.0 )
+					if( len( contours[ 0 ][ 0 ] ) > 3 ):
+						contours = np.vstack( contours[ 0 ] ).squeeze()
+						data_inundation = geometry.Polygon( contours )
+						data_inundation = data_inundation.buffer( 0 )
+						contours = contours.transpose()
+						points_lon = matrix_lon[ contours[ 1 ] , contours[ 0 ] ]
+						points_lat = matrix_lat[ contours[ 1 ] , contours[ 0 ] ]
+						distances = np.power( np.power( ( points_lon - lon_cen_vector[ i ] ) * ( step_lon_m / step_lon_deg ) , 2 ) + np.power( ( points_lat - lat_cen_vector[ i ] ) * ( step_lat_m / step_lat_deg ) , 2 ) , 0.5 )
+						string_data = string_data + "\n" + str( polygon[ j ][ 3 ] ) + " " + str( sum( sum( data_step ) ) * area_pixel ) + " " + str( distances.max() / 1000.0 )
+					else:
+						distances = 0.0
+						string_data = string_data + "\n" + str( polygon[ j ][ 3 ] ) + " " + str( sum( sum( data_step ) ) * area_pixel ) + " " + str( 0.0 )
+
 				if( N == 1 ):
 					string_cones = string_cones + "\n" + str( j ) + " " + str( polygon[ j ][ 3 ] ) + " " + str( polygon[ j ][ 2 ] ) + " " + str( polygon[ j ][ 5 ] )
 		if( N > 1 ):
@@ -1441,13 +1446,18 @@ def compute_energy_cones_deg( type_sim , lon1 , lon2 , lat1 , lat2 , step_lon_de
 		if( save_data == 1 or type_sim == 2 ):
 			img = data_step[ range( len( data_cones[ : , 0 ] ) -1 , -1 , -1 ) , : ].astype( np.uint8 )
 			contours = cv.findContours( img , cv.RETR_EXTERNAL , cv.CHAIN_APPROX_SIMPLE )
-			contours = np.vstack( contours[ 0 ] ).squeeze().transpose()
-			points_lon = matrix_lon[ contours[ 1 ] , contours[ 0 ] ]
-			points_lat = matrix_lat[ contours[ 1 ] , contours[ 0 ] ]
-			distances = np.power( np.power( ( points_lon - lon_cen_vector[ i ] ) * step_lon_m / step_lon_deg , 2 ) + np.power( ( points_lat - lat_cen_vector[ i ] ) , 2 ) * step_lat_m / step_lat_deg , 0.5 )
-			summary_data[ i , 4 ] = sum( sum( data_step ) ) * area_pixel
-			summary_data[ i , 5 ] = distances.max() / 1000.0
-			summary_data[ i , 6 ] = runout_min / 1000.0
+			if( len( contours[ 0 ][ 0 ] > 3 ) ):
+				contours = np.vstack( contours[ 0 ] ).squeeze().transpose()
+				points_lon = matrix_lon[ contours[ 1 ] , contours[ 0 ] ]
+				points_lat = matrix_lat[ contours[ 1 ] , contours[ 0 ] ]
+				distances = np.power( np.power( ( points_lon - lon_cen_vector[ i ] ) * step_lon_m / step_lon_deg , 2 ) + np.power( ( points_lat - lat_cen_vector[ i ] ) , 2 ) * step_lat_m / step_lat_deg , 0.5 )
+				summary_data[ i , 4 ] = sum( sum( data_step ) ) * area_pixel
+				summary_data[ i , 5 ] = distances.max() / 1000.0
+				summary_data[ i , 6 ] = runout_min / 1000.0
+			else:
+				summary_data[ i , 4 ] = 0.0
+				summary_data[ i , 5 ] = 0.0
+				summary_data[ i , 6 ] = 0.0	
 		print( ' Simulation finished (N = ' + str( i + 1 ) + ')' )
 	if( skipped < N ):
 		return [ summary_data , string_data , string_cones , string_compare , sim_data , data_cones , polygon ]
@@ -1711,14 +1721,18 @@ def compute_energy_cones_utm( type_sim , n_north , n_east , east_cor , north_cor
 				if( ( j == 0 or ( j + 1 == len( polygon ) ) ) or ( polygon[ j ][ 3 ] < polygon[ j + 1 ][ 3 ] ) ):
 					img = data_step[ range( len( data_cones[ : , 0 ] ) -1 , -1 , -1 ) , : ].astype( np.uint8 )
 					contours = cv.findContours( img , cv.RETR_EXTERNAL , cv.CHAIN_APPROX_SIMPLE )
-					contours = np.vstack( contours[ 0 ] ).squeeze()
-					data_inundation = geometry.Polygon( contours )
-					data_inundation = data_inundation.buffer( 0 )
-					contours = contours.transpose()
-					points_east = matrix_east[ contours[ 1 ] , contours[ 0 ] ]
-					points_north = matrix_north[ contours[ 1 ] , contours[ 0 ] ]
-					distances = np.power( np.power( ( points_east - east_cen_vector[ i ] ) , 2 ) + np.power( ( points_north - north_cen_vector[ i ] ) , 2 ) , 0.5 )
-					string_data = string_data + "\n" + str( polygon[ j ][ 3 ] ) + " " + str( sum( sum( data_step ) ) * area_pixel ) + " " + str( distances.max() / 1000.0 )
+					if( len( contours[ 0 ][ 0 ] ) > 3 ):
+						contours = np.vstack( contours[ 0 ] ).squeeze()
+						data_inundation = geometry.Polygon( contours )
+						data_inundation = data_inundation.buffer( 0 )
+						contours = contours.transpose()
+						points_east = matrix_east[ contours[ 1 ] , contours[ 0 ] ]
+						points_north = matrix_north[ contours[ 1 ] , contours[ 0 ] ]
+						distances = np.power( np.power( ( points_east - east_cen_vector[ i ] ) , 2 ) + np.power( ( points_north - north_cen_vector[ i ] ) , 2 ) , 0.5 )
+						string_data = string_data + "\n" + str( polygon[ j ][ 3 ] ) + " " + str( sum( sum( data_step ) ) * area_pixel ) + " " + str( distances.max() / 1000.0 )
+					else:
+						distances = 0.0
+						string_data = string_data + "\n" + str( polygon[ j ][ 3 ] ) + " " + str( sum( sum( data_step ) ) * area_pixel ) + " " + str( 0.0 )
 				if( N == 1 ):
 					string_cones = string_cones + "\n" + str( j ) + " " + str( polygon[ j ][ 3 ] ) + " " + str( polygon[ j ][ 2 ] ) + " " + str( polygon[ j ][ 5 ] )
 		if( N > 1 ):
@@ -1823,13 +1837,18 @@ def compute_energy_cones_utm( type_sim , n_north , n_east , east_cor , north_cor
 		if( save_data == 1 or type_sim == 2 ):
 			img = data_step[ range( len( data_cones[ : , 0 ] ) -1 , -1 , -1 ) , : ].astype( np.uint8 )
 			contours = cv.findContours( img , cv.RETR_EXTERNAL , cv.CHAIN_APPROX_SIMPLE )
-			contours = np.vstack( contours[ 0 ] ).squeeze().transpose()
-			points_east = matrix_east[ contours[ 1 ] , contours[ 0 ] ]
-			points_north = matrix_north[ contours[ 1 ] , contours[ 0 ] ]
-			distances = np.power( np.power( ( points_east - east_cen_vector[ i ] ) , 2 ) + np.power( ( points_north - north_cen_vector[ i ] ) , 2 ) , 0.5 )
-			summary_data[ i , 4 ] = sum( sum( data_step ) ) * area_pixel
-			summary_data[ i , 5 ] = distances.max() / 1000.0
-			summary_data[ i , 6 ] = runout_min / 1000.0
+			if( len( contours[ 0 ][ 0 ] ) > 3 ):
+				contours = np.vstack( contours[ 0 ] ).squeeze().transpose()
+				points_east = matrix_east[ contours[ 1 ] , contours[ 0 ] ]
+				points_north = matrix_north[ contours[ 1 ] , contours[ 0 ] ]
+				distances = np.power( np.power( ( points_east - east_cen_vector[ i ] ) , 2 ) + np.power( ( points_north - north_cen_vector[ i ] ) , 2 ) , 0.5 )
+				summary_data[ i , 4 ] = sum( sum( data_step ) ) * area_pixel
+				summary_data[ i , 5 ] = distances.max() / 1000.0
+				summary_data[ i , 6 ] = runout_min / 1000.0
+			else:
+				summary_data[ i , 4 ] = 0.0
+				summary_data[ i , 5 ] = 0.0
+				summary_data[ i , 6 ] = 0.0
 		print( ' Simulation finished (N = ' + str( i + 1 ) + ')' )
 
 	if( skipped < N ):
@@ -1936,16 +1955,16 @@ def plot_deg( run_name , type_sim , Cities , polygon , lon1 , lon2 , lat1 , lat2
 	val_down = np.maximum( val_up / 10.0 , 0.05 )
 	plt.figure( 1 , figsize = ( 8.0 , 5.0 ) )
 	plt.axes().set_aspect( step_lat_m / step_lon_m )
-	cmapg = plt.cm.get_cmap( 'Greys' )
-	cmapr = plt.cm.get_cmap( 'Reds' )
-	cmaps = plt.cm.get_cmap( 'Blues' ) 
+	cmapg = plt.get_cmap( 'Greys' )
+	cmapr = plt.get_cmap( 'Reds' )
+	cmaps = plt.get_cmap( 'Blues' ) 
 	if( N > 1 ):
 		CS_Topo = plt.contourf( matrix_lon , matrix_lat , Topography , 100 , alpha = 1.0 , cmap = cmapg , antialiased = True )
 		CS_Sea = plt.contourf( matrix_lon , matrix_lat , Topography_Sea , 100 , alpha = 0.5 , cmap = cmaps , antialiased = True )
-		CS = plt.contourf( matrix_lon , matrix_lat , data_cones , 100 , vmin = 0.0 , vmax = 1.0 , alpha = 0.3 , interpolation = 'linear' , cmap = cmapr , antialiased = True )
+		CS = plt.contourf( matrix_lon , matrix_lat , data_cones , 100 , vmin = 0.0 , vmax = 1.0 , alpha = 0.3 , cmap = cmapr , antialiased = True )
 		fmt = '%.2f'
 		plt.colorbar()
-		CS_lines = plt.contour( matrix_lon , matrix_lat , data_cones , np.array( [ val_down , val_up ] ) , colors = 'r' , interpolation = 'linear' , linewidths = 0.1 )
+		CS_lines = plt.contour( matrix_lon , matrix_lat , data_cones , np.array( [ val_down , val_up ] ) , colors = 'r' ,  linewidths = 0.1 )
 		plt.clabel( CS_lines , inline = 0.1 , fontsize = 7 , colors = 'k' , fmt = fmt )
 	else:
 		CS_Topo = plt.contourf( matrix_lon , matrix_lat , Topography , 100 , alpha = 1.0 , cmap = cmapg , antialiased = True )
@@ -2091,16 +2110,16 @@ def plot_utm( run_name , type_sim , polygon , matrix_east , matrix_north , east_
 	val_down = np.maximum( val_up / 10.0 , 0.05 )
 	plt.figure( 1 , figsize = ( 8.0 , 5.0 ) )
 	plt.axes().set_aspect( 1.0 )
-	cmapg = plt.cm.get_cmap( 'Greys' )
-	cmapr = plt.cm.get_cmap( 'Reds' )
-	cmaps = plt.cm.get_cmap( 'Blues' ) 
+	cmapg = plt.get_cmap( 'Greys' )
+	cmapr = plt.get_cmap( 'Reds' )
+	cmaps = plt.get_cmap( 'Blues' ) 
 	if( N > 1 ):
 		CS_Topo = plt.contourf( matrix_east , matrix_north , Topography , 100 , alpha = 1.0 , cmap = cmapg , antialiased = True )
 		CS_Sea = plt.contourf( matrix_east , matrix_north , Topography_Sea , 100 , alpha = 0.5 , cmap = cmaps , antialiased = True )
-		CS = plt.contourf( matrix_east , matrix_north , data_cones , 100 , vmin = 0.0 , vmax = 1.0 , alpha = 0.3 , interpolation = 'linear' , cmap = cmapr , antialiased = True )
+		CS = plt.contourf( matrix_east , matrix_north , data_cones , 100 , vmin = 0.0 , vmax = 1.0 , alpha = 0.3 , cmap = cmapr , antialiased = True )
 		fmt = '%.2f'
 		plt.colorbar()
-		CS_lines = plt.contour( matrix_east , matrix_north , data_cones , np.array( [ val_down , val_up ] ) , colors = 'r' , interpolation = 'linear' , linewidths = 0.1 )
+		CS_lines = plt.contour( matrix_east , matrix_north , data_cones , np.array( [ val_down , val_up ] ) , colors = 'r' ,  linewidths = 0.1 )
 		plt.clabel( CS_lines , inline = 0.1 , fontsize = 7 , colors = 'k' , fmt = fmt )
 	else:
 		CS_Topo = plt.contourf( matrix_east , matrix_north , Topography , 100 , alpha = 1.0 , cmap = cmapg , antialiased = True )
@@ -2301,9 +2320,9 @@ def plot_only_topography_deg( Cities , lon1 , lon2 , lat1 , lat2 , step_lat_m , 
 
 	plt.figure( 1 , figsize = ( 8.0 , 5.0 ) )
 	plt.axes().set_aspect( step_lat_m / step_lon_m )
-	cmapg = plt.cm.get_cmap( 'Greys' )
-	cmapr = plt.cm.get_cmap( 'Reds' )
-	cmaps = plt.cm.get_cmap( 'Blues' ) 
+	cmapg = plt.get_cmap( 'Greys' )
+	cmapr = plt.get_cmap( 'Reds' )
+	cmaps = plt.get_cmap( 'Blues' ) 
 	CS_Topo = plt.contourf( matrix_lon , matrix_lat , Topography , 100 , alpha = 1.0 , cmap = cmapg , antialiased = True )
 	CS_Sea = plt.contourf( matrix_lon , matrix_lat , Topography_Sea , 100 , alpha = 0.5 , cmap = cmaps , antialiased = True )
 	plt.xlabel( 'Longitude $[º]$' )
@@ -2317,9 +2336,9 @@ def plot_only_topography_utm( matrix_east , matrix_north , east_cor , north_cor 
 
 	plt.figure( 1 , figsize = ( 8.0 , 5.0 ) )
 	plt.axes().set_aspect( 1.0 )
-	cmapg = plt.cm.get_cmap( 'Greys' )
-	cmapr = plt.cm.get_cmap( 'Reds' )
-	cmaps = plt.cm.get_cmap( 'Blues' ) 
+	cmapg = plt.get_cmap( 'Greys' )
+	cmapr = plt.get_cmap( 'Reds' )
+	cmaps = plt.get_cmap( 'Blues' ) 
 	CS_Topo = plt.contourf( matrix_east , matrix_north , Topography , 100 , alpha = 1.0 , cmap = cmapg , antialiased = True )
 	CS_Sea = plt.contourf( matrix_east , matrix_north , Topography_Sea , 100 , alpha = 0.5 , cmap = cmaps , antialiased = True )
 	plt.xlabel( 'East [m]' )
@@ -2404,16 +2423,16 @@ def plot_only_map_deg( Cities , lon1 , lon2 , lat1 , lat2 , step_lat_m , step_lo
 	val_down = np.maximum( val_up / 10.0 , 0.05 )
 	plt.figure( 1 , figsize = ( 8.0 , 5.0 ) )
 	plt.axes().set_aspect( step_lat_m / step_lon_m )
-	cmapg = plt.cm.get_cmap( 'Greys' )
-	cmapr = plt.cm.get_cmap( 'Reds' )
-	cmaps = plt.cm.get_cmap( 'Blues' ) 
+	cmapg = plt.get_cmap( 'Greys' )
+	cmapr = plt.get_cmap( 'Reds' )
+	cmaps = plt.get_cmap( 'Blues' ) 
 	if( N > 1 ):
 		CS_Topo = plt.contourf( matrix_lon , matrix_lat , Topography , 1000 , alpha = 1.0 , cmap = cmapg , antialiased = True )
 		CS_Sea = plt.contourf( matrix_lon , matrix_lat , Topography_Sea , 100 , alpha = 0.5 , cmap = cmaps , antialiased = True )
-		CS = plt.contourf( matrix_lon , matrix_lat , data_cones , 100 , vmin = 0.0 , vmax = 1.0 , alpha = 0.3 , interpolation = 'linear' , cmap = cmapr , antialiased = True )	
+		CS = plt.contourf( matrix_lon , matrix_lat , data_cones , 100 , vmin = 0.0 , vmax = 1.0 , alpha = 0.3 , cmap = cmapr , antialiased = True )	
 		fmt = '%.2f'
 		plt.colorbar()
-		CS_lines = plt.contour( matrix_lon , matrix_lat , data_cones , np.array( [ val_down , val_up ] ) , colors = 'r' , interpolation = 'linear' , linewidths = 1 )
+		CS_lines = plt.contour( matrix_lon , matrix_lat , data_cones , np.array( [ val_down , val_up ] ) , colors = 'r' ,  linewidths = 1 )
 		plt.clabel( CS_lines , inline = 0.1 , fontsize = 10 , colors = 'k' , fmt = fmt )
 	else:
 		CS_Topo = plt.contourf( matrix_lon , matrix_lat , Topography , 1000 , alpha = 1.0 , cmap = cmapg , antialiased = True )
@@ -2437,16 +2456,16 @@ def plot_only_map_utm( matrix_east , matrix_north , east_cor , north_cor , n_eas
 	val_down = np.maximum( val_up / 10.0 , 0.05 )
 	plt.figure( 1 , figsize = ( 8.0 , 5.0 ) )
 	plt.axes().set_aspect( 1.0 )
-	cmapg = plt.cm.get_cmap( 'Greys' )
-	cmapr = plt.cm.get_cmap( 'Reds' )
-	cmaps = plt.cm.get_cmap( 'Blues' ) 
+	cmapg = plt.get_cmap( 'Greys' )
+	cmapr = plt.get_cmap( 'Reds' )
+	cmaps = plt.get_cmap( 'Blues' ) 
 	if( N > 1 ):
 		CS_Topo = plt.contourf( matrix_east , matrix_north , Topography , 100 , alpha = 1.0 , cmap = cmapg , antialiased = True )
 		CS_Sea = plt.contourf( matrix_east , matrix_north , Topography_Sea , 100 , alpha = 0.5 , cmap = cmaps , antialiased = True )
-		CS = plt.contourf( matrix_east , matrix_north , data_cones , 100 , vmin = 0.0 , vmax = 1.0 , alpha = 0.3 , interpolation = 'linear' , cmap = cmapr , antialiased = True )	
+		CS = plt.contourf( matrix_east , matrix_north , data_cones , 100 , vmin = 0.0 , vmax = 1.0 , alpha = 0.3 , cmap = cmapr , antialiased = True )	
 		fmt = '%.2f'
 		plt.colorbar()
-		CS_lines = plt.contour( matrix_east , matrix_north , data_cones , np.array( [ val_down , val_up ] ) , colors = 'r' , interpolation = 'linear' , linewidths = 1 )
+		CS_lines = plt.contour( matrix_east , matrix_north , data_cones , np.array( [ val_down , val_up ] ) , colors = 'r' ,  linewidths = 1 )
 		plt.clabel( CS_lines , inline = 0.1 , fontsize = 10 , colors = 'k' , fmt = fmt )
 	else:
 		CS_Topo = plt.contourf( matrix_east , matrix_north , Topography , 100 , alpha = 1.0 , cmap = cmapg , antialiased = True )
