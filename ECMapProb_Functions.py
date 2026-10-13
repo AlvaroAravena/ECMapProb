@@ -837,7 +837,7 @@ def read_comparison_polygon_deg( comparison_polygon , comparison_type , input_fi
 			string_compare = np.zeros( ( N , 11 ) ) * np.nan
 		else:
 			string_compare = np.loadtxt( input_file_cal , skiprows = 1 )
-		line_compare = plt.contour( matrix_lon , matrix_lat , matrix_compare[ range( len( matrix_compare[ : , 0 ] ) -1 , -1 , -1 ) , : ] , np.array( [ 0 ] ) , colors = 'r' , interpolation = 'linear' )
+		line_compare = plt.contour( matrix_lon , matrix_lat , matrix_compare[ range( len( matrix_compare[ : , 0 ] ) -1 , -1 , -1 ) , : ] , np.array( [ 0 ] ) , colors = 'r' )
 		plt.close()
 		path_compare = line_compare.get_paths()[ 0 ]
 		ver_compare = path_compare.vertices
@@ -932,7 +932,7 @@ def read_comparison_polygon_utm( comparison_polygon , comparison_type , input_fi
 			string_compare = np.zeros( ( N , 11 ) ) * np.nan
 		else:
 			string_compare = np.loadtxt( input_file_cal , skiprows = 1 )
-		line_compare = plt.contour( matrix_east , matrix_north , matrix_compare[ range( len( matrix_compare[ : , 0 ] ) -1 , -1 , -1 ) , : ] , np.array( [ 0 ] ) , colors = 'r' , interpolation = 'linear' )
+		line_compare = plt.contour( matrix_east , matrix_north , matrix_compare[ range( len( matrix_compare[ : , 0 ] ) -1 , -1 , -1 ) , : ] , np.array( [ 0 ] ) , colors = 'r' )
 		plt.close()
 		path_compare = line_compare.get_paths()[ 0 ]
 		ver_compare = path_compare.vertices
@@ -1352,7 +1352,7 @@ def compute_energy_cones_deg( type_sim , lon1 , lon2 , lat1 , lat2 , step_lon_de
 					data_step_border[ len( data_step_border[ : , 0 ] ) -1 , : ] = 0.0
 					data_step_border[ : , 0 ] = 0.0
 					data_step_border[ : , len( data_step_border[ 0 , : ] ) -1 ] = 0.0
-					line_new = plt.contour( matrix_lon , matrix_lat , data_step_border , np.array( [ 0 ] ) , colors = 'r' , interpolation = 'linear' )
+					line_new = plt.contour( matrix_lon , matrix_lat , data_step_border , np.array( [ 0 ] ) , colors = 'r' )
 					path_new = line_new.get_paths()
 					if( len( path_new ) == 1 ):
 						path_new = path_new[ 0 ]
@@ -1747,7 +1747,7 @@ def compute_energy_cones_utm( type_sim , n_north , n_east , east_cor , north_cor
 					data_step_border[ len( data_step_border[ : , 0 ] ) -1 , : ] = 0.0
 					data_step_border[ : , 0 ] = 0.0
 					data_step_border[ : , len( data_step_border[ 0 , : ] ) -1 ] = 0.0
-					line_new = plt.contour( matrix_east , matrix_north , data_step_border , np.array( [ 0 ] ) , colors = 'r' , interpolation = 'linear' )
+					line_new = plt.contour( matrix_east , matrix_north , data_step_border , np.array( [ 0 ] ) , colors = 'r' )
 					path_new = line_new.get_paths()
 					if( len( path_new ) == 1 ):
 						path_new = path_new[ 0 ]
@@ -1983,11 +1983,11 @@ def plot_deg( run_name , type_sim , Cities , polygon , lon1 , lon2 , lat1 , lat2
 			plt.plot( polygon[ i ][ 0 ] , polygon[ i ][ 1 ] , 'b.' , markersize = 2 )
 	if( type_sim == 2 ):
 		if( not comparison_polygon == '' and comparison_type == 1 ):
-			line_compare = plt.contour( matrix_lon , matrix_lat , matrix_compare[ range( len( matrix_compare[ : , 0 ] ) -1 , -1 , -1 ) , : ] , np.array( [ 0 ] ) , colors = 'b' , interpolation = 'linear' )
+			line_compare = plt.contour( matrix_lon , matrix_lat , matrix_compare[ range( len( matrix_compare[ : , 0 ] ) -1 , -1 , -1 ) , : ] , np.array( [ 0 ] ) , colors = 'b' )
 		if( not comparison_polygon == '' and comparison_type == 2 ):
 			plt.plot( vertices_compare[ : , 0 ] , vertices_compare[ : , 1 ] , 'b.' , markersize = 2 )
 		if( ang_cal_range < 360 ):
-			line_direction = plt.contour( matrix_lon , matrix_lat , data_direction , np.array( [ 0 ] ) , colors = 'g' , interpolation = 'linear' )
+			line_direction = plt.contour( matrix_lon , matrix_lat , data_direction , np.array( [ 0 ] ) , colors = 'g' )
 	plt.savefig( 'Results/' + run_name + '/Map.png' )
 	if( N > 1 and type_sim == 1 ):
 		plt.figure( 2 , figsize = ( 14.0 , 5.0 ) )
@@ -2136,11 +2136,11 @@ def plot_utm( run_name , type_sim , polygon , matrix_east , matrix_north , east_
 			plt.plot( polygon[ i ][ 0 ] , polygon[ i ][ 1 ] , 'b.' , markersize = 2 )
 	if( type_sim == 2 ):
 		if( not comparison_polygon == '' and comparison_type == 1 ):
-			line_compare = plt.contour( matrix_east , matrix_north , matrix_compare[ range( len( matrix_compare[ : , 0 ] ) -1 , -1 , -1 ) , : ] , np.array( [ 0 ] ) , colors = 'b' , interpolation = 'linear' )
+			line_compare = plt.contour( matrix_east , matrix_north , matrix_compare[ range( len( matrix_compare[ : , 0 ] ) -1 , -1 , -1 ) , : ] , np.array( [ 0 ] ) , colors = 'b' )
 		if( not comparison_polygon == '' and comparison_type == 2 ):
 			plt.plot( vertices_compare[ : , 0 ] , vertices_compare[ : , 1 ] , 'b.' , markersize = 2 )
 		if( ang_cal_range < 360 ):
-			line_direction = plt.contour( matrix_east , matrix_north , data_direction , np.array( [ 0 ] ) , colors = 'g' , interpolation = 'linear' )
+			line_direction = plt.contour( matrix_east , matrix_north , data_direction , np.array( [ 0 ] ) , colors = 'g' )
 
 	plt.savefig( 'Results/' + run_name + '/Map.png' )
 	if( N > 1 and type_sim == 1 ):
@@ -2403,14 +2403,14 @@ def plot_only_height( height_vector , hl_vector , variable_vector , type_input ,
 def plot_only_comparison_polygon_deg( matrix_lon , matrix_lat , matrix_compare , comparison_type , vertices_compare ):
 
 	if( comparison_type == 1 ):
-		line_compare = plt.contour( matrix_lon , matrix_lat , matrix_compare[ range( len( matrix_compare[ : , 0 ] ) -1 , -1 , -1 ) , : ] , np.array( [ 0 ] ) , colors = 'b' , interpolation = 'linear' )
+		line_compare = plt.contour( matrix_lon , matrix_lat , matrix_compare[ range( len( matrix_compare[ : , 0 ] ) -1 , -1 , -1 ) , : ] , np.array( [ 0 ] ) , colors = 'b' )
 	else:
 		plt.plot( vertices_compare[ : , 0 ] , vertices_compare[ : , 1 ] , 'b.' , markersize = 2 )
 
 def plot_only_comparison_polygon_utm( matrix_east , matrix_north , matrix_compare , comparison_type , vertices_compare ):
 
 	if( comparison_type == 1 ):
-		line_compare = plt.contour( matrix_east , matrix_north , matrix_compare[ range( len( matrix_compare[ : , 0 ] ) -1 , -1 , -1 ) , : ] , np.array( [ 0 ] ) , colors = 'b' , interpolation = 'linear' )
+		line_compare = plt.contour( matrix_east , matrix_north , matrix_compare[ range( len( matrix_compare[ : , 0 ] ) -1 , -1 , -1 ) , : ] , np.array( [ 0 ] ) , colors = 'b' )
 	else:
 		plt.plot( vertices_compare[ : , 0 ] , vertices_compare[ : , 1 ] , 'b.' , markersize = 2 )
 		
